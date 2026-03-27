@@ -1,0 +1,392 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum USER_ROLE {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id        Int      @id @default(autoincrement()) @db.Integer
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  role          USER_ROLE            @default(STUDENT)
+  student       Student?
+  tutor         Tutor?
+  notifications Notification[]
+  conversations Conversation[]       @relation("CreatedConversations")
+  messages      Message[]
+  transactions  Transaction[]
+  assignments   Assignment[]         @relation("AssignedBy")
+  gradedSubs    ExerciseSubmission[] @relation("GradedBy")
+
+  exercises Exercise[]
+
+  courses Course[]
+}
+
+model Student {
+  id            String  @id @db.Char(36)
+  userId        Int     @unique @db.Integer
+  gradeLevel    String? @db.VarChar(50)
+  schoolName    String? @db.VarChar(255)
+  learningGoals String? @db.Text
+
+  user User @relation(fields: [userId], references: [id])
+
+  submissions ExerciseSubmission[]
+  enrollments ClassEnrollment[]
+  progress    StudentProgress[]
+  attendances SessionAttendance[]
+}
+
+model Tutor {
+  id                      String   @id @db.Char(36)
+  userId                  Int      @unique @db.Integer
+  bio                     String?  @db.Text
+  teachingExperienceYears Int?
+  hourlyRate              Decimal? @db.Decimal(10, 2)
+  rating                  Decimal? @db.Decimal(3, 2)
+  isVerified              Boolean?
+  status                  String?  @db.VarChar(50)
+
+  user     User           @relation(fields: [userId], references: [id])
+  subjects TutorSubject[]
+  classes  Class[]
+  sessions Session[]
+}
+
+model Grade {
+  id          String   @id @db.Char(36)
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subjects Subject[]
+  exercises Exercise[]
+}
+
+model Subject {
+  id              String   @id @db.Char(36)
+  name            String   @db.VarChar(255)
+  gradeId         String?  @db.Char(36)
+  parentSubjectId String?  @db.Char(36)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  grade    Grade?    @relation(fields: [gradeId], references: [id])
+  parent   Subject?  @relation("SubjectHierarchy", fields: [parentSubjectId], references: [id])
+  children Subject[] @relation("SubjectHierarchy")
+
+  topics    Topic[]
+  exercises Exercise[]
+  courses   Course[]
+
+  tutorSubjects TutorSubject[]
+
+  studentProgresses StudentProgress[]
+}
+
+model Topic {
+  id            String   @id @db.Char(36)
+  subjectId     String   @db.Char(36)
+  name          String   @db.VarChar(255)
+  orderIndex    Int?
+  parentTopicId String?  @db.Char(36)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subject  Subject @relation(fields: [subjectId], references: [id])
+  parent   Topic?  @relation("TopicHierarchy", fields: [parentTopicId], references: [id])
+  children Topic[] @relation("TopicHierarchy")
+
+  exercises Exercise[]
+
+  studentProgresses StudentProgress[]
+}
+
+model TutorSubject {
+  id               String  @id @db.Char(36)
+  tutorId          String  @db.Char(36)
+  subjectId        String  @db.Char(36)
+  proficiencyLevel String? @db.VarChar(50)
+
+  tutor   Tutor   @relation(fields: [tutorId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+}
+
+model Exercise {
+  id                 String   @id @db.Char(36)
+  title              String?  @db.VarChar(255)
+  gradeId            String?  @db.Char(36)
+  subjectId          String?  @db.Char(36)
+  topicId            String?  @db.Char(36)
+  exerciseType       String?  @db.VarChar(50)
+  contentType        String?  @db.VarChar(50)
+  difficultyLevel    String?  @db.VarChar(50)
+  totalPoints        Decimal? @db.Decimal(6, 2)
+  timeLimitMinutes   Int?
+  isAiGenerated      Boolean  @default(false)
+  aiGenerationConfig Json?
+  status             String?  @db.VarChar(50) @default("draft")
+  createdBy          Int?     @db.Integer
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  grade   Grade?   @relation(fields: [gradeId], references: [id])
+  subject Subject? @relation(fields: [subjectId], references: [id])
+  topic   Topic?   @relation(fields: [topicId], references: [id])
+  creator User?    @relation(fields: [createdBy], references: [id])
+
+  questions   ExerciseQuestion[]
+  attachments ExerciseAttachment[]
+  assignments Assignment[]
+}
+
+model ExerciseQuestion {
+  id               String   @id @db.Char(36)
+  exerciseId       String   @db.Char(36)
+  questionText     String?  @db.Text
+  questionType     String?  @db.VarChar(50)
+  orderIndex       Int?
+  points           Decimal? @db.Decimal(6, 2)
+  content          Json?
+  explanation      String?  @db.Text
+  hints            Json?
+  autoGrade        Boolean  @default(false)
+  aiGradingEnabled Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  exercise    Exercise              @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  attachments ExerciseAttachment[]
+  answers     SubmissionAnswer[]
+}
+
+model ExerciseAttachment {
+  id         String  @id @db.Char(36)
+  exerciseId String  @db.Char(36)
+  questionId String? @db.Char(36)
+  fileName   String  @db.VarChar(255)
+  fileUrl    String  @db.Text
+  publicId   String? @db.VarChar(255)
+  fileType   String  @db.VarChar(100)
+  fileSize   Int?
+  createdAt  DateTime @default(now())
+
+  exercise Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  question ExerciseQuestion?  @relation(fields: [questionId], references: [id], onDelete: SetNull)
+}
+
+model Assignment {
+  id             String    @id @db.Char(36)
+  exerciseId     String    @db.Char(36)
+  assignedToType String?   @db.VarChar(50)
+  assignedToId   String?   @db.Char(36)
+  assignedBy     Int?      @db.Integer
+  dueDate        DateTime?
+  maxAttempts    Int?
+  status         String?   @db.VarChar(50)
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  assigner User?    @relation("AssignedBy", fields: [assignedBy], references: [id])
+
+  submissions ExerciseSubmission[]
+}
+
+model ExerciseSubmission {
+  id            String    @id @db.Char(36)
+  assignmentId  String    @db.Char(36)
+  studentId     String    @db.Char(36)
+  attemptNumber Int?
+  submittedAt   DateTime?
+  totalScore    Decimal?  @db.Decimal(6, 2)
+  percentage    Decimal?  @db.Decimal(5, 2)
+  status        String?   @db.VarChar(50)
+  isLate        Boolean?
+  gradedBy      Int?      @db.Integer
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  student    Student    @relation(fields: [studentId], references: [id])
+  grader     User?      @relation("GradedBy", fields: [gradedBy], references: [id])
+
+  answers SubmissionAnswer[]
+}
+
+model SubmissionAnswer {
+  id           String   @id @db.Char(36)
+  submissionId String   @db.Char(36)
+  questionId   String   @db.Char(36)
+  answerData   Json?
+  isCorrect    Boolean?
+  pointsEarned Decimal? @db.Decimal(6, 2)
+  feedback     String?  @db.Text
+
+  submission ExerciseSubmission @relation(fields: [submissionId], references: [id])
+  question   ExerciseQuestion   @relation(fields: [questionId], references: [id])
+}
+
+model Course {
+  id        String   @id @db.Char(36)
+  name      String?  @db.VarChar(255)
+  subjectId String?  @db.Char(36)
+  level     String?  @db.VarChar(50)
+  price     Decimal? @db.Decimal(10, 2)
+  createdBy Int?     @db.Integer
+  status    String?  @db.VarChar(50)
+
+  subject Subject? @relation(fields: [subjectId], references: [id])
+  creator User?    @relation(fields: [createdBy], references: [id])
+
+  modules CourseModule[]
+  classes Class[]
+}
+
+model CourseModule {
+  id         String  @id @db.Char(36)
+  courseId   String  @db.Char(36)
+  title      String? @db.VarChar(255)
+  orderIndex Int?
+
+  course  Course         @relation(fields: [courseId], references: [id])
+  lessons CourseLesson[]
+}
+
+model CourseLesson {
+  id              String  @id @db.Char(36)
+  moduleId        String  @db.Char(36)
+  title           String? @db.VarChar(255)
+  contentType     String? @db.VarChar(50)
+  durationMinutes Int?
+  orderIndex      Int?
+
+  module CourseModule @relation(fields: [moduleId], references: [id])
+}
+
+model Class {
+  id          String    @id @db.Char(36)
+  courseId    String    @db.Char(36)
+  name        String?   @db.VarChar(255)
+  tutorId     String    @db.Char(36)
+  startDate   DateTime?
+  endDate     DateTime?
+  maxStudents Int?
+  status      String?   @db.VarChar(50)
+
+  course Course @relation(fields: [courseId], references: [id])
+  tutor  Tutor  @relation(fields: [tutorId], references: [id])
+
+  enrollments ClassEnrollment[]
+  sessions    Session[]
+}
+
+model ClassEnrollment {
+  id                 String   @id @db.Char(36)
+  classId            String   @db.Char(36)
+  studentId          String   @db.Char(36)
+  status             String?  @db.VarChar(50)
+  progressPercentage Decimal? @db.Decimal(5, 2)
+
+  class   Class   @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model Session {
+  id             String    @id @db.Char(36)
+  classId        String?
+  tutorId        String
+  title          String?   @db.VarChar(255)
+  scheduledStart DateTime?
+  scheduledEnd   DateTime?
+  meetingLink    String?   @db.Text
+  status         String?   @db.VarChar(50)
+
+  class Class? @relation(fields: [classId], references: [id])
+  tutor Tutor  @relation(fields: [tutorId], references: [id])
+
+  attendances SessionAttendance[]
+}
+
+model SessionAttendance {
+  id        String    @id @db.Char(36)
+  sessionId String    @db.Char(36)
+  studentId String    @db.Char(36)
+  status    String?   @db.VarChar(50)
+  joinedAt  DateTime?
+
+  session Session @relation(fields: [sessionId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model StudentProgress {
+  id                 String   @id @db.Char(36)
+  studentId          String   @db.Char(36)
+  subjectId          String?
+  topicId            String?
+  exercisesCompleted Int?
+  averageScore       Decimal? @db.Decimal(5, 2)
+  masteryLevel       String?  @db.VarChar(50)
+
+  student Student  @relation(fields: [studentId], references: [id])
+  subject Subject? @relation(fields: [subjectId], references: [id])
+  topic   Topic?   @relation(fields: [topicId], references: [id])
+}
+
+model Notification {
+  id               String   @id @db.Char(36)
+  userId           Int      @db.Integer
+  title            String?  @db.VarChar(255)
+  message          String?  @db.Text
+  notificationType String?  @db.VarChar(50)
+  isRead           Boolean?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id               String  @id @db.Char(36)
+  conversationType String? @db.VarChar(50)
+  createdBy        Int?
+
+  creator  User?     @relation("CreatedConversations", fields: [createdBy], references: [id])
+  messages Message[]
+}
+
+model Message {
+  id             String  @id @db.Char(36)
+  conversationId String  @db.Char(36)
+  senderId       Int     @db.Integer
+  messageText    String? @db.Text
+  attachments    Json?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+}
+
+model Transaction {
+  id              String   @id @db.Char(36)
+  userId          Int      @db.Integer
+  amount          Decimal? @db.Decimal(10, 2)
+  transactionType String?  @db.VarChar(50)
+  paymentMethod   String?  @db.VarChar(50)
+  status          String?  @db.VarChar(50)
+
+  user User @relation(fields: [userId], references: [id])
+}

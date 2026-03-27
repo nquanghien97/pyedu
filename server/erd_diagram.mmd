@@ -1,0 +1,346 @@
+```mermaid
+erDiagram
+    %% ====================================
+    %% USER MANAGEMENT
+    %% ====================================
+    users ||--o{ user_roles : "has"
+    users ||--o| students : "is"
+    users ||--o| tutors : "is"
+    users ||--o{ notifications : "receives"
+    users ||--o{ conversations : "creates"
+    users ||--o{ conversation_participants : "participates"
+    users ||--o{ messages : "sends"
+    users ||--o{ transactions : "makes"
+
+    user_roles {
+        uuid id PK
+        uuid user_id FK
+        string role
+        timestamp created_at
+    }
+
+    students {
+        uuid id PK
+        uuid user_id FK
+        string grade_level
+        string school_name
+        text learning_goals
+    }
+
+    tutors {
+        uuid id PK
+        uuid user_id FK
+        text bio
+        int teaching_experience_years
+        decimal hourly_rate
+        decimal rating
+        boolean is_verified
+        string status
+    }
+
+    %% ====================================
+    %% SUBJECTS & CURRICULUM
+    %% ====================================
+    subjects ||--o{ subjects : "parent"
+    subjects ||--o{ topics : "contains"
+    subjects ||--o{ exercises : "has"
+    subjects ||--o{ tutor_subjects : "taught_by"
+    subjects ||--o{ courses : "bases_on"
+
+    topics {
+        uuid id PK
+        uuid subject_id FK
+        string name
+        int order_index
+        uuid parent_topic_id FK
+    }
+
+    tutor_subjects {
+        uuid id PK
+        uuid tutor_id FK
+        uuid subject_id FK
+        string proficiency_level
+    }
+
+    %% ====================================
+    %% EXERCISES - CORE MODULE
+    %% ====================================
+    exercises ||--o{ exercise_questions : "contains"
+    exercises ||--o{ exercise_attachments : "has"
+    exercises ||--o{ assignments : "assigned_as"
+    
+    exercises {
+        uuid id PK
+        string title
+        uuid subject_id FK
+        uuid topic_id FK
+        string exercise_type
+        string content_type
+        string difficulty_level
+        decimal total_points
+        int time_limit_minutes
+        boolean is_ai_generated
+        jsonb ai_generation_config
+        string status
+        uuid created_by FK
+    }
+
+    exercise_questions {
+        uuid id PK
+        uuid exercise_id FK
+        text question_text
+        string question_type
+        int order_index
+        decimal points
+        jsonb content
+        text explanation
+        jsonb hints
+        boolean auto_grade
+        boolean ai_grading_enabled
+    }
+
+    exercise_questions ||--o{ exercise_attachments : "has"
+    exercise_questions ||--o{ submission_answers : "answered_by"
+
+    exercise_attachments {
+        uuid id PK
+        uuid exercise_id FK
+        uuid question_id FK
+        string file_name
+        string file_url
+        string file_type
+    }
+
+    %% ====================================
+    %% ASSIGNMENTS & SUBMISSIONS
+    %% ====================================
+    assignments ||--o{ exercise_submissions : "submitted_as"
+    
+    assignments {
+        uuid id PK
+        uuid exercise_id FK
+        string assigned_to_type
+        uuid assigned_to_id
+        uuid assigned_by FK
+        timestamp due_date
+        int max_attempts
+        string status
+    }
+
+    exercise_submissions {
+        uuid id PK
+        uuid assignment_id FK
+        uuid student_id FK
+        int attempt_number
+        timestamp submitted_at
+        decimal total_score
+        decimal percentage
+        string status
+        boolean is_late
+        uuid graded_by FK
+    }
+
+    exercise_submissions ||--o{ submission_answers : "contains"
+
+    submission_answers {
+        uuid id PK
+        uuid submission_id FK
+        uuid question_id FK
+        jsonb answer_data
+        boolean is_correct
+        decimal points_earned
+        text feedback
+    }
+
+    %% ====================================
+    %% COURSES & CLASSES
+    %% ====================================
+    courses ||--o{ course_modules : "contains"
+    courses ||--o{ classes : "instantiated_as"
+    
+    course_modules ||--o{ course_lessons : "contains"
+
+    courses {
+        uuid id PK
+        string name
+        uuid subject_id FK
+        string level
+        decimal price
+        uuid created_by FK
+        string status
+    }
+
+    course_modules {
+        uuid id PK
+        uuid course_id FK
+        string title
+        int order_index
+    }
+
+    course_lessons {
+        uuid id PK
+        uuid module_id FK
+        string title
+        string content_type
+        int duration_minutes
+        int order_index
+    }
+
+    classes {
+        uuid id PK
+        uuid course_id FK
+        string name
+        uuid tutor_id FK
+        date start_date
+        date end_date
+        int max_students
+        string status
+    }
+
+    classes ||--o{ class_enrollments : "has"
+    classes ||--o{ class_schedules : "scheduled_as"
+    classes ||--o{ sessions : "runs"
+
+    class_enrollments {
+        uuid id PK
+        uuid class_id FK
+        uuid student_id FK
+        string status
+        decimal progress_percentage
+    }
+
+    class_schedules {
+        uuid id PK
+        uuid class_id FK
+        int day_of_week
+        time start_time
+        time end_time
+    }
+
+    %% ====================================
+    %% SESSIONS & ATTENDANCE
+    %% ====================================
+    sessions ||--o{ session_attendances : "tracks"
+    sessions ||--o{ reviews : "reviewed_by"
+
+    sessions {
+        uuid id PK
+        uuid class_id FK
+        uuid tutor_id FK
+        uuid student_id FK
+        string title
+        timestamp scheduled_start
+        timestamp scheduled_end
+        string meeting_link
+        string status
+    }
+
+    session_attendances {
+        uuid id PK
+        uuid session_id FK
+        uuid student_id FK
+        string status
+        timestamp joined_at
+    }
+
+    %% ====================================
+    %% TUTORING SYSTEM
+    %% ====================================
+    tutors ||--o{ tutor_availability : "sets"
+    tutors ||--o{ booking_requests : "receives"
+    tutors ||--o{ sessions : "conducts"
+    tutors ||--o{ reviews : "receives"
+
+    students ||--o{ booking_requests : "makes"
+    students ||--o{ reviews : "gives"
+    students ||--o{ exercise_submissions : "submits"
+    students ||--o{ session_attendances : "attends"
+    students ||--o{ student_progress : "tracks"
+    students ||--o{ class_enrollments : "enrolls"
+
+    tutor_availability {
+        uuid id PK
+        uuid tutor_id FK
+        int day_of_week
+        time start_time
+        time end_time
+        string status
+    }
+
+    booking_requests {
+        uuid id PK
+        uuid student_id FK
+        uuid tutor_id FK
+        timestamp preferred_start
+        string status
+    }
+
+    reviews {
+        uuid id PK
+        uuid tutor_id FK
+        uuid student_id FK
+        uuid session_id FK
+        int rating
+        text comment
+    }
+
+    %% ====================================
+    %% PROGRESS & NOTIFICATIONS
+    %% ====================================
+    student_progress {
+        uuid id PK
+        uuid student_id FK
+        uuid subject_id FK
+        uuid topic_id FK
+        int exercises_completed
+        decimal average_score
+        string mastery_level
+    }
+
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        string title
+        text message
+        string notification_type
+        boolean is_read
+    }
+
+    %% ====================================
+    %% MESSAGING
+    %% ====================================
+    conversations ||--o{ conversation_participants : "has"
+    conversations ||--o{ messages : "contains"
+
+    conversations {
+        uuid id PK
+        string conversation_type
+        uuid created_by FK
+    }
+
+    conversation_participants {
+        uuid id PK
+        uuid conversation_id FK
+        uuid user_id FK
+    }
+
+    messages {
+        uuid id PK
+        uuid conversation_id FK
+        uuid sender_id FK
+        text message_text
+        jsonb attachments
+    }
+
+    %% ====================================
+    %% PAYMENTS
+    %% ====================================
+    transactions {
+        uuid id PK
+        uuid user_id FK
+        decimal amount
+        string transaction_type
+        string payment_method
+        string status
+    }
+```
