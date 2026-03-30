@@ -7,25 +7,14 @@ import { useState } from "react";
 import { withAuth } from "@/hoc/withAuth";
 import { USER_ROLE } from "@/entity/user";
 
-const historyChat = [
-  {
-    id: '1',
-    title: 'Phân tích hàm số và đồ thị'
-  },
-  {
-    id: '2',
-    title: 'Giải bài tập xác xuất'
-  }
-]
-
 function StudentLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="">
       <Header open={open} toggleClick={() => setOpen(!open)} />
       <main className="flex flex-col">
-        <div className="flex">
-          <Sidebar open={open} toggleClick={() => setOpen(!open)} menu={menuSidebarStudent} historyChat={historyChat} />
+        <div className="flex h-[calc(100vh-68px)]">
+          <Sidebar open={open} toggleClick={() => setOpen(!open)} menu={menuSidebarStudent} />
           <div className="flex-1 bg-gray-50">
             {children}
           </div>

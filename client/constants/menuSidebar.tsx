@@ -97,15 +97,15 @@ export const menuSidebarStudent: DataSidebarType[] = [
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
   },
   {
-    title: 'Báo cáo',
-    url: '/student/reports',
-    icon: <FileChartColumn width={16} height={16} />,
+    title: 'Chat bot AI',
+    url: '/student/chat',
+    icon: <AtomIcon width={16} height={16} />,
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
   },
   {
-    title: 'Giải bài AI',
-    url: '/student/chat',
-    icon: <AtomIcon width={16} height={16} />,
+    title: 'Báo cáo',
+    url: '/student/reports',
+    icon: <FileChartColumn width={16} height={16} />,
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
   },
 ]

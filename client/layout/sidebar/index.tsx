@@ -20,10 +20,6 @@ interface SidebarProps extends PropsWithChildren {
   end?: string;
   exit?: string;
   menu: DataSidebarType[]
-  historyChat?: {
-    id: string
-    title: string
-  }[]
 }
 
 type OptionsHistoryState = {
@@ -33,7 +29,7 @@ type OptionsHistoryState = {
 } | null;
 
 function Sidebar(props: SidebarProps) {
-  const { open, toggleClick, menu, historyChat } = props;
+  const { open, toggleClick, menu } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOpenOptionsHistory, setIsOpenOptionsHistory] = useState<OptionsHistoryState>(null)
@@ -105,57 +101,6 @@ function Sidebar(props: SidebarProps) {
                 // }
                 return <SidebarItem key={data.title} menu={data} open={open} />;
               }
-            )}
-            {(historyChat && historyChat.length !== 0) && (
-              <div className="pl-4 mt-2">
-                <div className="">
-                  <div className="border-2 border-transparent border-l-[#ccc] pl-2 flex justify-between mb-2">
-                    <p className="text-[#8d94a0] font-semibold text-sm">Gần đây</p>
-                    <div className="flex items-center cursor-pointer">
-                      <p className="font-semibold text-sm">Xem tất cả</p>
-                      <ChevronRightIcon width={16} height={16} />
-                    </div>
-                  </div>
-                  <ul className="">
-                    {historyChat?.map((chat, index) => (
-                      <li key={chat.id} className="group text-sm p-2 cursor-pointer hover:bg-[#f1f1f1] duration-300 rounded-md flex justify-between items-center">
-                        <p>{chat.title}</p>
-                        <EllipsisIcon width={16} height={16} className="text-[#aba9a9] hover:text-[black] duration-300 hidden group-hover:block" onClick={(e) => handleOptionsHistoryClick(e, index)} />
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Popup - render ở root level qua fixed positioning */}
-                  {isOpenOptionsHistory && (
-                    <div
-                      ref={optionsHistoryRef}
-                      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden min-w-35 p-2"
-                      style={{ top: isOpenOptionsHistory.y, left: isOpenOptionsHistory.x }}
-                    >
-                      <button
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-[#f1f1f1] rounded-md cursor-pointer flex items-center gap-2"
-                        onClick={() => {
-                          // handle rename
-                          setIsOpenOptionsHistory(null);
-                        }}
-                      >
-                        <PencilIcon width={14} height={14} />
-                        Đổi tên
-                      </button>
-                      <button
-                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[#f1f1f1] rounded-md cursor-pointer flex items-center gap-2"
-                        onClick={() => {
-                          // handle delete
-                          setIsOpenOptionsHistory(null);
-                        }}
-                      >
-                        <TrashIcon width={14} height={14} />
-                        Xóa
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
             )}
           </div>
           <div className="py-2 border border-transparent border-t-[#ccc]">

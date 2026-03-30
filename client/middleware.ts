@@ -4,7 +4,6 @@ import { USER_ROLE } from "./entity/user";
 
 export default function middleware(req: NextRequest) {
   const token = req.cookies.get("accessToken")?.value;
-  console.log('token middlaware', token)
   const role = req.cookies.get("role")?.value;
 
   const { pathname } = req.nextUrl;
@@ -48,6 +47,7 @@ export const config = {
     "/teacher/:path*",
     "/admin/:path*",
     "/login",
-    "/register"
+    "/register",
+    "/chat-sesstion"
   ],
 };

@@ -8,6 +8,8 @@ import { getTopicsBySubject, getTopicById, createTopic, updateTopic, deleteTopic
 import { getExercises, getExerciseById, createExercise, updateExercise, updateExerciseStatus, deleteExercise, addQuestion, updateQuestion, deleteQuestion } from './exerciseHandler';
 import { upload, uploadAttachment, deleteAttachment } from './uploadHandler';
 import { generateExerciseByAI, generateExerciseFromFile } from './aiGenerateHandler';
+import { getSessions, createSession, deleteSession, getSessionMessages } from './chatSessionHandler';
+import { sendMessage } from './chatMessageHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -23,6 +25,12 @@ protectedRouter.use(authMiddleware('jwt'));
 // Chat
 protectedRouter.post('/chat', chatbotHandler);
 
+// Chat Sessions Phase 2
+protectedRouter.get('/chat-sessions', getSessions);
+protectedRouter.post('/chat-sessions', createSession);
+protectedRouter.delete('/chat-sessions/:id', deleteSession);
+protectedRouter.get('/chat-sessions/:id/messages', getSessionMessages);
+protectedRouter.post('/chat-sessions/:sessionId/messages', upload.single('file'), sendMessage);
 // Grades
 protectedRouter.get('/grades', getGrades);
 protectedRouter.get('/grades/:id', getGradeById);
