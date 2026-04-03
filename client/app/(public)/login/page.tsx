@@ -79,7 +79,9 @@ function LoginPage() {
       <div className="w-1/2 m-auto bg-white rounded-lg shadow-lg px-8 py-4">
         <div className="">
           <div className="flex justify-center">
-            <Image src="/logo.png" alt="Logo" width={100} height={100} />
+            <Link href="/">
+              <Image src="/logo.png" alt="Logo" width={100} height={100} />
+            </Link>
           </div>
           <h1 className="mb-4 text-3xl font-semibold text-center">Đăng nhập tài khoản</h1>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -96,12 +98,12 @@ function LoginPage() {
             <div className="flex justify-center mb-2">
               <Button variant="outline" className="bg-[#3b82f6] px-8 cursor-pointer text-white hover:text-white hover:bg-[#2563eb]">Login</Button>
             </div>
-              <p className="text-center text-sm text-muted-foreground">
-                Bạn chưa có tài khoản?{' '}
-                <Link href="/register" className="text-primary hover:underline">
-                  Đăng ký
-                </Link>
-              </p>
+            <p className="text-center text-sm text-muted-foreground">
+              Bạn chưa có tài khoản?{' '}
+              <Link href="/register" className="text-primary hover:underline">
+                Đăng ký
+              </Link>
+            </p>
           </form>
         </div>
       </div>

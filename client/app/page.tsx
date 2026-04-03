@@ -1,7 +1,57 @@
+import Header from "@/components/ui/homepage/Header";
+import HeroSection from "@/components/ui/homepage/sections/HeroSection";
+import FeaturesSection from "@/components/ui/homepage/sections/FeaturesSection";
+import HowItWorksSection from "@/components/ui/homepage/sections/HowItWorksSection";
+import ForWhoSection from "@/components/ui/homepage/sections/ForWhoSectiton";
+import AiPoweredSection from "@/components/ui/homepage/sections/AiPoweredSection";
+import StatisticsSection from "@/components/ui/homepage/sections/StatisticsSection";
+import CtaSection from "@/components/ui/homepage/sections/CtaSection";
+import Footer from "@/components/ui/homepage/Footer";
+
+/* ──────────────────── Animated Counter ──────────────────── */
+
+
+/* ──────────────────── Feature Card ──────────────────── */
+
+
+/* ──────────────────── Step Card ──────────────────── */
+
+
+/* ══════════════════════════════════════════════════════════ */
+/*                      LANDING PAGE                         */
+/* ══════════════════════════════════════════════════════════ */
+
 export default function Home() {
+
+
   return (
-    <div>
-      hello world
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* ─── HEADER ─── */}
+      <Header />
+
+      {/* ─── HERO SECTION ─── */}
+      <HeroSection />
+
+      {/* ─── FEATURES SECTION ─── */}
+      <FeaturesSection bgColor="bg-[#f1f1f1]" />
+
+      {/* ─── HOW IT WORKS SECTION ─── */}
+      <HowItWorksSection />
+
+      {/* ─── FOR WHO SECTION ─── */}
+      <ForWhoSection bgColor="bg-[#f1f1f1]" />
+
+      {/* ─── AI-POWERED SECTION ─── */}
+      <AiPoweredSection />
+
+      {/* ─── STATISTICS SECTION ─── */}
+      <StatisticsSection bgColor="bg-[#f1f1f1]" />
+
+      {/* ─── CTA SECTION ─── */}
+      <CtaSection />
+
+      {/* ─── FOOTER ─── */}
+      <Footer />
     </div>
   );
 }
