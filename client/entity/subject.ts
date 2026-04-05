@@ -1,7 +1,7 @@
 export interface SubjectEntity {
   id: string;
   name: string;
-  gradeId?: string | null;
+  grade?: number | null;
   parentSubjectId: string | null;
   createdAt: string;
   updatedAt: string;

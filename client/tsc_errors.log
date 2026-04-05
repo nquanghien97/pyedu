@@ -1,0 +1,1 @@
+app/(teacher)/teacher/subjects/page.tsx(158,52): error TS2561: Object literal may only specify known properties, but 'grade' does not exist in type '{ name: string; gradeId?: string | null | undefined; parentSubjectId?: string | null | undefined; }'. Did you mean to write 'gradeId'?

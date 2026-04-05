@@ -38,7 +38,7 @@ model User {
 
   exercises Exercise[]
 
-  courses Course[]
+  courses      Course[]
   chatSessions ChatSession[]
 }
 
@@ -73,26 +73,14 @@ model Tutor {
   sessions Session[]
 }
 
-model Grade {
-  id          String   @id @db.Char(36)
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  subjects Subject[]
-  exercises Exercise[]
-}
-
 model Subject {
   id              String   @id @db.Char(36)
   name            String   @db.VarChar(255)
-  gradeId         String?  @db.Char(36)
+  grade           Int?     @db.Integer
   parentSubjectId String?  @db.Char(36)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  grade    Grade?    @relation(fields: [gradeId], references: [id])
   parent   Subject?  @relation("SubjectHierarchy", fields: [parentSubjectId], references: [id])
   children Subject[] @relation("SubjectHierarchy")
 
@@ -136,7 +124,7 @@ model TutorSubject {
 model Exercise {
   id                 String   @id @db.Char(36)
   title              String?  @db.VarChar(255)
-  gradeId            String?  @db.Char(36)
+  grade              Int?     @db.Integer
   subjectId          String?  @db.Char(36)
   topicId            String?  @db.Char(36)
   exerciseType       String?  @db.VarChar(50)
@@ -146,12 +134,11 @@ model Exercise {
   timeLimitMinutes   Int?
   isAiGenerated      Boolean  @default(false)
   aiGenerationConfig Json?
-  status             String?  @db.VarChar(50) @default("draft")
+  status             String?  @default("draft") @db.VarChar(50)
   createdBy          Int?     @db.Integer
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  grade   Grade?   @relation(fields: [gradeId], references: [id])
   subject Subject? @relation(fields: [subjectId], references: [id])
   topic   Topic?   @relation(fields: [topicId], references: [id])
   creator User?    @relation(fields: [createdBy], references: [id])
@@ -176,24 +163,24 @@ model ExerciseQuestion {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  exercise    Exercise              @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exercise    Exercise             @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   attachments ExerciseAttachment[]
   answers     SubmissionAnswer[]
 }
 
 model ExerciseAttachment {
-  id         String  @id @db.Char(36)
-  exerciseId String  @db.Char(36)
-  questionId String? @db.Char(36)
-  fileName   String  @db.VarChar(255)
-  fileUrl    String  @db.Text
-  publicId   String? @db.VarChar(255)
-  fileType   String  @db.VarChar(100)
+  id         String   @id @db.Char(36)
+  exerciseId String   @db.Char(36)
+  questionId String?  @db.Char(36)
+  fileName   String   @db.VarChar(255)
+  fileUrl    String   @db.Text
+  publicId   String?  @db.VarChar(255)
+  fileType   String   @db.VarChar(100)
   fileSize   Int?
   createdAt  DateTime @default(now())
 
   exercise Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  question ExerciseQuestion?  @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  question ExerciseQuestion? @relation(fields: [questionId], references: [id], onDelete: SetNull)
 }
 
 model Assignment {
@@ -283,16 +270,17 @@ model CourseLesson {
 
 model Class {
   id          String    @id @db.Char(36)
-  courseId    String    @db.Char(36)
+  courseId    String?   @db.Char(36)
+  grade       Int?      @db.Integer
   name        String?   @db.VarChar(255)
-  tutorId     String    @db.Char(36)
+  tutorId     String?    @db.Char(36)
   startDate   DateTime?
   endDate     DateTime?
   maxStudents Int?
   status      String?   @db.VarChar(50)
 
-  course Course @relation(fields: [courseId], references: [id])
-  tutor  Tutor  @relation(fields: [tutorId], references: [id])
+  course Course? @relation(fields: [courseId], references: [id])
+  tutor  Tutor?  @relation(fields: [tutorId], references: [id])
 
   enrollments ClassEnrollment[]
   sessions    Session[]
@@ -393,23 +381,23 @@ model Transaction {
 }
 
 model ChatSession {
-  id        String        @id @db.Char(36)
-  userId    Int           @db.Integer
-  title     String        @db.VarChar(255)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  
-  user      User          @relation(fields: [userId], references: [id])
-  messages  ChatMessage[]
+  id        String   @id @db.Char(36)
+  userId    Int      @db.Integer
+  title     String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id])
+  messages ChatMessage[]
 }
 
 model ChatMessage {
-  id            String      @id @db.Char(36)
-  chatSessionId String      @db.Char(36)
-  role          String      @db.VarChar(50)
-  content       String      @db.Text
-  attachments   Json?       
-  createdAt     DateTime    @default(now())
+  id            String   @id @db.Char(36)
+  chatSessionId String   @db.Char(36)
+  role          String   @db.VarChar(50)
+  content       String   @db.Text
+  attachments   Json?
+  createdAt     DateTime @default(now())
 
-  session       ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  session ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
 }

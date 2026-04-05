@@ -1,379 +1,359 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  BookOpen, Calendar, Clock, CheckCircle2, Plus, History,
-  ChevronDown, TrendingUp, Eye, Pencil, RotateCcw
+  BookOpen, Calendar, Clock, CheckCircle2, History,
+  ChevronDown, Search, Loader2, Target, Users, User as UserIcon
 } from "lucide-react";
+import { getTeacherClasses, getTeacherStudents, DropdownClass, DropdownStudent } from "@/services/meta";
+import { getExercises } from "@/services/exercise";
+import { getTeacherAssignments, createTeacherAssignment } from "@/services/assignment";
+import { ExerciseEntity } from "@/entity/exercise";
+import { AssignmentEntity } from "@/entity/assignment";
 
-type Tab = "new" | "schedule" | "history";
-type AssignMode = "manual" | "auto";
-
-interface Assignment {
-  id: number;
-  name: string;
-  questions: number;
-  duration: number;
-  icon: string;
-}
-
-interface ScheduleItem {
-  date: string;
-  isToday: boolean;
-  title: string;
-  class: string;
-  time: string;
-}
-
-interface HistoryItem {
-  id: number;
-  name: string;
-  class: string;
-  dateAssigned: string;
-  completion: number;
-}
-
-const libraryAssignments: Assignment[] = [
-  { id: 1, name: "Ôn tập Đạo hàm ...", questions: 20, duration: 45, icon: "📋" },
-  { id: 2, name: "Lượng giác nâng cao", questions: 15, duration: 60, icon: "Σ" },
-];
-
-const scheduleItems: ScheduleItem[] = [
-  { date: "Ngày mai, 14 Th10", isToday: true, title: "Giải tích cơ bản", class: "Lớp 12A1", time: "08:00 AM" },
-  { date: "Thứ 2, 16 Th10", isToday: false, title: "Đề thi thử học kì 1", class: "Toán khối 10", time: "07:30 AM" },
-  { date: "Thứ 3, 17 Th10", isToday: false, title: "Luyện tập số phức", class: "Lớp 12A2", time: "14:00 PM" },
-];
-
-const historyItems: HistoryItem[] = [
-  { id: 1, name: "Đạo hàm và ứng dụng (Phần 1)", class: "Lớp 12A1", dateAssigned: "10 Th10", completion: 88 },
-  { id: 2, name: "Chuyển động thẳng biến đổi đều", class: "Lớp 11B2", dateAssigned: "08 Th10", completion: 72 },
-  { id: 3, name: "Phản ứng Oxi hóa – Khử", class: "Lớp 10C5", dateAssigned: "05 Th10", completion: 64 },
-];
+type AssignTarget = "class" | "student";
+type Tab = "new" | "history";
 
 export default function AssignPage() {
   const [activeTab, setActiveTab] = useState<Tab>("new");
-  const [selectedClass, setSelectedClass] = useState("Lớp 10A1 - Toán học");
-  const [selectedAssignment, setSelectedAssignment] = useState<number>(1);
-  const [assignMode, setAssignMode] = useState<AssignMode>("manual");
 
-  const tabs = [
-    { key: "new" as Tab, label: "Giao bài mới" },
-    { key: "schedule" as Tab, label: "Lịch giao bài" },
-    { key: "history" as Tab, label: "Lịch sử giao bài" },
-  ];
+  // Meta data
+  const [classes, setClasses] = useState<DropdownClass[]>([]);
+  const [students, setStudents] = useState<DropdownStudent[]>([]);
+  const [exercises, setExercises] = useState<ExerciseEntity[]>([]);
+  const [history, setHistory] = useState<AssignmentEntity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Form state
+  const [assignTarget, setAssignTarget] = useState<AssignTarget>("class");
+  const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
+  const [dueDate, setDueDate] = useState<string>("");
+
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [clsRes, stdRes, excRes, histRes] = await Promise.all([
+          getTeacherClasses(),
+          getTeacherStudents(),
+          getExercises({ status: 'approved', limit: 100 }), // Load max 100 for library
+          getTeacherAssignments()
+        ]);
+        setClasses(clsRes);
+        setStudents(stdRes);
+        setExercises((excRes as any).data || []); // Fix for api wrapping
+        setHistory(histRes.data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleCreateAssignment = async () => {
+    if (!selectedExerciseId) return alert("Vui lòng chọn bài tập");
+    if (assignTarget === 'class' && !selectedClassId) return alert("Vui lòng chọn lớp học");
+    if (assignTarget === 'student' && !selectedStudentId) return alert("Vui lòng chọn học sinh");
+    if (!dueDate) return alert("Vui lòng chọn hạn nộp bài");
+
+    setSubmitting(true);
+    try {
+      await createTeacherAssignment({
+        exerciseId: selectedExerciseId,
+        assignedToType: assignTarget,
+        assignedToId: assignTarget === 'class' ? selectedClassId : selectedStudentId,
+        dueDate: new Date(dueDate).toISOString(),
+      });
+      alert('Giao bài thành công!');
+      
+      // Reload history and switch tab
+      const histRes = await getTeacherAssignments();
+      setHistory(histRes.data || []);
+      setActiveTab('history');
+      
+      // Reset form
+      setSelectedExerciseId('');
+      setDueDate('');
+    } catch (e) {
+      alert("Đã xảy ra lỗi khi giao bài");
+      console.error(e);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", padding: "28px 28px" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+    <div className="min-h-screen bg-slate-50 p-7">
+      <div className="max-w-[1000px] mx-auto">
 
         {/* Header */}
-        <div style={{ marginBottom: 20 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: 0 }}>Quản lý Giao bài tập</h1>
-          <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 5, marginBottom: 0 }}>
-            Lên kế hoạch và theo dõi tiến độ bài tập về nhà của học sinh.
+        <div className="mb-6">
+          <h1 className="text-2xl font-extrabold text-gray-900">Quản lý Giao bài tập</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Giao bài tập cho lớp hoặc cá nhân học sinh và theo dõi tiến độ.
           </p>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #E5E7EB", marginBottom: 24 }}>
-          {tabs.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                padding: "10px 20px", fontSize: 14, fontWeight: activeTab === t.key ? 600 : 400,
-                color: activeTab === t.key ? "#3B82F6" : "#6B7280",
-                borderBottom: activeTab === t.key ? "2px solid #3B82F6" : "2px solid transparent",
-                marginBottom: -1, transition: "all 0.15s",
-              }}
-            >{t.label}</button>
-          ))}
+        <div className="flex gap-4 border-b border-gray-200 mb-6">
+          <button
+            onClick={() => setActiveTab("new")}
+            className={`px-5 py-2.5 text-sm font-semibold transition-all border-b-2 ${
+              activeTab === "new" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Giao bài mới
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`px-5 py-2.5 text-sm font-semibold transition-all border-b-2 ${
+              activeTab === "history" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Lịch sử đã giao
+          </button>
         </div>
 
-        {/* Content */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
-
-          {/* LEFT COLUMN */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Form card */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "22px 24px" }}>
-              {/* Title */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 22 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 9, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <BookOpen size={15} color="#3B82F6" />
-                </div>
-                <span style={{ fontWeight: 700, fontSize: 15, color: "#111827" }}>Thông tin giao bài mới</span>
-              </div>
-
-              {/* Row 1: Class + Deadline */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Chọn lớp học</label>
-                  <div style={{ position: "relative" }}>
-                    <select
-                      value={selectedClass}
-                      onChange={e => setSelectedClass(e.target.value)}
-                      style={{
-                        width: "100%", padding: "9px 36px 9px 12px",
-                        border: "1.5px solid #E5E7EB", borderRadius: 9,
-                        fontSize: 13, color: "#374151", background: "#fff",
-                        appearance: "none", cursor: "pointer", outline: "none",
-                      }}
-                    >
-                      <option>Lớp 10A1 - Toán học</option>
-                      <option>Lớp 11B2 - Vật lý</option>
-                      <option>Lớp 12A1 - Toán học</option>
-                    </select>
-                    <ChevronDown size={14} color="#9CA3AF" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                  </div>
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Thời hạn nộp bài</label>
-                  <input
-                    type="datetime-local"
-                    style={{
-                      width: "100%", padding: "9px 12px",
-                      border: "1.5px solid #E5E7EB", borderRadius: 9,
-                      fontSize: 13, color: "#374151", background: "#fff",
-                      outline: "none", boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Assignment library */}
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 10 }}>Chọn bài tập từ thư viện</label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {libraryAssignments.map(a => (
-                    <div
-                      key={a.id}
-                      onClick={() => setSelectedAssignment(a.id)}
-                      style={{
-                        border: selectedAssignment === a.id ? "2px solid #3B82F6" : "1.5px solid #E5E7EB",
-                        borderRadius: 12, padding: "12px 14px",
-                        cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
-                        background: selectedAssignment === a.id ? "#EFF6FF" : "#fff",
-                        position: "relative", transition: "all 0.15s",
-                      }}
-                    >
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: selectedAssignment === a.id ? "#3B82F6" : "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, color: selectedAssignment === a.id ? "#fff" : "#6B7280", flexShrink: 0 }}>
-                        {a.icon}
+        {loading ? (
+          <div className="flex items-center justify-center p-20">
+            <Loader2 className="animate-spin text-blue-500" size={32} />
+          </div>
+        ) : (
+          <>
+            {activeTab === "new" && (
+              <div className="grid grid-cols-[1fr_320px] gap-6">
+                <div className="flex flex-col gap-6">
+                  
+                  {/* Form card */}
+                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                    <div className="flex items-center gap-2.5 mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                        <Target size={20} className="text-blue-600" />
                       </div>
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0 }}>{a.name}</p>
-                        <p style={{ fontSize: 11, color: "#9CA3AF", margin: "2px 0 0" }}>{a.questions} câu hỏi • {a.duration} phút</p>
-                      </div>
-                      {selectedAssignment === a.id && (
-                        <div style={{ position: "absolute", top: 8, right: 8, width: 18, height: 18, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <CheckCircle2 size={12} color="#fff" />
-                        </div>
-                      )}
+                      <span className="font-bold text-gray-900 text-lg">Thông tin giao bài</span>
                     </div>
-                  ))}
-                </div>
-                <button style={{ background: "none", border: "none", cursor: "pointer", color: "#3B82F6", fontSize: 13, fontWeight: 500, marginTop: 10, padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
-                  <Plus size={14} /> Thêm bài tập khác từ thư viện
-                </button>
-              </div>
 
-              {/* Mode */}
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 10 }}>Hình thức giao bài</label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {([
-                    { key: "manual" as AssignMode, title: "Giao thủ công", desc: "Giao ngay lập tức cho các lớp đã chọn" },
-                    { key: "auto" as AssignMode, title: "Giao tự động hàng ngày", desc: "Hệ thống tự động giao bài theo lịch cố định" },
-                  ]).map(m => (
-                    <div
-                      key={m.key}
-                      onClick={() => setAssignMode(m.key)}
-                      style={{
-                        border: assignMode === m.key ? "2px solid #3B82F6" : "1.5px solid #E5E7EB",
-                        borderRadius: 12, padding: "12px 14px",
-                        cursor: "pointer", display: "flex", alignItems: "flex-start", gap: 10,
-                        background: assignMode === m.key ? "#EFF6FF" : "#fff",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      <div style={{
-                        width: 16, height: 16, borderRadius: "50%", flexShrink: 0, marginTop: 2,
-                        border: assignMode === m.key ? "5px solid #3B82F6" : "2px solid #D1D5DB",
-                        background: "#fff", transition: "all 0.15s",
-                      }} />
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0 }}>{m.title}</p>
-                        <p style={{ fontSize: 11, color: "#9CA3AF", margin: "3px 0 0", lineHeight: 1.4 }}>{m.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: "flex", gap: 12 }}>
-                <button style={{
-                  flex: 1, padding: "12px", borderRadius: 12, border: "none",
-                  background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                  color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(59,130,246,0.35)", transition: "opacity 0.2s",
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.9")}
-                  onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-                >
-                  Hoàn tất giao bài
-                </button>
-                <button style={{
-                  padding: "12px 24px", borderRadius: 12,
-                  border: "1.5px solid #E5E7EB", background: "#fff",
-                  color: "#374151", fontSize: 14, fontWeight: 600, cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.color = "#3B82F6"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
-                >
-                  Lưu nháp
-                </button>
-              </div>
-            </div>
-
-            {/* History table */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 22px", borderBottom: "1px solid #F3F4F6" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <History size={15} color="#6B7280" />
-                  <span style={{ fontWeight: 700, fontSize: 14, color: "#111827" }}>Lịch sử bài đã giao gần đây</span>
-                </div>
-                <button style={{ background: "none", border: "none", fontSize: 13, color: "#3B82F6", fontWeight: 500, cursor: "pointer" }}>Xem tất cả</button>
-              </div>
-              <div style={{ padding: "0 22px" }}>
-                {/* Head */}
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 0.8fr", padding: "10px 0", borderBottom: "1px solid #F3F4F6" }}>
-                  {["TÊN BÀI TẬP", "LỚP", "NGÀY GIAO", "HOÀN THÀNH", "HÀNH ĐỘNG"].map(h => (
-                    <span key={h} style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.06em" }}>{h}</span>
-                  ))}
-                </div>
-                {historyItems.map((item, i) => (
-                  <div key={item.id}
-                    style={{
-                      display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 0.8fr",
-                      padding: "14px 0", alignItems: "center",
-                      borderBottom: i < historyItems.length - 1 ? "1px solid #F9FAFB" : "none",
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#FAFAFA")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{item.name}</span>
-                    <span style={{ fontSize: 13, color: "#6B7280" }}>{item.class}</span>
-                    <span style={{ fontSize: 13, color: "#6B7280" }}>{item.dateAssigned}</span>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                        <div style={{ flex: 1, height: 5, background: "#EFF6FF", borderRadius: 999, maxWidth: 70 }}>
-                          <div style={{ height: 5, width: `${item.completion}%`, background: "#3B82F6", borderRadius: 999 }} />
-                        </div>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: "#3B82F6" }}>{item.completion}%</span>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 5 }}>
-                      {[Eye, Pencil, RotateCcw].map((Icon, j) => (
-                        <button key={j} style={{ width: 28, height: 28, border: "1px solid #E5E7EB", borderRadius: 7, background: "#F8FAFC", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                          onMouseEnter={e => { e.currentTarget.style.background = "#EFF6FF"; e.currentTarget.style.borderColor = "#3B82F6"; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = "#F8FAFC"; e.currentTarget.style.borderColor = "#E5E7EB"; }}
+                    {/* Target Type */}
+                    <div className="mb-6">
+                      <label className="text-xs font-bold text-gray-700 block mb-3 uppercase tracking-wider">Đối tượng nhận bài</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div
+                          onClick={() => setAssignTarget("class")}
+                          className={`border-2 rounded-xl p-3.5 cursor-pointer flex items-center gap-3 transition-colors ${
+                            assignTarget === "class" ? "border-blue-500 bg-blue-50/50" : "border-gray-100 hover:border-blue-200"
+                          }`}
                         >
-                          <Icon size={12} color="#6B7280" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+                          <div className={`p-2 rounded-lg ${assignTarget === "class" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"}`}>
+                            <Users size={18} />
+                          </div>
+                          <div>
+                            <p className={`font-bold text-sm ${assignTarget === "class" ? "text-blue-900" : "text-gray-700"}`}>Cả lớp học</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Giao cho tất cả học sinh trong lớp</p>
+                          </div>
+                        </div>
 
-          {/* RIGHT COLUMN */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Schedule card */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "20px 20px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Calendar size={14} color="#3B82F6" />
-                </div>
-                <span style={{ fontWeight: 700, fontSize: 14, color: "#111827" }}>Lịch giao sắp tới</span>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                {scheduleItems.map((item, i) => (
-                  <div key={i} style={{ display: "flex", gap: 14, paddingBottom: i < scheduleItems.length - 1 ? 18 : 0 }}>
-                    {/* Timeline dot */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: item.isToday ? "#3B82F6" : "#D1D5DB", marginTop: 4, flexShrink: 0 }} />
-                      {i < scheduleItems.length - 1 && (
-                        <div style={{ width: 1.5, flex: 1, background: "#E5E7EB", marginTop: 4 }} />
-                      )}
-                    </div>
-                    <div style={{ flex: 1, paddingBottom: i < scheduleItems.length - 1 ? 0 : 0 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, color: item.isToday ? "#3B82F6" : "#9CA3AF", margin: "0 0 6px", letterSpacing: "0.03em" }}>{item.date}</p>
-                      <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "10px 12px" }}>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: "0 0 6px" }}>{item.title}</p>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: 11, color: "#9CA3AF" }}>{item.class}</span>
-                          <span style={{ fontSize: 11, color: "#6B7280", display: "flex", alignItems: "center", gap: 3 }}>
-                            <Clock size={10} />{item.time}
-                          </span>
+                        <div
+                          onClick={() => setAssignTarget("student")}
+                          className={`border-2 rounded-xl p-3.5 cursor-pointer flex items-center gap-3 transition-colors ${
+                            assignTarget === "student" ? "border-blue-500 bg-blue-50/50" : "border-gray-100 hover:border-blue-200"
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${assignTarget === "student" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"}`}>
+                            <UserIcon size={18} />
+                          </div>
+                          <div>
+                            <p className={`font-bold text-sm ${assignTarget === "student" ? "text-blue-900" : "text-gray-700"}`}>Cá nhân</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Giao cho một học sinh cụ thể</p>
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* Row 1: Target Dropdown + Deadline */}
+                    <div className="grid grid-cols-2 gap-5 mb-6">
+                      <div>
+                        {assignTarget === "class" ? (
+                          <>
+                            <label className="text-xs font-bold text-gray-700 block mb-2">Chọn lớp học</label>
+                            <div className="relative">
+                              <select
+                                value={selectedClassId}
+                                onChange={e => setSelectedClassId(e.target.value)}
+                                className="w-full pl-3 pr-10 py-2.5 border-2 border-gray-100 rounded-xl text-sm text-gray-700 bg-white appearance-none outline-none focus:border-blue-400 font-semibold"
+                              >
+                                <option value="" disabled>-- Chọn lớp --</option>
+                                {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                              </select>
+                              <ChevronDown size={16} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <label className="text-xs font-bold text-gray-700 block mb-2">Chọn học sinh</label>
+                            <div className="relative">
+                              <select
+                                value={selectedStudentId}
+                                onChange={e => setSelectedStudentId(e.target.value)}
+                                className="w-full pl-3 pr-10 py-2.5 border-2 border-gray-100 rounded-xl text-sm text-gray-700 bg-white appearance-none outline-none focus:border-blue-400 font-semibold"
+                              >
+                                <option value="" disabled>-- Chọn học sinh --</option>
+                                {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}
+                              </select>
+                              <ChevronDown size={16} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 block mb-2">Thời hạn nộp bài</label>
+                        <input
+                          type="datetime-local"
+                          value={dueDate}
+                          onChange={e => setDueDate(e.target.value)}
+                          className="w-full px-3 py-2.5 border-2 border-gray-100 rounded-xl text-sm text-gray-700 bg-white outline-none focus:border-blue-400 font-semibold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Assignment library */}
+                    <div className="mb-6">
+                      <label className="text-xs font-bold text-gray-700 block mb-3 uppercase tracking-wider">Chọn bài tập từ thư viện</label>
+                      <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 pb-2">
+                        {exercises.length === 0 && (
+                          <div className="col-span-2 p-6 text-center text-sm text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                            Chưa có bài tập nào đã duyệt trong hệ thống.
+                          </div>
+                        )}
+                        {exercises.map(ex => (
+                          <div
+                            key={ex.id}
+                            onClick={() => setSelectedExerciseId(ex.id)}
+                            className={`border-2 rounded-xl p-3 cursor-pointer flex items-start gap-3 transition-colors ${
+                              selectedExerciseId === ex.id ? "border-blue-500 bg-blue-50/30" : "border-gray-100 hover:border-blue-200"
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                              selectedExerciseId === ex.id ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-500"
+                            }`}>
+                              <BookOpen size={18} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-900 truncate">{ex.title}</p>
+                              <p className="text-[11px] text-gray-500 mt-1 truncate">
+                                {ex.subject?.name} • {ex._count?.questions || 0} câu hỏi • {ex.timeLimitMinutes || '--'} phút
+                              </p>
+                            </div>
+                            {selectedExerciseId === ex.id && (
+                              <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <CheckCircle2 size={12} className="text-white" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={handleCreateAssignment}
+                        disabled={submitting}
+                        className="flex-1 py-3.5 rounded-xl border-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-shadow disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer flex justify-center items-center gap-2"
+                      >
+                        {submitting && <Loader2 size={16} className="animate-spin" />}
+                        {submitting ? 'Đang xử lý...' : 'Hoàn tất giao bài'}
+                      </button>
+                    </div>
                   </div>
-                ))}
-              </div>
-
-              <button style={{
-                width: "100%", marginTop: 16, padding: "10px",
-                border: "1.5px solid #E5E7EB", borderRadius: 10,
-                background: "#fff", color: "#374151",
-                fontSize: 13, fontWeight: 600, cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.color = "#3B82F6"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
-              >
-                Xem toàn bộ lịch
-              </button>
-            </div>
-
-            {/* Stats card */}
-            <div style={{
-              background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
-              borderRadius: 16, padding: "20px 22px",
-              boxShadow: "0 4px 16px rgba(59,130,246,0.35)",
-              position: "relative", overflow: "hidden",
-            }}>
-              {/* Decorative wave */}
-              <svg style={{ position: "absolute", bottom: 0, right: 0, opacity: 0.15 }} width="140" height="80" viewBox="0 0 140 80">
-                <path d="M0,40 C30,10 60,70 90,40 C120,10 130,60 140,40 L140,80 L0,80 Z" fill="#fff" />
-              </svg>
-
-              <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)", margin: "0 0 6px" }}>THỐNG KÊ TUẦN NÀY</p>
-              <p style={{ fontSize: 26, fontWeight: 800, color: "#fff", margin: "0 0 16px" }}>12 Bài tập đã giao</p>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.85)" }}>Hoàn thành trung bình</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>78%</span>
                 </div>
-                <div style={{ height: 6, background: "rgba(255,255,255,0.2)", borderRadius: 999 }}>
-                  <div style={{ height: 6, width: "78%", background: "#fff", borderRadius: 999 }} />
-                </div>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", margin: "10px 0 0", display: "flex", alignItems: "center", gap: 4 }}>
-                  <TrendingUp size={11} /> * Tăng 12% so với tuần trước
-                </p>
-              </div>
-            </div>
 
-          </div>
-        </div>
+                {/* Right Column: Tips */}
+                <div className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 rounded-2xl p-6 h-fit">
+                   <h3 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
+                     <span className="bg-blue-200 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center text-sm">💡</span>
+                     Mẹo giao bài
+                   </h3>
+                   <ul className="text-sm text-gray-600 space-y-4">
+                     <li className="flex items-start gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                       Học sinh sẽ nhận được thông báo ngay khi bạn giao bài thành công.
+                     </li>
+                     <li className="flex items-start gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                       Ngày hết hạn có thể thay đổi sau khi giao.
+                     </li>
+                     <li className="flex items-start gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                       Hỗ trợ giao cùng một bài tập cho nhiều đối tượng khác nhau ở các thời điểm khác nhau.
+                     </li>
+                   </ul>
+                </div>
+
+              </div>
+            )}
+
+            {activeTab === "history" && (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50/80 border-b border-gray-100">
+                      {['BÀI TẬP', 'ĐỐI TƯỢNG', 'LOẠI', 'HẠN NỘP', 'TIẾN ĐỘ'].map((h) => (
+                        <th key={h} className="text-[11px] font-bold text-gray-400 uppercase tracking-wider text-left px-6 py-4">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.length === 0 ? (
+                      <tr>
+                        <td colSpan={5}>
+                          <div className="text-center p-12 text-sm text-gray-500">Chưa có dữ liệu giao bài.</div>
+                        </td>
+                      </tr>
+                    ) : (
+                      history.map((a, i) => {
+                        const targetName = a.assignedToType === 'class' 
+                          ? classes.find(c => c.id === a.assignedToId)?.name || 'Lớp ẩn'
+                          : students.find(s => s.id === a.assignedToId)?.name || 'Học sinh ẩn';
+                          
+                        return (
+                          <tr key={a.id} className="border-b border-gray-50 hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <p className="font-bold text-sm text-gray-900">{a.exercise?.title}</p>
+                              <p className="text-[11px] text-gray-400 mt-0.5">{a.exercise?.subject?.name}</p>
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-700">
+                              {targetName}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${a.assignedToType === 'class' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
+                                {a.assignedToType === 'class' ? 'LỚP HỌC' : 'CÁ NHÂN'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {a.dueDate ? new Date(a.dueDate).toLocaleString('vi-VN') : 'Không có hạn'}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-600">
+                              {(a as any)._count?.submissions || 0} bài nộp
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

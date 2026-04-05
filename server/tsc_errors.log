@@ -1,0 +1,7 @@
+src/translation/database/assignment.repo.ts(153,15): error TS2353: Object literal may only specify known properties, and 'grade' does not exist in type 'ExerciseInclude<DefaultArgs>'.
+src/translation/database/grade.repo.ts(2,15): error TS2305: Module '"../../generated/prisma/client"' has no exported member 'Grade'.
+src/translation/database/grade.repo.ts(10,19): error TS2339: Property 'grade' does not exist on type 'PrismaClient<never, GlobalOmitConfig | undefined, DefaultArgs>'.
+src/translation/database/grade.repo.ts(34,19): error TS2339: Property 'grade' does not exist on type 'PrismaClient<never, GlobalOmitConfig | undefined, DefaultArgs>'.
+src/translation/database/grade.repo.ts(40,19): error TS2339: Property 'grade' does not exist on type 'PrismaClient<never, GlobalOmitConfig | undefined, DefaultArgs>'.
+src/translation/database/grade.repo.ts(50,19): error TS2339: Property 'grade' does not exist on type 'PrismaClient<never, GlobalOmitConfig | undefined, DefaultArgs>'.
+src/translation/database/grade.repo.ts(60,19): error TS2339: Property 'grade' does not exist on type 'PrismaClient<never, GlobalOmitConfig | undefined, DefaultArgs>'.

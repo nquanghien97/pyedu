@@ -49,7 +49,7 @@ export const subjectRepository = {
       data: {
         id: nanoid(36),
         name: data.name,
-        gradeId: data.gradeId ?? null,
+        grade: data.grade ?? null,
         parentSubjectId: data.parentSubjectId ?? null,
       },
     });
@@ -60,7 +60,7 @@ export const subjectRepository = {
       where: { id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
-        ...(data.gradeId !== undefined && { gradeId: data.gradeId }),
+        ...(data.grade !== undefined && { grade: data.grade }),
         ...(data.parentSubjectId !== undefined && { parentSubjectId: data.parentSubjectId }),
       },
     });

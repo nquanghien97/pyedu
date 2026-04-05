@@ -22,7 +22,7 @@ const questionInputSchema = z.object({
 
 export const createExerciseSchema = z.object({
   title: z.string().min(1, 'Tiêu đề không được để trống').max(255),
-  gradeId: z.string().length(36).optional(),
+  grade: z.number().int().min(1).max(12).optional(),
   subjectId: z.string().length(36).optional(),
   topicId: z.string().length(36).optional(),
   exerciseType: z.string().max(50).optional(),
@@ -43,7 +43,7 @@ export type UpdateExerciseInput = z.infer<typeof updateExerciseSchema>;
 export type QuestionInput = z.infer<typeof questionInputSchema>;
 
 export interface ExerciseFilters {
-  gradeId?: string;
+  grade?: number;
   subjectId?: string;
   topicId?: string;
   difficultyLevel?: string;

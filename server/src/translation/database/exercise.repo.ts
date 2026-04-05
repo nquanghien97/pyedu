@@ -6,7 +6,7 @@ import { Prisma } from '../../generated/prisma/client';
 function buildWhereClause(filters: ExerciseFilters): Prisma.ExerciseWhereInput {
   const where: Prisma.ExerciseWhereInput = {};
 
-  if (filters.gradeId) where.gradeId = filters.gradeId;
+  if (filters.grade) where.grade = filters.grade;
   if (filters.subjectId) where.subjectId = filters.subjectId;
   if (filters.topicId) where.topicId = filters.topicId;
   if (filters.difficultyLevel) where.difficultyLevel = filters.difficultyLevel;
@@ -76,7 +76,7 @@ export const exerciseRepository = {
       data: {
         id: exerciseId,
         title: data.title,
-        gradeId: data.gradeId,
+        grade: data.grade ?? null,
         subjectId: data.subjectId ?? null,
         topicId: data.topicId ?? null,
         exerciseType: data.exerciseType ?? null,
@@ -114,6 +114,7 @@ export const exerciseRepository = {
       data: {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.subjectId !== undefined && { subjectId: data.subjectId }),
+        ...(data.grade !== undefined && { grade: data.grade }),
         ...(data.topicId !== undefined && { topicId: data.topicId }),
         ...(data.exerciseType !== undefined && { exerciseType: data.exerciseType }),
         ...(data.difficultyLevel !== undefined && { difficultyLevel: data.difficultyLevel }),

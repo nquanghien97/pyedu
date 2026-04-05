@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { loginHandler } from './loginHandler';
 import { logoutHandler } from './logoutHandler';
-import { getGrades, getGradeById, createGrade, updateGrade, deleteGrade } from './gradeHandler';
+import { getClasses, createClass, getClassStudents, enrollStudent, removeStudent } from './classHandler';
 import { chatbotHandler } from './chatbotHandler';
 import { getSubjects, getSubjectById, createSubject, updateSubject, deleteSubject } from './subjectHandler';
 import { getTopicsBySubject, getTopicById, createTopic, updateTopic, deleteTopic } from './topicHandler';
@@ -10,6 +10,9 @@ import { upload, uploadAttachment, deleteAttachment } from './uploadHandler';
 import { generateExerciseByAI, generateExerciseFromFile } from './aiGenerateHandler';
 import { getSessions, createSession, deleteSession, getSessionMessages } from './chatSessionHandler';
 import { sendMessage } from './chatMessageHandler';
+import { getStudentAssignments } from './studentAssignmentHandler';
+import { createTeacherAssignment, getTeacherAssignments } from './teacherAssignmentHandler';
+import { getTeacherClasses, getTeacherStudents } from './metaHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -31,12 +34,12 @@ protectedRouter.post('/chat-sessions', createSession);
 protectedRouter.delete('/chat-sessions/:id', deleteSession);
 protectedRouter.get('/chat-sessions/:id/messages', getSessionMessages);
 protectedRouter.post('/chat-sessions/:sessionId/messages', upload.single('file'), sendMessage);
-// Grades
-protectedRouter.get('/grades', getGrades);
-protectedRouter.get('/grades/:id', getGradeById);
-protectedRouter.post('/grades', createGrade);
-protectedRouter.put('/grades/:id', updateGrade);
-protectedRouter.delete('/grades/:id', deleteGrade);
+// Classes
+protectedRouter.get('/classes', getClasses);
+protectedRouter.post('/classes', createClass);
+protectedRouter.get('/classes/:id/students', getClassStudents);
+protectedRouter.post('/classes/:id/students', enrollStudent);
+protectedRouter.delete('/classes/:id/students/:studentId', removeStudent);
 
 // Subjects
 protectedRouter.get('/subjects', getSubjects);
@@ -72,5 +75,16 @@ protectedRouter.delete('/uploads/:id', deleteAttachment);
 // AI Generator
 protectedRouter.post('/ai/generate-exercise', generateExerciseByAI);
 protectedRouter.post('/ai/generate-exercise-by-file', upload.single('file'), generateExerciseFromFile);
+
+// Teacher Meta Data (for Assign Dropdowns)
+protectedRouter.get('/teacher/classes', getTeacherClasses);
+protectedRouter.get('/teacher/students', getTeacherStudents);
+
+// Teacher Assignments
+protectedRouter.post('/teacher/assignments', createTeacherAssignment);
+protectedRouter.get('/teacher/assignments', getTeacherAssignments);
+
+// Student Assignments
+protectedRouter.get('/student/assignments', getStudentAssignments);
 
 jwtRouter.use(protectedRouter);

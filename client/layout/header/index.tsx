@@ -76,8 +76,7 @@ function Header(props: HeaderProps) {
               <div className="flex items-center justify-center rounded-full bg-[#f1f1f1] w-10 h-10 p-2">
                 <UserIcon width={24} height={24} />
               </div>
-              {/* <span>{user?.username}</span> */}
-              <span>Khắc Tuấn</span>
+              <span>{user?.name}</span>
               <ArrowRight
                 width={16}
                 height={16}

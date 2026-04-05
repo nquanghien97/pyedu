@@ -9,14 +9,14 @@ export async function getSubjectById(id: string) {
   return api<SubjectEntity>({ url: `/api/v1/subjects/${id}` });
 }
 
-export async function createSubject(data: { name: string; gradeId?: string | null; parentSubjectId?: string | null }) {
+export async function createSubject(data: { name: string; grade?: number | null; parentSubjectId?: string | null }) {
   return api<SubjectEntity>({
     url: '/api/v1/subjects',
     options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
 
-export async function updateSubject(id: string, data: { name?: string; gradeId?: string | null; parentSubjectId?: string | null }) {
+export async function updateSubject(id: string, data: { name?: string; grade?: number | null; parentSubjectId?: string | null }) {
   return api<SubjectEntity>({
     url: `/api/v1/subjects/${id}`,
     options: { method: 'PUT', body: JSON.stringify(data) },
