@@ -19,8 +19,8 @@ function DifficultyDots({ level }: { level: number }) {
 
 const assignments = [
   { id: 1, subject: "Toán học", sub: "Đạo hàm & Tích phân", deadline: "Hôm nay, 20:00", level: 3, status: "urgent", initial: "M", color: "#EF4444", bg: "#FEF2F2" },
-  { id: 2, subject: "Vật lý",   sub: "Dòng điện xoay chiều", deadline: "Ngày mai",        level: 2, status: "normal", initial: "P", color: "#6366F1", bg: "#EEF2FF" },
-  { id: 3, subject: "Tiếng Anh", sub: "Reading: IELTS Unit 8", deadline: "15 Thg 10",     level: 1, status: "normal", initial: "E", color: "#22C55E", bg: "#F0FDF4" },
+  { id: 2, subject: "Vật lý", sub: "Dòng điện xoay chiều", deadline: "Ngày mai", level: 2, status: "normal", initial: "P", color: "#6366F1", bg: "#EEF2FF" },
+  { id: 3, subject: "Tiếng Anh", sub: "Reading: IELTS Unit 8", deadline: "15 Thg 10", level: 1, status: "normal", initial: "E", color: "#22C55E", bg: "#F0FDF4" },
 ];
 
 const activities = [
@@ -29,75 +29,79 @@ const activities = [
   { text: "Đã xem video bài giảng Lịch sử", meta: "2 ngày trước • 15:30", dot: "#F59E0B" },
 ];
 
-const avatarColors = ["#BFDBFE","#DDD6FE","#FDE68A","#BBF7D0","#FECACA"];
+const avatarColors = ["#BFDBFE", "#DDD6FE", "#FDE68A", "#BBF7D0", "#FECACA"];
 
 export default function StudentDashboard() {
   const [weekFilter] = useState("Tuần này");
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", padding: "28px 28px" }}>
-      <div style={{ maxWidth: 960, margin: "0 auto" }}>
+    <div className="min-h-screen bg-slate-50 p-7">
+      <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div style={{ marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>
-            Chào buổi sáng, Nam! 👋
-          </h1>
-          <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 5, marginBottom: 0 }}>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Chào buổi sáng, Nam! 👋</h1>
+          <p className="text-sm text-gray-400 mt-1">
             Hôm nay bạn có 3 bài tập quan trọng cần hoàn thành để duy trì chuỗi học tập.
           </p>
         </div>
 
         {/* Stat cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
           {/* Bài tập cần làm */}
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "20px 22px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex justify-between items-start mb-3.5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-50">
                 <CheckCircle2 size={20} color="#3B82F6" />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, background: "#F0FDF4", color: "#16A34A", padding: "3px 9px", borderRadius: 999 }}>+2 mới</span>
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-green-50 text-green-700">+2 mới</span>
             </div>
-            <p style={{ fontSize: 12, color: "#9CA3AF", margin: "0 0 4px" }}>Bài tập cần làm</p>
-            <p style={{ fontSize: 26, fontWeight: 800, color: "#111827", margin: 0 }}>05 <span style={{ fontSize: 13, fontWeight: 400, color: "#9CA3AF" }}>bài</span></p>
+            <p className="text-xs text-gray-400 mb-1">Bài tập cần làm</p>
+            <p className="text-2xl font-extrabold text-gray-900">
+              05 <span className="text-sm font-normal text-gray-400">bài</span>
+            </p>
           </div>
 
           {/* Điểm trung bình */}
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "20px 22px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F5F3FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex justify-between items-start mb-3.5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-50">
                 <Star size={20} color="#8B5CF6" />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, background: "#F0FDF4", color: "#16A34A", padding: "3px 9px", borderRadius: 999 }}>+0.2đ</span>
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-green-50 text-green-700">+0.2đ</span>
             </div>
-            <p style={{ fontSize: 12, color: "#9CA3AF", margin: "0 0 4px" }}>Điểm trung bình</p>
-            <p style={{ fontSize: 26, fontWeight: 800, color: "#111827", margin: 0 }}>8.5 <span style={{ fontSize: 13, fontWeight: 400, color: "#9CA3AF" }}>/10</span></p>
+            <p className="text-xs text-gray-400 mb-1">Điểm trung bình</p>
+            <p className="text-2xl font-extrabold text-gray-900">
+              8.5 <span className="text-sm font-normal text-gray-400">/10</span>
+            </p>
           </div>
 
           {/* Streak */}
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "20px 22px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex justify-between items-start mb-3.5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-50">
                 <Flame size={20} color="#F97316" />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, background: "#FEF2F2", color: "#DC2626", padding: "3px 9px", borderRadius: 999 }}>Top 5%</span>
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700">Top 5%</span>
             </div>
-            <p style={{ fontSize: 12, color: "#9CA3AF", margin: "0 0 4px" }}>Streak học tập</p>
-            <p style={{ fontSize: 26, fontWeight: 800, color: "#111827", margin: 0 }}>12 <span style={{ fontSize: 13, fontWeight: 400, color: "#9CA3AF" }}>ngày</span></p>
+            <p className="text-xs text-gray-400 mb-1">Streak học tập</p>
+            <p className="text-2xl font-extrabold text-gray-900">
+              12 <span className="text-sm font-normal text-gray-400">ngày</span>
+            </p>
           </div>
         </div>
 
         {/* Main content grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 16 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           {/* LEFT */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="flex flex-col gap-4">
 
             {/* Weekly progress chart */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "20px 22px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Tiến độ mục tiêu tuần</span>
-                <button style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, padding: "5px 12px", fontSize: 12, color: "#374151", fontWeight: 500, cursor: "pointer" }}>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-base font-bold text-gray-900">Tiến độ mục tiêu tuần</span>
+                <button className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 font-medium cursor-pointer hover:bg-slate-100 transition-colors">
                   {weekFilter} <ChevronDown size={12} color="#9CA3AF" />
                 </button>
               </div>
@@ -105,16 +109,16 @@ export default function StudentDashboard() {
             </div>
 
             {/* Priority assignments */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 22px", borderBottom: "1px solid #F3F4F6" }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Bài tập ưu tiên</span>
-                <button style={{ background: "none", border: "none", fontSize: 13, color: "#3B82F6", fontWeight: 500, cursor: "pointer" }}>Xem tất cả</button>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-base font-bold text-gray-900">Bài tập ưu tiên</span>
+                <button className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors">Xem tất cả</button>
               </div>
 
               {/* Table head */}
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.8fr 1fr", padding: "10px 22px", background: "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
+              <div className="grid grid-cols-4 gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-200">
                 {["MÔN HỌC", "HẠN CHÓT", "ĐỘ KHÓ", "TRẠNG THÁI"].map(h => (
-                  <span key={h} style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.06em" }}>{h}</span>
+                  <span key={h} className="text-xs font-bold text-slate-500 tracking-wide">{h}</span>
                 ))}
               </div>
 
@@ -126,10 +130,11 @@ export default function StudentDashboard() {
                     borderBottom: i < assignments.length - 1 ? "1px solid #F9FAFB" : "none",
                     transition: "background 0.15s",
                   }}
+                  className={`grid grid-cols-4 gap-4 px-5 py-2.5 bg-slate-50  ${i < assignments.length - 1 && 'border-b border-[#F9FAFB]'} duration-300`}
                   onMouseEnter={e => (e.currentTarget.style.background = "#FAFAFA")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div className="flex items-center gap-2">
                     <div style={{ width: 32, height: 32, borderRadius: 9, background: a.bg, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, color: a.color, flexShrink: 0 }}>
                       {a.initial}
                     </div>

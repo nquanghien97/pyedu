@@ -94,10 +94,10 @@ export default function OnlineTutorPage() {
       </div>
 
       {/* Main layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, padding: "20px 28px", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="grid grid-cols-3 gap-5 p-4 max-w-7xl mx-auto">
 
         {/* ── LEFT: Chat ── */}
-        <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", height: "calc(100vh - 116px)" }}>
+        <div className="col-span-2" style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", height: "calc(100vh - 116px)" }}>
 
           {/* Chat header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid #F3F4F6" }}>
@@ -107,8 +107,8 @@ export default function OnlineTutorPage() {
                 <span style={{ position: "absolute", bottom: 1, right: 1, width: 9, height: 9, background: "#22C55E", borderRadius: "50%", border: "1.5px solid #fff" }} />
               </div>
               <div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>Cửa sổ Chat</p>
-                <p style={{ fontSize: 11, color: "#22C55E", margin: "1px 0 0", fontWeight: 500 }}>Gia sư AI đang sẵn sàng</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>Gia sư A</p>
+                <p style={{ fontSize: 11, color: "#22C55E", margin: "1px 0 0", fontWeight: 500 }}>Đang online</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -183,7 +183,7 @@ export default function OnlineTutorPage() {
         </div>
 
         {/* ── RIGHT: Sidebar ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "calc(100vh - 116px)", overflowY: "auto" }}>
+        <div className="" style={{ display: "flex", flexDirection: "column", gap: 16, height: "calc(100vh - 116px)", overflowY: "auto" }}>
 
           {/* Video call */}
           <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>

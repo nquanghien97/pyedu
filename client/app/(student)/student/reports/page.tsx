@@ -9,7 +9,7 @@ import { MapPin, Settings, Info, Sparkles } from "lucide-react";
 
 // ── Data ────────────────────────────────────────────────────────
 const radarData = [
-  { subject: "Toán (9.0)",    value: 9.0, fullMark: 10 },
+  { subject: "Toán (9.0)", value: 9.0, fullMark: 10 },
   { subject: "Vật lý (8.5)", value: 8.5, fullMark: 10 },
   { subject: "Hóa học (7.5)", value: 7.5, fullMark: 10 },
   { subject: "Anh văn (8.5)", value: 8.5, fullMark: 10 },
@@ -26,9 +26,9 @@ const progressData = [
 
 const recentGrades = [
   { id: 1, icon: "📘", iconBg: "#EFF6FF", name: "Đạo hàm và ứng dụng", subject: "Toán học", date: "20/05/2024", status: "done", score: "8.5/10" },
-  { id: 2, icon: "💬", iconBg: "#FEF2F2", name: "Past Continuous Tense",  subject: "Anh văn",  date: "18/05/2024", status: "done", score: "9.0/10" },
-  { id: 3, icon: "⚗️", iconBg: "#F0FDF4", name: "Cấu tạo nguyên tử",      subject: "Hóa học",  date: "15/05/2024", status: "done", score: "7.5/10" },
-  { id: 4, icon: "📖", iconBg: "#FFFBEB", name: "Tác phẩm Vợ Nhặt",       subject: "Ngữ văn",  date: "12/05/2024", status: "grading", score: "—/10" },
+  { id: 2, icon: "💬", iconBg: "#FEF2F2", name: "Past Continuous Tense", subject: "Anh văn", date: "18/05/2024", status: "done", score: "9.0/10" },
+  { id: 3, icon: "⚗️", iconBg: "#F0FDF4", name: "Cấu tạo nguyên tử", subject: "Hóa học", date: "15/05/2024", status: "done", score: "7.5/10" },
+  { id: 4, icon: "📖", iconBg: "#FFFBEB", name: "Tác phẩm Vợ Nhặt", subject: "Ngữ văn", date: "12/05/2024", status: "grading", score: "—/10" },
 ];
 
 const CustomLineTooltip = ({ active, payload, label }: any) => {
@@ -50,7 +50,7 @@ export default function ReportsPage() {
       fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
       padding: "24px 28px",
     }}>
-      <div style={{ maxWidth: 1020, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="max-w-7xl mx-auto flex flex-col gap-5">
 
         {/* ── Top Section ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 16 }}>

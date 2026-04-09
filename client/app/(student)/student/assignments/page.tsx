@@ -223,7 +223,7 @@ export default function AssignmentPage() {
       // Note: difficultyLevel filter was removed from StudentAssignmentFilters 
       // as assignments are tracked by status/subject instead, 
       // but we keep text search and subject filtering.
-      
+
       if (searchDebounced.trim()) {
         filters.search = searchDebounced.trim();
       }
@@ -264,7 +264,7 @@ export default function AssignmentPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-7">
-      <div className="max-w-[980px] mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -482,7 +482,7 @@ export default function AssignmentPage() {
 
                   let statusText = 'Chưa làm';
                   let statusColor = 'bg-gray-100 text-gray-600';
-                  
+
                   if (isCompleted) {
                     statusText = 'Đã nộp';
                     statusColor = 'bg-green-100 text-green-700';
@@ -562,7 +562,7 @@ export default function AssignmentPage() {
                           </span>
                         </div>
                       </td>
-                      
+
                       {/* Status */}
                       <td className="px-6 py-4 align-middle">
                         <span className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg ${statusColor}`}>
@@ -578,13 +578,13 @@ export default function AssignmentPage() {
                       {/* Action */}
                       <td className="px-6 py-4 align-middle">
                         {isCompleted ? (
-                           <button className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg hover:border-blue-300 transition-all cursor-pointer">
-                             Xem lại
-                           </button>
+                          <button className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg hover:border-blue-300 transition-all cursor-pointer">
+                            Xem lại
+                          </button>
                         ) : (
-                           <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none">
-                             Làm bài
-                           </button>
+                          <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none">
+                            Làm bài
+                          </button>
                         )}
                       </td>
                     </tr>

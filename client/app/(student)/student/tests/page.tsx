@@ -6,9 +6,9 @@ import { CheckCircle2, Clock, Star, SlidersHorizontal, ChevronLeft, ChevronRight
 type Tab = "chapter" | "schedule" | "results";
 
 const tabs: { key: Tab; label: string; icon: string }[] = [
-  { key: "chapter",  label: "Bài kiểm tra chương", icon: "📋" },
-  { key: "schedule", label: "Lịch kiểm tra",       icon: "📅" },
-  { key: "results",  label: "Kết quả kiểm tra",    icon: "📊" },
+  { key: "chapter", label: "Bài kiểm tra chương", icon: "📋" },
+  { key: "schedule", label: "Lịch kiểm tra", icon: "📅" },
+  { key: "results", label: "Kết quả kiểm tra", icon: "📊" },
 ];
 
 const exams = [
@@ -59,15 +59,15 @@ const exams = [
 ];
 
 const statusConfig: Record<string, { label: string; bg: string; color: string; dot: string }> = {
-  done:       { label: "Đã hoàn thành", bg: "#F0FDF4", color: "#16A34A", dot: "#22C55E" },
-  notstarted: { label: "Chưa bắt đầu",  bg: "#F3F4F6", color: "#6B7280", dot: "#D1D5DB" },
-  ongoing:    { label: "Đang diễn ra",  bg: "#ECFDF5", color: "#059669", dot: "#10B981" },
+  done: { label: "Đã hoàn thành", bg: "#F0FDF4", color: "#16A34A", dot: "#22C55E" },
+  notstarted: { label: "Chưa bắt đầu", bg: "#F3F4F6", color: "#6B7280", dot: "#D1D5DB" },
+  ongoing: { label: "Đang diễn ra", bg: "#ECFDF5", color: "#059669", dot: "#10B981" },
 };
 
 const actionConfig: Record<string, { label: string; variant: "link" | "button" }> = {
-  review:   { label: "Xem lại",  variant: "link"   },
-  start:    { label: "Làm bài",  variant: "button" },
-  continue: { label: "Tiếp tục", variant: "link"   },
+  review: { label: "Xem lại", variant: "link" },
+  start: { label: "Làm bài", variant: "button" },
+  continue: { label: "Tiếp tục", variant: "link" },
 };
 
 function StatusBadge({ type }: { type: string }) {
@@ -117,15 +117,11 @@ export default function TestsPage() {
   const totalPages = 3;
 
   return (
-    <div style={{
-      minHeight: "100vh", background: "#F8FAFC",
-      fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-      padding: "24px 28px",
-    }}>
-      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans p-6">
+      <div className="max-w-7xl mx-auto">
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #E5E7EB", marginBottom: 24 }}>
+        <div className="flex gap-0 border-b border-[#E5E7EB] mb-6">
           {tabs.map(t => (
             <button
               key={t.key}

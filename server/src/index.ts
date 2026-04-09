@@ -15,7 +15,7 @@ export const initialiseServer = async () => {
   setupNodeProcess();
 
   const app = express();
-  const PORT = 8080;
+  const PORT = process.env.PORT || 8080;
 
   app.use(compression());
   app.use(
@@ -27,7 +27,7 @@ export const initialiseServer = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cors({
-    origin: "http://localhost:3000",
+    origin: true,
     credentials: true
   }));
   app.get('/livez', livezRequestHandler);
