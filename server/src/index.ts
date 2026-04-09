@@ -11,6 +11,11 @@ import { lifecycle } from './execution/lifecycle/lifecycle';
 import { logger } from './lib/logger';
 import { jwtRouter } from './translation/routes/jwtRoute';
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://pyedu.vercel.app/"
+];
+
 export const initialiseServer = async () => {
   setupNodeProcess();
 
@@ -27,7 +32,15 @@ export const initialiseServer = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cors({
-    origin: "http://localhost:3000",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // mobile app / postman
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true
   }));
   app.get('/livez', livezRequestHandler);
