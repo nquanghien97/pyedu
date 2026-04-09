@@ -13,7 +13,8 @@ import { jwtRouter } from './translation/routes/jwtRoute';
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://pyedu.vercel.app"
+  "https://pyedu.vercel.app",
+  "https://nongsanviet.site"
 ];
 
 export const initialiseServer = async () => {
