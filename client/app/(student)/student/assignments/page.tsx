@@ -34,9 +34,8 @@ import {
   getStudentAssignments,
   StudentAssignmentFilters,
 } from '@/services/assignment';
-import { gradeService } from '@/services/grade';
-import { GradeEntity } from '@/entity/grade';
 import { SubjectEntity } from '@/entity/subject';
+import { getSubjects } from '@/services/subject';
 
 type TabKey = 'all' | 'easy' | 'medium' | 'hard' | 'expert';
 
@@ -180,7 +179,6 @@ export default function AssignmentPage() {
     overdue: 0,
     averageScore: null,
   });
-  const [grades, setGrades] = useState<GradeEntity[]>([]);
   const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
 
   // Debounce search
@@ -191,20 +189,13 @@ export default function AssignmentPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Load grades and subjects
+  // Load subjects
   useEffect(() => {
     const loadMeta = async () => {
       try {
-        const gradeRes = await gradeService.getGrades();
-        if (gradeRes?.data) {
-          setGrades(gradeRes.data);
-          const subjects: SubjectEntity[] = [];
-          gradeRes.data.forEach((g: GradeEntity) => {
-            if (g.subjects) {
-              subjects.push(...g.subjects);
-            }
-          });
-          setAllSubjects(subjects);
+        const res = await getSubjects();
+        if (res?.data) {
+          setAllSubjects(res.data);
         }
       } catch {
         // silent
