@@ -37,12 +37,7 @@ export const menuSidebarTeacher = [
     items: [
       {
         title: 'Ngân hàng bài tập',
-        url: '/teacher/exercises',
-        allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],
-      },
-      {
-        title: 'Quản lý bài tập',
-        url: '/teacher/assignments/management',
+        url: '/teacher/assignments/exercises',
         allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],
       },
       {

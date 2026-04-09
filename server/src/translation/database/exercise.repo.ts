@@ -26,7 +26,7 @@ export const exerciseRepository = {
     const where = buildWhereClause(filters);
     const skip = (pagination.page - 1) * pagination.limit;
 
-    const [exercises, total] = await Promise.all([
+    const [exercises, total, publishedCount, draftCount] = await Promise.all([
       prisma.exercise.findMany({
         where,
         include: {
@@ -40,11 +40,15 @@ export const exerciseRepository = {
         take: pagination.limit,
       }),
       prisma.exercise.count({ where }),
+      prisma.exercise.count({ where: { status: 'approved' } }),
+      prisma.exercise.count({ where: { status: 'draft' } }),
     ]);
 
     return {
       exercises,
       total,
+      publishedCount,
+      draftCount,
       page: pagination.page,
       limit: pagination.limit,
       totalPages: Math.ceil(total / pagination.limit),
@@ -87,19 +91,19 @@ export const exerciseRepository = {
         createdBy,
         questions: data.questions
           ? {
-              create: data.questions.map((q, index) => ({
-                id: nanoid(36),
-                questionText: q.questionText,
-                questionType: q.questionType,
-                orderIndex: q.orderIndex ?? index + 1,
-                points: q.points ?? null,
-                content: (q.content ?? Prisma.JsonNull),
-                explanation: q.explanation ?? null,
-                hints: (q.hints ?? Prisma.JsonNull),
-                autoGrade: q.autoGrade ?? false,
-                aiGradingEnabled: q.aiGradingEnabled ?? false,
-              })),
-            }
+            create: data.questions.map((q, index) => ({
+              id: nanoid(36),
+              questionText: q.questionText,
+              questionType: q.questionType,
+              orderIndex: q.orderIndex ?? index + 1,
+              points: q.points ?? null,
+              content: (q.content ?? Prisma.JsonNull),
+              explanation: q.explanation ?? null,
+              hints: (q.hints ?? Prisma.JsonNull),
+              autoGrade: q.autoGrade ?? false,
+              aiGradingEnabled: q.aiGradingEnabled ?? false,
+            })),
+          }
           : undefined,
       },
       include: {

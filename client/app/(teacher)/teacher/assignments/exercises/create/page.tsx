@@ -5,15 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { GradeEntity } from '@/entity/grade';
 import { SubjectEntity, TopicEntity } from '@/entity/subject';
 import { DIFFICULTY_LABELS, QUESTION_TYPE_LABELS, QuestionType } from '@/entity/exercise';
-import { gradeService } from '@/services/grade';
 import { getSubjects, getTopicsBySubject } from '@/services/subject';
 import { createExercise } from '@/services/exercise';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusIcon, TrashIcon, ArrowLeftIcon, GripVerticalIcon } from 'lucide-react';
+
+// Danh sách khối lớp cố định
+const GRADES = Array.from({ length: 12 }, (_, i) => ({
+  id: (i + 1).toString(),
+  name: `Khối ${i + 1}`,
+}));
 import { useAiStore } from '@/stores/ai.store';
 import { MathText } from '@/components/ui/math-text';
 
@@ -33,7 +37,7 @@ const questionSchema = z.object({
 
 const exerciseFormSchema = z.object({
   title: z.string().min(1, 'Tiêu đề không được để trống').max(255, 'Tiêu đề tối đa 255 ký tự'),
-  gradeId: z.string().optional(),
+  grade: z.string().optional(),
   subjectId: z.string().optional(),
   topicId: z.string().optional(),
   difficultyLevel: z.string().optional(),
@@ -63,7 +67,8 @@ function getContentForType(type: QuestionType): Record<string, unknown> {
 
 export default function CreateExercisePage() {
   const router = useRouter();
-  const [grades, setGrades] = useState<GradeEntity[]>([]);
+  const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
+  const [topics, setTopics] = useState<TopicEntity[]>([]);
   
   // Zustand Store
   const { aiDraft, clearAiDraft } = useAiStore();
@@ -80,7 +85,7 @@ export default function CreateExercisePage() {
     resolver: zodResolver(exerciseFormSchema) as any,
     defaultValues: {
       title: '',
-      gradeId: '',
+      grade: '',
       subjectId: '',
       topicId: '',
       difficultyLevel: '',
@@ -95,17 +100,13 @@ export default function CreateExercisePage() {
     name: 'questions',
   });
 
-  const watchedGradeId = watch('gradeId');
+  const watchedGradeId = watch('grade');
   const watchedSubjectId = watch('subjectId');
 
-  const selectedGrade = grades.find(g => g.id === watchedGradeId);
-  const subjects = selectedGrade?.subjects || [];
-  
-  const selectedSubject = subjects.find(s => s.id === watchedSubjectId);
-  const topics = selectedSubject?.topics || [];
+  const subjects = allSubjects.filter(s => s.grade === Number(watchedGradeId));
 
   useEffect(() => {
-    gradeService.getGrades().then(res => setGrades(res.data)).catch(() => {});
+    getSubjects().then(res => setAllSubjects(res.data)).catch(() => {});
 
     // Check Zustand Store for AI draft
     if (aiDraft) {
@@ -146,6 +147,11 @@ export default function CreateExercisePage() {
   }, [watchedGradeId, setValue]);
 
   useEffect(() => {
+    if (watchedSubjectId) {
+      getTopicsBySubject(watchedSubjectId).then(res => setTopics(res.data)).catch(() => {});
+    } else {
+      setTopics([]);
+    }
     setValue('topicId', '');
   }, [watchedSubjectId, setValue]);
 
@@ -173,7 +179,7 @@ export default function CreateExercisePage() {
     try {
       await createExercise({
         title: data.title,
-        gradeId: data.gradeId || undefined,
+        grade: data.grade ? Number(data.grade) : undefined,
         subjectId: data.subjectId || undefined,
         topicId: data.topicId || undefined,
         difficultyLevel: data.difficultyLevel || undefined,
@@ -222,12 +228,12 @@ export default function CreateExercisePage() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Khối lớp (Tùy chọn)</label>
                 <select
-                  {...register('gradeId')}
+                  {...register('grade')}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   defaultValue=""
                 >
                   <option value="">-- Chọn Khối lớp --</option>
-                  {grades.map(g => (
+                  {GRADES.map(g => (
                     <option key={g.id} value={g.id}>{g.name}</option>
                   ))}
                 </select>
@@ -241,7 +247,7 @@ export default function CreateExercisePage() {
                   defaultValue=""
                   disabled={!watchedGradeId}
                 >
-                  <option value="">-- Chọn môn học --</option>
+                  <option value="">{watchedGradeId ? "-- Chọn môn học --" : "-- Chọn lớp trước --"}</option>
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}

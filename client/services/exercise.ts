@@ -9,7 +9,7 @@ interface ExerciseListResponse {
 export interface ExerciseFilters {
   page?: number;
   limit?: number;
-  gradeId?: string;
+  grade?: number | string;
   subjectId?: string;
   topicId?: string;
   difficultyLevel?: string;
@@ -28,9 +28,17 @@ function buildQueryString(filters: ExerciseFilters): string {
   return params.toString();
 }
 
+export interface ExerciseStats {
+  statistics?: {
+    total: number;
+    published: number;
+    draft: number;
+  };
+}
+
 export async function getExercises(filters: ExerciseFilters = {}) {
   const query = buildQueryString({ page: 1, limit: 20, ...filters });
-  return api<ExerciseEntity[]>({ url: `/api/v1/exercises?${query}` });
+  return api<ExerciseEntity[], ExerciseStats>({ url: `/api/v1/exercises?${query}` });
 }
 
 export async function getExerciseById(id: string) {
@@ -39,7 +47,7 @@ export async function getExerciseById(id: string) {
 
 export async function createExercise(data: {
   title: string;
-  gradeId?: string;
+  grade?: number;
   subjectId?: string;
   topicId?: string;
   exerciseType?: string;

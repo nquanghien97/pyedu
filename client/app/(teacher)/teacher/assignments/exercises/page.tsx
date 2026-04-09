@@ -2,24 +2,34 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { ExerciseEntity, DIFFICULTY_LABELS, DIFFICULTY_COLORS, STATUS_LABELS, STATUS_COLORS, DifficultyLevel, ExerciseStatus } from '@/entity/exercise';
-import { GradeEntity } from '@/entity/grade';
-import { SubjectEntity } from '@/entity/subject';
 import { getExercises, deleteExercise, ExerciseFilters } from '@/services/exercise';
-import { gradeService } from '@/services/grade';
+import { getSubjects } from '@/services/subject';
+import { SubjectEntity } from '@/entity/subject';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { PlusIcon, SearchIcon, TrashIcon, EyeIcon, FilterIcon, SparklesIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, TrashIcon, EyeIcon, FilterIcon, SparklesIcon, BookOpen, CheckCircle, FileText } from 'lucide-react';
+import StatCard from './StatCard';
+
+// Danh sách khối lớp cố định
+const GRADES = Array.from({ length: 12 }, (_, i) => ({
+  id: (i + 1).toString(),
+  name: `Khối ${i + 1}`,
+}));
 
 export default function ExercisesPage() {
   const [exercises, setExercises] = useState<ExerciseEntity[]>([]);
-  const [grades, setGrades] = useState<GradeEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
-  const [filters, setFilters] = useState<ExerciseFilters>({});
+  const [statistics, setStatistics] = useState({ total: 0, published: 0, draft: 0 });
+  const [filters, setFilters] = useState<Partial<ExerciseFilters>>({});
   const [searchInput, setSearchInput] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
+
+  // Lọc môn học theo khối lớp đang chọn trong bộ lọc
+  const subjects = allSubjects.filter((s) => s.grade === Number(filters.grade));
 
   const fetchExercises = useCallback(async () => {
     setLoading(true);
@@ -28,6 +38,9 @@ export default function ExercisesPage() {
       setExercises(res.data);
       if (res.pagination) {
         setPagination(prev => ({ ...prev, ...res.pagination }));
+      }
+      if (res.statistics) {
+        setStatistics(res.statistics);
       }
     } catch (error) {
       console.error('Failed to fetch exercises:', error);
@@ -41,11 +54,8 @@ export default function ExercisesPage() {
   }, [fetchExercises]);
 
   useEffect(() => {
-    gradeService.getGrades().then(res => setGrades(res.data)).catch(() => {});
+    getSubjects().then((res) => setAllSubjects(res.data));
   }, []);
-
-  const selectedGrade = grades.find(g => g.id === filters.gradeId);
-  const subjects = selectedGrade?.subjects || [];
 
   const handleSearch = () => {
     setFilters(prev => ({ ...prev, search: searchInput }));
@@ -70,13 +80,13 @@ export default function ExercisesPage() {
           <p className="text-sm text-gray-500 mt-1">Tạo và quản lý bài tập, câu hỏi cho học sinh</p>
         </div>
         <div className="flex gap-3">
-          <Link href="/teacher/exercises/ai-generate">
+          <Link href="/teacher/assignments/exercises/ai-generate">
             <Button className="gap-2 bg-gradient-to-r from-purple-500 to-[#3b82f6] hover:opacity-90 border-0 text-white shadow-md shadow-[#3b82f6]/20 transition-all">
               <SparklesIcon className="w-4 h-4" />
               AI Tạo đề
             </Button>
           </Link>
-          <Link href="/teacher/exercises/create">
+          <Link href="/teacher/assignments/exercises/create">
             <Button className="gap-2 shadow-sm bg-[#3b82f6] hover:bg-blue-600">
               <PlusIcon className="w-4 h-4" />
               Thủ công
@@ -108,14 +118,14 @@ export default function ExercisesPage() {
         {showFilters && (
           <div className="grid grid-cols-4 gap-3 mt-3 pt-3 border-t">
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">Khối lớp</label>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Lớp học</label>
               <select
                 className="w-full border rounded-md px-3 py-2 text-sm"
-                value={filters.gradeId || ''}
-                onChange={e => setFilters(prev => ({ ...prev, gradeId: e.target.value || undefined, subjectId: undefined, page: 1 }))}
+                value={filters.grade || ''}
+                onChange={e => setFilters((prev: Partial<ExerciseFilters>) => ({ ...prev, grade: e.target.value || undefined, subjectId: undefined, page: 1 }))}
               >
                 <option value="">Tất cả</option>
-                {grades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                {GRADES.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
             </div>
             <div>
@@ -123,10 +133,10 @@ export default function ExercisesPage() {
               <select
                 className="w-full border rounded-md px-3 py-2 text-sm"
                 value={filters.subjectId || ''}
-                onChange={e => setFilters(prev => ({ ...prev, subjectId: e.target.value || undefined, page: 1 }))}
-                disabled={!filters.gradeId}
+                onChange={e => setFilters((prev: Partial<ExerciseFilters>) => ({ ...prev, subjectId: e.target.value || undefined, page: 1 }))}
+                disabled={!filters.grade}
               >
-                <option value="">Tất cả</option>
+                <option value="">{filters.grade ? "Tất cả môn học" : "Chọn lớp trước"}</option>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
@@ -135,7 +145,7 @@ export default function ExercisesPage() {
               <select
                 className="w-full border rounded-md px-3 py-2 text-sm"
                 value={filters.difficultyLevel || ''}
-                onChange={e => setFilters(prev => ({ ...prev, difficultyLevel: e.target.value || undefined }))}
+                onChange={e => setFilters((prev: Partial<ExerciseFilters>) => ({ ...prev, difficultyLevel: e.target.value || undefined }))}
               >
                 <option value="">Tất cả</option>
                 {Object.entries(DIFFICULTY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -146,7 +156,7 @@ export default function ExercisesPage() {
               <select
                 className="w-full border rounded-md px-3 py-2 text-sm"
                 value={filters.status || ''}
-                onChange={e => setFilters(prev => ({ ...prev, status: e.target.value || undefined }))}
+                onChange={e => setFilters((prev: Partial<ExerciseFilters>) => ({ ...prev, status: e.target.value || undefined }))}
               >
                 <option value="">Tất cả</option>
                 {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -157,7 +167,7 @@ export default function ExercisesPage() {
       </div>
 
       {/* Exercise Table */}
-      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden mb-8">
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -182,7 +192,7 @@ export default function ExercisesPage() {
               {exercises.map(exercise => (
                 <tr key={exercise.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <Link href={`/teacher/exercises/${exercise.id}`} className="text-sm font-medium text-gray-900 hover:text-[#3b82f6]">
+                    <Link href={`/teacher/assignments/exercises/${exercise.id}`} className="text-sm font-medium text-gray-900 hover:text-[#3b82f6]">
                       {exercise.title || 'Không có tiêu đề'}
                     </Link>
                   </td>
@@ -204,7 +214,7 @@ export default function ExercisesPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Link href={`/teacher/exercises/${exercise.id}`}>
+                      <Link href={`/teacher/assignments/exercises/${exercise.id}`}>
                         <Button size="sm" variant="ghost"><EyeIcon className="w-4 h-4" /></Button>
                       </Link>
                       <Button size="sm" variant="ghost" onClick={() => handleDelete(exercise.id)} className="text-red-500 hover:text-red-700">
@@ -244,6 +254,12 @@ export default function ExercisesPage() {
             </div>
           </div>
         )}
+      </div>
+
+      <div style={{ display: "flex", gap: 16 }}>
+        <StatCard icon={BookOpen} iconBg="#EFF6FF" iconColor="#3B82F6" value={statistics.total.toString()} label="TỔNG SỐ BÀI TẬP" />
+        <StatCard icon={CheckCircle} iconBg="#F0FDF4" iconColor="#22C55E" value={statistics.published.toString()} label="ĐÃ DUYỆT" />
+        <StatCard icon={FileText} iconBg="#FFFBEB" iconColor="#F59E0B" value={statistics.draft.toString()} label="BẢN NHÁP" />
       </div>
     </div>
   );

@@ -6,9 +6,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { aiGenerateService } from '@/services/aiGenerate';
-import { gradeService } from '@/services/grade';
-import { GradeEntity } from '@/entity/grade';
 import { DIFFICULTY_LABELS, QUESTION_TYPE_LABELS, DifficultyLevel, QuestionType } from '@/entity/exercise';
+import { SubjectEntity } from '@/entity/subject';
+import { getSubjects } from '@/services/subject';
+
+// Danh sách khối lớp cố định
+const GRADES = Array.from({ length: 12 }, (_, i) => ({
+  id: (i + 1).toString(),
+  name: `Khối ${i + 1}`,
+}));
 import { useAiStore } from '@/stores/ai.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +23,7 @@ import Link from 'next/link';
 
 // ---------- Schemas ----------
 const topicSchema = z.object({
-  gradeId: z.string().optional(),
+  grade: z.string().optional(),
   subjectId: z.string().optional(),
   topicName: z.string().min(1, 'Chủ đề không được để trống'),
   difficultyLevel: z.string().min(1, 'Chọn mức độ khó'),
@@ -33,11 +39,11 @@ export default function AIGeneratePage() {
   
   const [activeTab, setActiveTab] = useState<'topic' | 'file'>('topic');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [grades, setGrades] = useState<GradeEntity[]>([]);
+  const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
   
   // File state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileGradeId, setFileGradeId] = useState('');
+  const [fileGrade, setFileGrade] = useState('');
   const [fileSubjectId, setFileSubjectId] = useState('');
   const [fileInstructions, setFileInstructions] = useState('');
 
@@ -51,7 +57,7 @@ export default function AIGeneratePage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(topicSchema) as any,
     defaultValues: {
-      gradeId: '',
+      grade: '',
       subjectId: '',
       topicName: '',
       difficultyLevel: 'medium',
@@ -61,21 +67,19 @@ export default function AIGeneratePage() {
     },
   });
 
-  const watchedGradeId = watchTopic('gradeId');
-  const selectedGradeObj = grades.find(g => g.id === watchedGradeId);
-  const topicSubjects = selectedGradeObj?.subjects || [];
+  const watchedGradeId = watchTopic('grade');
+  const topicSubjects = allSubjects.filter(s => s.grade === Number(watchedGradeId));
 
-  const fileSelectedGradeObj = grades.find(g => g.id === fileGradeId);
-  const fileSubjects = fileSelectedGradeObj?.subjects || [];
+  const fileSubjects = allSubjects.filter(s => s.grade === Number(fileGrade));
 
   useEffect(() => {
-    gradeService.getGrades().then(res => setGrades(res.data)).catch(() => {});
+    getSubjects().then(res => setAllSubjects(res.data)).catch(() => {});
   }, []);
 
   const handleTopicSubmit = async (data: TopicFormValues) => {
     setIsGenerating(true);
     try {
-      const gName = grades.find(g => g.id === data.gradeId)?.name;
+      const gName = GRADES.find(g => g.id === data.grade)?.name;
       const sName = topicSubjects.find(s => s.id === data.subjectId)?.name;
 
       const res = await aiGenerateService.generateByTopic({
@@ -91,7 +95,7 @@ export default function AIGeneratePage() {
       if (res.success && res.data) {
         setAiDraft({
           ...res.data,
-          gradeId: data.gradeId,
+          grade: data.grade,
           subjectId: data.subjectId,
         });
         router.push('/teacher/exercises/create');
@@ -109,7 +113,7 @@ export default function AIGeneratePage() {
     
     setIsGenerating(true);
     try {
-      const gName = grades.find(g => g.id === fileGradeId)?.name;
+      const gName = GRADES.find(g => g.id === fileGrade)?.name;
       const sName = fileSubjects.find(s => s.id === fileSubjectId)?.name;
 
       const res = await aiGenerateService.generateByFile({
@@ -122,7 +126,7 @@ export default function AIGeneratePage() {
       if (res.success && res.data) {
         setAiDraft({
           ...res.data,
-          gradeId: fileGradeId,
+          grade: fileGrade,
           subjectId: fileSubjectId,
         });
         router.push('/teacher/exercises/create');
@@ -202,9 +206,9 @@ export default function AIGeneratePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Khối ngữ cảnh</label>
-                  <select {...registerTopic('gradeId')} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6] transition-shadow">
+                  <select {...registerTopic('grade')} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6] transition-shadow">
                     <option value="">-- Mặc định --</option>
-                    {grades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    {GRADES.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                   </select>
                 </div>
                 <div>
@@ -290,14 +294,14 @@ export default function AIGeneratePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Khối ngữ cảnh (tùy chọn)</label>
-                  <select value={fileGradeId} onChange={e => setFileGradeId(e.target.value)} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <select value={fileGrade} onChange={e => setFileGrade(e.target.value)} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <option value="">-- Để AI phán đoán --</option>
-                    {grades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    {GRADES.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Môn học</label>
-                  <select value={fileSubjectId} onChange={e => setFileSubjectId(e.target.value)} disabled={!fileGradeId} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50">
+                  <select value={fileSubjectId} onChange={e => setFileSubjectId(e.target.value)} disabled={!fileGrade} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50">
                     <option value="">-- Để AI phán đoán --</option>
                     {fileSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>

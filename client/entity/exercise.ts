@@ -24,7 +24,7 @@ export interface ExerciseEntity {
   title: string | null;
   subjectId: string | null;
   topicId: string | null;
-  gradeId: string | null;
+  grade: number | null;
   exerciseType: string | null;
   difficultyLevel: DifficultyLevel | null;
   totalPoints: number | null;

@@ -13,9 +13,9 @@ import {
   ExerciseStatus,
   QuestionType,
 } from '@/entity/exercise';
-import { GradeEntity } from '@/entity/grade';
-import { gradeService } from '@/services/grade';
+import { SubjectEntity, TopicEntity } from '@/entity/subject';
 import { getExerciseById, updateExercise, updateExerciseStatus, deleteExercise } from '@/services/exercise';
+import { getSubjects, getTopicsBySubject } from '@/services/subject';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,12 @@ import {
   XIcon,
 } from 'lucide-react';
 
+// Danh sách khối lớp cố định
+export const GRADES = Array.from({ length: 12 }, (_, i) => ({
+  id: (i + 1).toString(),
+  name: `Khối ${i + 1}`,
+}));
+
 export default function ExerciseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -38,7 +44,6 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [grades, setGrades] = useState<GradeEntity[]>([]);
 
   // Edit form state
   const [editTitle, setEditTitle] = useState('');
@@ -48,6 +53,12 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
   const [editDifficulty, setEditDifficulty] = useState('');
   const [editTotalPoints, setEditTotalPoints] = useState(0);
   const [editTimeLimit, setEditTimeLimit] = useState(0);
+
+  const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
+  const [topics, setTopics] = useState<TopicEntity[]>([]);
+
+  // Lọc môn học theo khối lớp đang chọn
+  const subjects = allSubjects.filter((s) => s.grade === Number(editGradeId));
 
   const fetchExercise = useCallback(async () => {
     try {
@@ -62,19 +73,31 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
 
   useEffect(() => {
     fetchExercise();
-    gradeService.getGrades().then((res) => setGrades(res.data)).catch(() => { });
+    // Fetch tất cả môn học một lần để dùng chung
+    getSubjects().then((res) => setAllSubjects(res.data));
   }, [fetchExercise]);
 
-  // Derived selectors
-  const selectedGrade = grades.find((g) => g.id === editGradeId);
-  const subjects = selectedGrade?.subjects || [];
-  const selectedSubject = subjects.find((s) => s.id === editSubjectId);
-  const topics = selectedSubject?.topics || [];
+  // Fetch chủ đề khi môn học thay đổi
+  useEffect(() => {
+    if (editSubjectId) {
+      getTopicsBySubject(editSubjectId).then((res) => setTopics(res.data));
+    } else {
+      setTopics([]);
+    }
+  }, [editSubjectId]);
+
+  // Reset môn học/chủ đề khi đổi khối lớp
+  useEffect(() => {
+    if (isEditing && exercise && Number(editGradeId) !== exercise.grade) {
+      setEditSubjectId('');
+      setEditTopicId('');
+    }
+  }, [editGradeId, isEditing, exercise]);
 
   const startEditing = () => {
     if (!exercise) return;
     setEditTitle(exercise.title || '');
-    setEditGradeId(exercise.gradeId || '');
+    setEditGradeId(exercise.grade?.toString() || '');
     setEditSubjectId(exercise.subjectId || '');
     setEditTopicId(exercise.topicId || '');
     setEditDifficulty(exercise.difficultyLevel || '');
@@ -92,9 +115,9 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
     try {
       await updateExercise(id, {
         title: editTitle,
-        gradeId: editGradeId || undefined,
-        subjectId: editSubjectId || undefined,
-        topicId: editTopicId || undefined,
+        grade: editGradeId ? Number(editGradeId) : null,
+        subjectId: editSubjectId || null,
+        topicId: editTopicId || null,
         difficultyLevel: editDifficulty || undefined,
         totalPoints: Number(editTotalPoints) || undefined,
         timeLimitMinutes: Number(editTimeLimit) || undefined,
@@ -228,7 +251,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
                   className={selectClass}
                 >
                   <option value="">-- Chọn khối --</option>
-                  {grades.map((g) => (
+                  {GRADES.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
                     </option>

@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown, M = object> {
   success: boolean;
   data: T;
   message?: string;
@@ -12,13 +12,16 @@ interface ApiResponse<T = unknown> {
   };
 }
 
-export async function api<T = unknown>({
+// Chuyển ApiResponse sang dạng Type hỗ trợ intersection để linh hoạt hơn
+export type ApiExtendedResponse<T = unknown, M = object> = ApiResponse<T> & M;
+
+export async function api<T = unknown, M = object>({
   url,
   options = {},
 }: {
   url: string;
   options?: RequestInit;
-}): Promise<ApiResponse<T>> {
+}): Promise<ApiExtendedResponse<T, M>> {
   const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
 
   const response = await fetch(fullUrl, {

@@ -19,6 +19,7 @@ export const getExercises: RequestHandler = withAsyncErrorHandling(async (req, r
     exerciseType: req.query.exerciseType as string,
     status: req.query.status as string,
     search: req.query.search as string,
+    grade: Number(req.query.grade) as number,
   };
 
   const result = await exerciseRepository.findAll(filters, { page, limit });
@@ -30,6 +31,11 @@ export const getExercises: RequestHandler = withAsyncErrorHandling(async (req, r
       limit: result.limit,
       total: result.total,
       totalPages: result.totalPages,
+    },
+    statistics: {
+      total: result.total,
+      published: result.publishedCount,
+      draft: result.draftCount,
     },
   });
 });
