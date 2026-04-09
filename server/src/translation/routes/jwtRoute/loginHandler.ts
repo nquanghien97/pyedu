@@ -27,12 +27,13 @@ export const loginHandler: RequestHandler = withAsyncErrorHandling(
       }
     );
 
-    const isProduction = process.env.NODE_ENV === "production";
+    const isSecure = req.secure || req.headers["x-forwarded-proto"] === "https";
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: true,
+      secure: isSecure,
       sameSite: "lax",
+      domain: isSecure ? ".nongsanviet.site" : undefined,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
