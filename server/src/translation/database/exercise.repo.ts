@@ -100,7 +100,7 @@ export const exerciseRepository = {
               content: (q.content ?? Prisma.JsonNull),
               explanation: q.explanation ?? null,
               hints: (q.hints ?? Prisma.JsonNull),
-              autoGrade: q.autoGrade ?? false,
+              autoGrade: q.autoGrade ?? (q.questionType !== 'essay'),
               aiGradingEnabled: q.aiGradingEnabled ?? false,
             })),
           }
@@ -143,6 +143,7 @@ export const exerciseRepository = {
   },
 
   async addQuestion(exerciseId: string, data: QuestionInput) {
+    const isAutoGrade = data.autoGrade ?? (data.questionType !== 'essay');
     return prisma.exerciseQuestion.create({
       data: {
         id: nanoid(36),
@@ -154,7 +155,7 @@ export const exerciseRepository = {
         content: (data.content ?? Prisma.JsonNull),
         explanation: data.explanation ?? null,
         hints: (data.hints ?? Prisma.JsonNull),
-        autoGrade: data.autoGrade ?? false,
+        autoGrade: isAutoGrade,
         aiGradingEnabled: data.aiGradingEnabled ?? false,
       },
     });

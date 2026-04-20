@@ -110,26 +110,8 @@ export default function SubjectsPage() {
     fetchData();
   }, [fetchData]);
 
-  // Derive unique active grades from classes and subjects
-  const groupedData = useMemo(() => {
-    const gradesSet = new Set<number>();
-    classes.forEach(c => c.grade && gradesSet.add(c.grade));
-    subjects.forEach(s => s.grade && gradesSet.add(s.grade));
-    
-    const gradesArray = Array.from(gradesSet).sort((a, b) => a - b);
-    
-    // Group subjects by grade
-    const map = new Map<number, SubjectEntity[]>();
-    gradesArray.forEach(g => map.set(g, []));
-    
-    subjects.forEach(s => {
-      if (s.grade && map.has(s.grade)) {
-        map.get(s.grade)?.push(s);
-      }
-    });
-
-    return { activeGrades: gradesArray, groups: map };
-  }, [classes, subjects]);
+  // We no longer group subjects by grade because subjects are 'Khối chung' (Global)
+  // Classes are independent list if needed, but here we only manage subjects and topics.
 
   const toggleGradeExpand = (grade: number) => {
     setExpandedGrades(prev => {
@@ -203,177 +185,93 @@ export default function SubjectsPage() {
           </div>
         </div>
 
-        {/* Grade List */}
+        {/* Subjects List */}
         <div className="space-y-4">
-          {groupedData.activeGrades.length === 0 && !editing && (
-            <div className="text-center py-20 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
-              <GraduationCap className="w-12 h-12 mx-auto mb-3 opacity-50 text-blue-500" />
-              <p>Chưa có Khối nào hoạt động. Hãy tạo Lớp học trước để kích hoạt Khối.</p>
-            </div>
-          )}
-
-          {groupedData.activeGrades.map(grade => {
-             const gradeSubjects = groupedData.groups.get(grade) || [];
-             
-             return (
-              <div key={grade} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all">
-                {/* Grade Header */}
-                <div 
-                  className="flex items-center gap-3 p-4 bg-gray-50 border-b border-gray-100 hover:bg-gray-100 cursor-pointer group"
-                  onClick={() => toggleGradeExpand(grade)}
-                >
-                  <button className="w-8 h-8 flex justify-center items-center hover:bg-gray-200 rounded-lg text-gray-500 transition-colors">
-                    {expandedGrades.has(grade) ? <ChevronDownIcon size={20} /> : <ChevronRightIcon size={20} />}
-                  </button>
-                  
-                  <div className="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-xl flex justify-center items-center font-bold">
-                    {grade}
-                  </div>
-                  <span className="font-extrabold text-gray-900 flex-1 text-lg">Khối {grade}</span>
-                  
-                  <span className="text-xs font-bold text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
-                    {gradeSubjects.length} môn học
-                  </span>
-                  
-                  <div className="hidden group-hover:flex items-center mx-2">
-                    <button
-                      className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-bold transition-colors flex items-center gap-1"
-                      title="Thêm môn học"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditing({ type: 'subject', mode: 'create', grade });
-                        setExpandedGrades(prev => new Set(prev).add(grade));
-                      }}
-                    >
-                      <PlusIcon size={16} /> Thêm môn
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all p-4">
+            <h2 className="font-extrabold text-gray-900 mb-4 text-xl flex items-center border-b pb-3">
+              <BookOpenIcon className="w-6 h-6 text-indigo-600 mr-2" />
+              Chương trình cốt lõi
+            </h2>
+            
+            {subjects.length === 0 && !editing && (
+              <p className="text-sm text-gray-400 font-medium py-4 text-center">Đang tải dữ liệu môn học...</p>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {subjects.map((subject) => (
+                <div key={subject.id} className="bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm transition-shadow hover:shadow-md">
+                  {/* Subject Header */}
+                  <div className="flex items-center gap-2 p-3 hover:bg-gray-100 group border-b border-gray-100 rounded-t-xl transition-colors">
+                    <button onClick={() => toggleSubjectExpand(subject.id)} className="w-8 h-8 flex justify-center items-center hover:bg-gray-200 rounded-lg text-gray-500">
+                      {expandedSubjects.has(subject.id) ? <ChevronDownIcon size={18} /> : <ChevronRightIcon size={18} />}
                     </button>
-                  </div>
-                </div>
 
-                {/* Subjects and Topics */}
-                {expandedGrades.has(grade) && (
-                  <div className="p-4 bg-white">
-                    {/* Create Subject Inline Form */}
-                    {editing?.type === 'subject' && editing.mode === 'create' && editing.grade === grade && (
-                      <div className="mb-4 ml-12 p-4 bg-blue-50/50 rounded-xl border border-blue-200 shadow-sm">
-                        <InlineNameForm
-                          defaultName=""
-                          icon={<BookOpenIcon className="w-5 h-5 text-blue-600" />}
-                          placeholder="Tên môn học mới (VD: Toán nâng cao)..."
-                          inputClassName="font-semibold"
-                          onSubmit={handleSave}
-                          onCancel={() => setEditing(null)}
-                        />
-                      </div>
-                    )}
-
-                    {/* Subject List */}
-                    {gradeSubjects.length === 0 && !editing && (
-                      <p className="text-sm text-gray-400 font-medium ml-12 py-4">Chưa có môn học nào thuộc Khối {grade}.</p>
-                    )}
+                    <BookOpenIcon className="w-5 h-5 text-blue-500" />
+                    <span className="font-bold text-gray-800 flex-1 truncate">{subject.name}</span>
+                    <span className="text-[10px] font-bold text-gray-400 bg-white border px-2 py-1 rounded-md">
+                      {subject.topics?.length || 0} chủ đề
+                    </span>
                     
-                    <div className="space-y-4 ml-4">
-                      {gradeSubjects.map(subject => (
-                        <div key={subject.id} className="ml-8 bg-white rounded-xl border border-gray-100 shadow-sm transition-shadow hover:shadow-md">
-                          {/* Subject Header */}
-                          <div className="flex items-center gap-2 p-3 hover:bg-gray-50 group border-b border-gray-50 rounded-t-xl transition-colors">
-                            <button onClick={() => toggleSubjectExpand(subject.id)} className="w-8 h-8 flex justify-center items-center hover:bg-gray-200 rounded-lg text-gray-500">
-                              {expandedSubjects.has(subject.id) ? <ChevronDownIcon size={18} /> : <ChevronRightIcon size={18} />}
-                            </button>
-
-                            {editing?.type === 'subject' && editing.mode === 'edit' && editing.id === subject.id ? (
-                              <InlineNameForm
-                                defaultName={subject.name}
-                                icon={<BookOpenIcon className="w-5 h-5 text-blue-500" />}
-                                placeholder="Tên môn học..."
-                                inputClassName="h-9 font-bold"
-                                onSubmit={handleSave}
-                                onCancel={() => setEditing(null)}
-                              />
-                            ) : (
-                              <>
-                                <BookOpenIcon className="w-5 h-5 text-blue-500" />
-                                <span className="font-bold text-gray-800 flex-1">{subject.name}</span>
-                                <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
-                                  {subject.topics?.length || 0} chủ đề
-                                </span>
-                                <div className="hidden group-hover:flex items-center gap-1 mx-2">
-                                  <button
-                                    className="w-8 h-8 flex justify-center items-center hover:bg-green-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
-                                    title="Thêm chủ đề"
-                                    onClick={() => {
-                                      setEditing({ type: 'topic', mode: 'create', parentId: subject.id });
-                                      setExpandedSubjects(prev => new Set(prev).add(subject.id));
-                                    }}
-                                  >
-                                    <PlusIcon size={18} />
-                                  </button>
-                                  <button
-                                    className="w-8 h-8 flex justify-center items-center hover:bg-orange-100 rounded-lg text-gray-400 hover:text-orange-600 transition-colors"
-                                    title="Sửa môn học"
-                                    onClick={() => setEditing({ type: 'subject', mode: 'edit', id: subject.id })}
-                                  >
-                                    <PencilIcon size={16} />
-                                  </button>
-                                  <button
-                                    className="w-8 h-8 flex justify-center items-center hover:bg-red-100 rounded-lg text-gray-400 hover:text-red-600 transition-colors"
-                                    title="Xóa môn học"
-                                    onClick={() => handleDelete('subject', subject.id)}
-                                  >
-                                    <TrashIcon size={16} />
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </div>
-
-                          {/* Topics */}
-                          {expandedSubjects.has(subject.id) && (
-                            <div className="bg-gray-50 px-4 pt-2 pb-4 rounded-b-xl">
-                              {/* Create Topic Inline Form */}
-                              {editing?.type === 'topic' && editing.mode === 'create' && editing.parentId === subject.id && (
-                                <div className="mt-2 ml-8 p-3 bg-white rounded-lg border border-green-200 shadow-sm">
-                                  <InlineNameForm
-                                    defaultName=""
-                                    icon={<FolderIcon className="w-4 h-4 text-green-500" />}
-                                    placeholder="Tên chủ đề mới..."
-                                    inputClassName="h-8 font-medium text-sm"
-                                    onSubmit={handleSave}
-                                    onCancel={() => setEditing(null)}
-                                  />
-                                </div>
-                              )}
-
-                              {/* Topic List */}
-                              {subject.topics && subject.topics.length > 0 ? (
-                                <div className="mt-2 ml-8 space-y-1.5">
-                                  {subject.topics.map(topic => (
-                                    <TopicItem
-                                      key={topic.id}
-                                      topic={topic}
-                                      isEditing={editing?.type === 'topic' && editing.mode === 'edit' && editing.id === topic.id}
-                                      onStartEdit={() => setEditing({ type: 'topic', mode: 'edit', id: topic.id })}
-                                      onSave={handleSave}
-                                      onCancel={() => setEditing(null)}
-                                      onDelete={() => handleDelete('topic', topic.id)}
-                                    />
-                                  ))}
-                                </div>
-                              ) : (
-                                !editing && (
-                                  <p className="text-xs font-medium text-gray-400 mt-3 ml-10 mb-1">Chưa có chủ đề nào.</p>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                    <div className="hidden group-hover:flex items-center gap-1 mx-1">
+                      <button
+                        className="w-8 h-8 flex justify-center items-center bg-white hover:bg-green-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors shadow-sm"
+                        title="Thêm chủ đề"
+                        onClick={() => {
+                          setEditing({ type: 'topic', mode: 'create', parentId: subject.id });
+                          setExpandedSubjects(prev => new Set(prev).add(subject.id));
+                        }}
+                      >
+                        <PlusIcon size={18} />
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  {/* Topics */}
+                  {expandedSubjects.has(subject.id) && (
+                    <div className="bg-white px-2 pt-2 pb-3 rounded-b-xl min-h-[100px]">
+                      {/* Create Topic Inline Form */}
+                      {editing?.type === 'topic' && editing.mode === 'create' && editing.parentId === subject.id && (
+                        <div className="mt-1 p-2 bg-green-50/50 rounded-md border border-green-200 shadow-sm mb-2">
+                          <InlineNameForm
+                            defaultName=""
+                            icon={<FolderIcon className="w-4 h-4 text-green-500" />}
+                            placeholder="Tên chủ đề mới..."
+                            inputClassName="h-8 font-medium text-sm bg-white"
+                            onSubmit={handleSave}
+                            onCancel={() => setEditing(null)}
+                          />
+                        </div>
+                      )}
+
+                      {/* Topic List */}
+                      {subject.topics && subject.topics.length > 0 ? (
+                        <div className="space-y-1">
+                          {subject.topics.map(topic => (
+                            <TopicItem
+                              key={topic.id}
+                              topic={topic}
+                              isEditing={editing?.type === 'topic' && editing.mode === 'edit' && editing.id === topic.id}
+                              onStartEdit={() => setEditing({ type: 'topic', mode: 'edit', id: topic.id })}
+                              onSave={handleSave}
+                              onCancel={() => setEditing(null)}
+                              onDelete={() => handleDelete('topic', topic.id)}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        !editing && (
+                          <div className="flex flex-col items-center justify-center p-4 text-center">
+                            <LayersIcon className="w-8 h-8 text-gray-300 mb-1" />
+                            <p className="text-xs font-medium text-gray-400">Chưa có chủ đề nào.</p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { setupNodeProcess } from './execution/lifecycle/process';
 import { lifecycle } from './execution/lifecycle/lifecycle';
 import { logger } from './lib/logger';
 import { jwtRouter } from './translation/routes/jwtRoute';
+import { startAutoAssignScheduler } from './execution/scheduler/autoAssignJob';
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -52,6 +53,10 @@ export const initialiseServer = async () => {
 
   const server = app.listen(PORT, () => {
     logger.info(`Server started on port ${PORT}`);
+
+    // Start cron jobs
+    startAutoAssignScheduler();
+    logger.info('Auto-assign scheduler started (daily at 6:00 AM)');
   });
 
   lifecycle.on('closing', () => {

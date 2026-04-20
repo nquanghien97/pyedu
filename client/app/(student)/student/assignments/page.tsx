@@ -18,6 +18,7 @@ import {
   Timer,
   BarChart3,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   ExerciseEntity,
   DIFFICULTY_LABELS,
@@ -159,6 +160,7 @@ function getSubjectColors(subjectName: string): { bg: string; text: string } {
 }
 
 export default function AssignmentPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [assignments, setAssignments] = useState<AssignmentEntity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -569,11 +571,17 @@ export default function AssignmentPage() {
                       {/* Action */}
                       <td className="px-6 py-4 align-middle">
                         {isCompleted ? (
-                          <button className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg hover:border-blue-300 transition-all cursor-pointer">
+                          <button
+                            onClick={() => router.push(`/student/assignments/${assignment.id}`)}
+                            className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg hover:border-blue-300 transition-all cursor-pointer"
+                          >
                             Xem lại
                           </button>
                         ) : (
-                          <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none">
+                          <button
+                            onClick={() => router.push(`/student/assignments/${assignment.id}`)}
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none"
+                          >
                             Làm bài
                           </button>
                         )}

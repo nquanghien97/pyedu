@@ -17,8 +17,8 @@ export default function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Đã login nhưng lại cố truy cập vào trang login/register -> đẩy về dashboard
-  if (token && (pathname === "/login" || pathname === "/register")) {
+  // Đã login (có đủ token và role) nhưng lại cố truy cập vào trang login/register -> đẩy về dashboard
+  if (token && role && (pathname === "/login" || pathname === "/register")) {
     if (role === USER_ROLE.TEACHER) return NextResponse.redirect(new URL("/teacher", req.url));
     if (role === USER_ROLE.STUDENT) return NextResponse.redirect(new URL("/student", req.url));
     if (role === USER_ROLE.ADMIN) return NextResponse.redirect(new URL("/admin", req.url));

@@ -53,7 +53,7 @@ function LoginPage() {
         // Lưu data user vào store
         setUser(userData);
         // Lưu role vào js-cookie để Client/HOC/Middleware cùng đọc được
-        Cookies.set('role', userData.role);
+        Cookies.set('role', userData.role, { expires: 1 }); // expires in 1 day to match accessToken
 
         // Redirect theo role
         if (userData.role === USER_ROLE.TEACHER) {

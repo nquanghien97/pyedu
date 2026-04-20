@@ -12,7 +12,10 @@ import { getSessions, createSession, deleteSession, getSessionMessages } from '.
 import { sendMessage } from './chatMessageHandler';
 import { getStudentAssignments } from './studentAssignmentHandler';
 import { createTeacherAssignment, getTeacherAssignments } from './teacherAssignmentHandler';
+import { submitAssignment, getSubmissionById, getAssignmentSubmissions, getMySubmissions, updateSubmissionGrade } from './submissionHandler';
+import { getMyProgress, getStudentsProgress, getStudentProgressDetail } from './progressHandler';
 import { getTeacherClasses, getTeacherStudents } from './metaHandler';
+import { getAutoAssignConfigs, createAutoAssignConfig, updateAutoAssignConfig, deleteAutoAssignConfig, triggerAutoAssign } from './autoAssignHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -83,8 +86,27 @@ protectedRouter.get('/teacher/students', getTeacherStudents);
 // Teacher Assignments
 protectedRouter.post('/teacher/assignments', createTeacherAssignment);
 protectedRouter.get('/teacher/assignments', getTeacherAssignments);
+protectedRouter.get('/teacher/assignments/:id/submissions', getAssignmentSubmissions);
 
 // Student Assignments
 protectedRouter.get('/student/assignments', getStudentAssignments);
+protectedRouter.post('/student/assignments/:id/submit', submitAssignment);
+protectedRouter.get('/student/assignments/:id/submissions', getMySubmissions);
+
+// Submissions
+protectedRouter.get('/submissions/:id', getSubmissionById);
+protectedRouter.put('/submissions/:id/grade', updateSubmissionGrade);
+
+// Progress
+protectedRouter.get('/progress/me', getMyProgress);
+protectedRouter.get('/progress/students', getStudentsProgress);
+protectedRouter.get('/progress/students/:studentId', getStudentProgressDetail);
+
+// Auto-Assign Config
+protectedRouter.get('/auto-assign', getAutoAssignConfigs);
+protectedRouter.post('/auto-assign', createAutoAssignConfig);
+protectedRouter.put('/auto-assign/:id', updateAutoAssignConfig);
+protectedRouter.delete('/auto-assign/:id', deleteAutoAssignConfig);
+protectedRouter.post('/auto-assign/run', triggerAutoAssign);
 
 jwtRouter.use(protectedRouter);

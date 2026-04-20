@@ -28,8 +28,8 @@ export default function ExercisesPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
 
-  // Lọc môn học theo khối lớp đang chọn trong bộ lọc
-  const subjects = allSubjects.filter((s) => s.grade === Number(filters.grade));
+  // Danh sách môn học giờ lấy trực tiếp từ tất cả thay vì theo khối
+  const subjects = allSubjects;
 
   const fetchExercises = useCallback(async () => {
     setLoading(true);
@@ -134,9 +134,8 @@ export default function ExercisesPage() {
                 className="w-full border rounded-md px-3 py-2 text-sm"
                 value={filters.subjectId || ''}
                 onChange={e => setFilters((prev: Partial<ExerciseFilters>) => ({ ...prev, subjectId: e.target.value || undefined, page: 1 }))}
-                disabled={!filters.grade}
               >
-                <option value="">{filters.grade ? "Tất cả môn học" : "Chọn lớp trước"}</option>
+                <option value="">Tất cả môn học</option>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>

@@ -46,6 +46,11 @@ export const menuSidebarTeacher = [
         allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],
       },
       {
+        title: 'Giao tự động',
+        url: '/teacher/auto-assign',
+        allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],
+      },
+      {
         title: 'Bài kiểm tra',
         url: '/teacher/assignments/tests',
         allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],

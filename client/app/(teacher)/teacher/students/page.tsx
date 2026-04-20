@@ -1,244 +1,249 @@
 'use client';
 
-import { useState } from "react";
-import { UserPlus, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Loader2, Users, TrendingUp, Award, Search } from 'lucide-react';
+import { getStudentsProgress } from '@/services/progress';
+import { TeacherStudentProgress, MASTERY_LABELS, MASTERY_COLORS, MASTERY_ICONS, MasteryLevel } from '@/entity/progress';
 
-type RankColor = "green" | "blue" | "gray";
-
-const students: Array<{
-  id: number;
-  initials: string;
-  name: string;
-  cls: string;
-  score: number;
-  rank: string;
-  rankColor: RankColor;
-  taskStatus: string;
-  taskDot: string;
-  avatarBg: string;
-  avatarColor: string;
-}> = [
-  { id: 1, initials: "LH", name: "Lê Hoàng Nam",    cls: "10A1", score: 9.2, rank: "Giỏi",      rankColor: "green",  taskStatus: "Hoàn thành",    taskDot: "#22C55E", avatarBg: "#EFF6FF", avatarColor: "#3B82F6" },
-  { id: 2, initials: "NT", name: "Nguyễn Thu Hà",   cls: "10A1", score: 7.8, rank: "Khá",       rankColor: "blue",   taskStatus: "Đang làm bài",  taskDot: "#F97316", avatarBg: "#FFF7ED", avatarColor: "#F97316" },
-  { id: 3, initials: "TV", name: "Trần Văn Tú",     cls: "10A2", score: 6.1, rank: "Trung bình",rankColor: "gray",   taskStatus: "Chưa bắt đầu", taskDot: "#EF4444", avatarBg: "#F5F3FF", avatarColor: "#8B5CF6" },
-  { id: 4, initials: "MT", name: "Mai Thị Tuyết",   cls: "10A1", score: 8.5, rank: "Giỏi",      rankColor: "green",  taskStatus: "Hoàn thành",    taskDot: "#22C55E", avatarBg: "#EFF6FF", avatarColor: "#6366F1" },
-  { id: 5, initials: "PV", name: "Phạm Văn Lâm",    cls: "11B1", score: 7.2, rank: "Khá",       rankColor: "blue",   taskStatus: "Hoàn thành",    taskDot: "#22C55E", avatarBg: "#FFF7ED", avatarColor: "#F59E0B" },
-];
-
-const rankStyle: Record<RankColor, { background: string; color: string }> = {
-  green: { background: "#F0FDF4", color: "#16A34A" },
-  blue:  { background: "#EFF6FF", color: "#2563EB" },
-  gray:  { background: "#F9FAFB", color: "#6B7280" },
-};
-
-function FilterPill({ label, value } : { label: string, value: string }) {
-  return (
-    <button style={{
-      background: "#fff",
-      border: "1.5px solid #E5E7EB",
-      borderRadius: 999,
-      padding: "7px 16px",
-      fontSize: 13,
-      color: "#374151",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      gap: 4,
-      whiteSpace: "nowrap",
-      transition: "border-color 0.2s",
-    }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = "#3B82F6"}
-      onMouseLeave={e => e.currentTarget.style.borderColor = "#E5E7EB"}
-    >
-      <span style={{ color: "#6B7280" }}>{label}</span>
-      <span style={{ fontWeight: 700, color: "#111827" }}>{value}</span>
-    </button>
-  );
+function classifyOverallMastery(score: number): MasteryLevel {
+  if (score >= 80) return 'mastered';
+  if (score >= 60) return 'proficient';
+  if (score >= 40) return 'developing';
+  return 'beginner';
 }
 
 export default function StudentsPage() {
-  const [page, setPage] = useState(1);
-  const totalPages = 3;
+  const [students, setStudents] = useState<TeacherStudentProgress[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await getStudentsProgress();
+        setStudents(data);
+      } catch {
+        // silently handle
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const filteredStudents = students.filter((s) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      s.studentName.toLowerCase().includes(q) ||
+      s.studentEmail.toLowerCase().includes(q)
+    );
+  });
+
+  // Stats
+  const totalStudents = students.length;
+  const avgScore =
+    totalStudents > 0
+      ? Math.round(
+          (students.reduce((sum, s) => sum + s.overallAverageScore, 0) /
+            totalStudents) *
+            10
+        ) / 10
+      : 0;
+  const excellentCount = students.filter(
+    (s) => s.overallAverageScore >= 80
+  ).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="text-blue-500 animate-spin" />
+          <p className="text-sm text-gray-500">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", padding: "32px 28px" }}>
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
-
+    <div className="min-h-screen bg-slate-50 p-7">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: 0 }}>Danh sách học sinh</h1>
-            <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 5, marginBottom: 0 }}>
-              Quản lý và theo dõi tiến độ học tập của các học sinh trong lớp.
+        <div className="mb-6">
+          <h1 className="text-xl font-extrabold text-gray-900">
+            Danh sách học sinh
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Quản lý và theo dõi tiến bộ học tập của các học sinh
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+              <Users size={20} className="text-blue-500" />
+            </div>
+            <p className="text-xs text-gray-400 mb-1">Tổng học sinh</p>
+            <p className="text-2xl font-extrabold text-gray-900">{totalStudents}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
+              <TrendingUp size={20} className="text-green-500" />
+            </div>
+            <p className="text-xs text-gray-400 mb-1">Điểm TB chung</p>
+            <p className="text-2xl font-extrabold text-gray-900">
+              {avgScore}<span className="text-sm font-normal text-gray-400">%</span>
             </p>
           </div>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <button style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-              border: "none", borderRadius: 10, padding: "9px 20px",
-              fontSize: 13, fontWeight: 600, color: "#fff",
-              cursor: "pointer", boxShadow: "0 2px 8px rgba(59,130,246,0.35)",
-              transition: "opacity 0.2s",
-            }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-              onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-            >
-              <UserPlus size={15} />
-              Thêm học sinh
-            </button>
-            <button style={{
-              width: 38, height: 38, borderRadius: 10,
-              border: "1.5px solid #E5E7EB", background: "#fff",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", transition: "all 0.2s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.background = "#EFF6FF"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.background = "#fff"; }}
-            >
-              <Download size={15} color="#6B7280" />
-            </button>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
+              <Award size={20} className="text-purple-500" />
+            </div>
+            <p className="text-xs text-gray-400 mb-1">Xuất sắc (≥80%)</p>
+            <p className="text-2xl font-extrabold text-gray-900">{excellentCount}</p>
           </div>
         </div>
 
-        {/* Filter Pills */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-          <FilterPill label="Lớp:" value="Tất cả các lớp" />
-          <FilterPill label="Học lực:" value="Tất cả học lực" />
-          <FilterPill label="Trạng thái:" value="Tất cả trạng thái" />
+        {/* Search */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm max-w-md focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+            <Search size={16} className="text-gray-400 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm học sinh..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border-none outline-none text-sm text-gray-700 bg-transparent w-full placeholder:text-gray-400"
+            />
+          </div>
         </div>
 
         {/* Table */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          border: "1px solid #F1F5F9",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-          overflow: "hidden",
-        }}>
-          {/* Head */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "2.4fr 0.8fr 0.9fr 1.1fr 1.4fr 1fr",
-            padding: "12px 22px",
-            borderBottom: "1px solid #F3F4F6",
-          }}>
-            {["HỌ TÊN HỌC SINH", "LỚP", "ĐIỂM TB", "PHÂN LOẠI", "TRẠNG THÁI BÀI TẬP", "THAO TÁC"].map(h => (
-              <span key={h} style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.07em" }}>{h}</span>
-            ))}
-          </div>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-50/80 border-b border-gray-100">
+                {['HỌC SINH', 'BÀI ĐÃ LÀM', 'ĐIỂM TB', 'XẾP LOẠI', 'MÔN HỌC'].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="text-[11px] font-bold text-gray-400 tracking-wider text-left px-6 py-3"
+                    >
+                      {h}
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.length === 0 && (
+                <tr>
+                  <td colSpan={5}>
+                    <div className="flex flex-col items-center justify-center py-16 gap-3">
+                      <Users size={28} className="text-gray-400" />
+                      <p className="text-sm font-semibold text-gray-500">
+                        {searchQuery ? 'Không tìm thấy học sinh phù hợp' : 'Chưa có học sinh nào'}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
 
-          {/* Rows */}
-          {students.map((s, i) => (
-            <div key={s.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "2.4fr 0.8fr 0.9fr 1.1fr 1.4fr 1fr",
-                padding: "14px 22px",
-                borderBottom: i < students.length - 1 ? "1px solid #F9FAFB" : "none",
-                alignItems: "center",
-                transition: "background 0.15s",
-                cursor: "default",
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = "#FAFAFA"}
-              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-            >
-              {/* Name + Avatar */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: "50%",
-                  background: s.avatarBg, color: s.avatarColor,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 13, fontWeight: 700, flexShrink: 0,
-                }}>
-                  {s.initials}
-                </div>
-                <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{s.name}</span>
-              </div>
+              {filteredStudents.map((student, idx) => {
+                const mastery = classifyOverallMastery(student.overallAverageScore);
+                const scoreColor =
+                  student.overallAverageScore >= 80
+                    ? '#16A34A'
+                    : student.overallAverageScore >= 60
+                      ? '#2563EB'
+                      : student.overallAverageScore >= 40
+                        ? '#D97706'
+                        : '#DC2626';
 
-              {/* Class */}
-              <span style={{ fontSize: 13, color: "#6B7280" }}>{s.cls}</span>
+                const initials = student.studentName
+                  .split(' ')
+                  .map((w) => w[0])
+                  .slice(-2)
+                  .join('')
+                  .toUpperCase();
 
-              {/* Score */}
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>{s.score}</span>
-
-              {/* Rank badge */}
-              <span style={{
-                ...rankStyle[s.rankColor],
-                fontSize: 12, fontWeight: 600,
-                padding: "3px 12px", borderRadius: 999,
-                display: "inline-block",
-              }}>
-                {s.rank}
-              </span>
-
-              {/* Task status */}
-              <span style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "#374151" }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.taskDot, flexShrink: 0 }} />
-                {s.taskStatus}
-              </span>
-
-              {/* Action */}
-              <button style={{
-                background: "none", border: "none", cursor: "pointer",
-                color: "#3B82F6", fontSize: 13, fontWeight: 600,
-                padding: 0,
-                transition: "color 0.15s",
-              }}
-                onMouseEnter={e => e.currentTarget.style.color = "#1D4ED8"}
-                onMouseLeave={e => e.currentTarget.style.color = "#3B82F6"}
-              >
-                Xem chi tiết
-              </button>
-            </div>
-          ))}
-
-          {/* Pagination */}
-          <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "14px 22px", borderTop: "1px solid #F3F4F6",
-          }}>
-            <span style={{ fontSize: 13, color: "#6B7280" }}>
-              Hiển thị <b style={{ color: "#111827" }}>1-5</b> của <b style={{ color: "#111827" }}>42</b> học sinh
-            </span>
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                style={{
-                  height: 32, padding: "0 12px", borderRadius: 8,
-                  border: "1px solid #E5E7EB", background: "#fff",
-                  fontSize: 13, color: "#6B7280", cursor: "pointer",
-                  display: "flex", alignItems: "center", gap: 4,
-                }}
-              >
-                <ChevronLeft size={13} /> Trước
-              </button>
-              {[1, 2, 3].map(n => (
-                <button key={n} onClick={() => setPage(n)} style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  border: page === n ? "none" : "1px solid #E5E7EB",
-                  background: page === n ? "#3B82F6" : "#fff",
-                  color: page === n ? "#fff" : "#374151",
-                  fontWeight: page === n ? 700 : 400,
-                  fontSize: 13, cursor: "pointer",
-                  transition: "all 0.15s",
-                }}>{n}</button>
-              ))}
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                style={{
-                  height: 32, padding: "0 12px", borderRadius: 8,
-                  border: "1px solid #E5E7EB", background: "#fff",
-                  fontSize: 13, color: "#6B7280", cursor: "pointer",
-                  display: "flex", alignItems: "center", gap: 4,
-                }}
-              >
-                Sau <ChevronRight size={13} />
-              </button>
-            </div>
-          </div>
+                return (
+                  <tr
+                    key={student.studentId}
+                    className="transition-colors hover:bg-slate-50/80"
+                    style={{
+                      borderBottom:
+                        idx < filteredStudents.length - 1
+                          ? '1px solid #F9FAFB'
+                          : 'none',
+                    }}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          style={{
+                            background: '#EFF6FF',
+                            color: '#3B82F6',
+                          }}
+                        >
+                          {initials}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {student.studentName}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {student.studentEmail}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-gray-700">
+                        {student.totalExercises}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className="text-sm font-bold"
+                        style={{ color: scoreColor }}
+                      >
+                        {student.overallAverageScore.toFixed(1)}%
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-full ${MASTERY_COLORS[mastery]}`}
+                      >
+                        {MASTERY_ICONS[mastery]} {MASTERY_LABELS[mastery]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {student.bySubject.slice(0, 3).map((subj) => (
+                          <span
+                            key={subj.subjectId}
+                            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+                          >
+                            {subj.subjectName}: {subj.averageScore.toFixed(0)}%
+                          </span>
+                        ))}
+                        {student.bySubject.length > 3 && (
+                          <span className="text-[10px] text-gray-400">
+                            +{student.bySubject.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-
       </div>
     </div>
   );

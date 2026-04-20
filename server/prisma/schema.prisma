@@ -71,6 +71,7 @@ model Tutor {
   subjects TutorSubject[]
   classes  Class[]
   sessions Session[]
+  autoAssignConfigs AutoAssignConfig[]
 }
 
 model Subject {
@@ -91,6 +92,7 @@ model Subject {
   tutorSubjects TutorSubject[]
 
   studentProgresses StudentProgress[]
+  autoAssignConfigs AutoAssignConfig[]
 }
 
 model Topic {
@@ -109,6 +111,7 @@ model Topic {
   exercises Exercise[]
 
   studentProgresses StudentProgress[]
+  autoAssignConfigs AutoAssignConfig[]
 }
 
 model TutorSubject {
@@ -284,6 +287,7 @@ model Class {
 
   enrollments ClassEnrollment[]
   sessions    Session[]
+  autoAssignConfigs AutoAssignConfig[]
 }
 
 model ClassEnrollment {
@@ -400,4 +404,23 @@ model ChatMessage {
   createdAt     DateTime @default(now())
 
   session ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+}
+
+model AutoAssignConfig {
+  id              String   @id @db.Char(36)
+  tutorId         String   @db.Char(36)
+  classId         String?  @db.Char(36)
+  subjectId       String   @db.Char(36)
+  topicId         String?  @db.Char(36)
+  difficultyLevel String?  @db.VarChar(50)
+  exercisesPerDay Int      @default(1)
+  isActive        Boolean  @default(true)
+  daysOfWeek      Json?    // [1,2,3,4,5] = Mon-Fri
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tutor   Tutor    @relation(fields: [tutorId], references: [id])
+  class   Class?   @relation(fields: [classId], references: [id])
+  subject Subject  @relation(fields: [subjectId], references: [id])
+  topic   Topic?   @relation(fields: [topicId], references: [id])
 }

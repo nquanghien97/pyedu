@@ -12,6 +12,9 @@ import { DataSidebarType } from '@/constants/menuSidebar';
 import Link from 'next/link';
 import { ChevronRightIcon, EllipsisIcon, LogOutIcon, PencilIcon, SettingsIcon, TrashIcon } from 'lucide-react';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
+import { Button } from '@/components/ui/button';
+import { logout } from '@/services/auth';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps extends PropsWithChildren {
   open: boolean;
@@ -55,7 +58,8 @@ function Sidebar(props: SidebarProps) {
     });
   };
 
-  const { me } = useAuthStore();
+  const { me, setUser } = useAuthStore();
+  const router = useRouter();
 
   useEffect(() => {
     if (containerRef.current) {
@@ -76,6 +80,13 @@ function Sidebar(props: SidebarProps) {
       toggleClick();
     }
   };
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    router.push('/login');
+  };
+
   const width = open ? '3rem' : '16rem';
   return (
     <>
@@ -114,13 +125,13 @@ function Sidebar(props: SidebarProps) {
               </Link>
             </div>
             <div className="px-3 py-2">
-              <Link
-                href="/"
-                className="flex gap-2 items-center text-red-500"
+              <div
+                className="cursor-pointer flex gap-2 items-center text-red-500"
+                onClick={handleLogout}
               >
                 <LogOutIcon width={20} height={20} />
                 {!open && <span className="whitespace-nowrap">Đăng xuất</span>}
-              </Link>
+              </div>
             </div>
           </div>
         </div>
