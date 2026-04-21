@@ -22,6 +22,7 @@ import {
 import { AnswerData, SubmitAnswerInput, SubmissionEntity } from '@/entity/submission';
 import { api } from '@/lib/api';
 import { submitExercise, getMySubmissions } from '@/services/submission';
+import { notification } from '@/components/notification';
 
 interface AssignmentDetail {
   id: string;
@@ -173,7 +174,7 @@ export default function DoExercisePage() {
       setShowResult(true);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Có lỗi xảy ra';
-      alert(message);
+      notification.error(message);
     } finally {
       setSubmitting(false);
     }

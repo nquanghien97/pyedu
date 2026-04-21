@@ -11,6 +11,7 @@ import { getExercises } from "@/services/exercise";
 import { getTeacherAssignments, createTeacherAssignment } from "@/services/assignment";
 import { ExerciseEntity } from "@/entity/exercise";
 import { AssignmentEntity } from "@/entity/assignment";
+import { notification } from "@/components/notification";
 
 type AssignTarget = "class" | "student";
 type Tab = "new" | "history";
@@ -58,10 +59,10 @@ export default function AssignPage() {
   }, []);
 
   const handleCreateAssignment = async () => {
-    if (!selectedExerciseId) return alert("Vui lòng chọn bài tập");
-    if (assignTarget === 'class' && !selectedClassId) return alert("Vui lòng chọn lớp học");
-    if (assignTarget === 'student' && !selectedStudentId) return alert("Vui lòng chọn học sinh");
-    if (!dueDate) return alert("Vui lòng chọn hạn nộp bài");
+    if (!selectedExerciseId) return notification.warning("Vui lòng chọn bài tập");
+    if (assignTarget === 'class' && !selectedClassId) return notification.warning("Vui lòng chọn lớp học");
+    if (assignTarget === 'student' && !selectedStudentId) return notification.warning("Vui lòng chọn học sinh");
+    if (!dueDate) return notification.warning("Vui lòng chọn hạn nộp bài");
 
     setSubmitting(true);
     try {
@@ -71,7 +72,7 @@ export default function AssignPage() {
         assignedToId: assignTarget === 'class' ? selectedClassId : selectedStudentId,
         dueDate: new Date(dueDate).toISOString(),
       });
-      alert('Giao bài thành công!');
+      notification.success('Giao bài thành công!');
 
       // Reload history and switch tab
       const histRes = await getTeacherAssignments();
@@ -82,7 +83,7 @@ export default function AssignPage() {
       setSelectedExerciseId('');
       setDueDate('');
     } catch (e) {
-      alert("Đã xảy ra lỗi khi giao bài");
+      notification.error("Đã xảy ra lỗi khi giao bài");
       console.error(e);
     } finally {
       setSubmitting(false);

@@ -20,6 +20,7 @@ const GRADES = Array.from({ length: 12 }, (_, i) => ({
 }));
 import { useAiStore } from '@/stores/ai.store';
 import { MathText } from '@/components/ui/math-text';
+import { notification } from '@/components/notification';
 
 // ---------- Zod Schemas ----------
 
@@ -69,7 +70,7 @@ export default function CreateExercisePage() {
   const router = useRouter();
   const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
   const [topics, setTopics] = useState<TopicEntity[]>([]);
-  
+
   // Zustand Store
   const { aiDraft, clearAiDraft } = useAiStore();
 
@@ -106,7 +107,7 @@ export default function CreateExercisePage() {
   const subjects = allSubjects;
 
   useEffect(() => {
-    getSubjects().then(res => setAllSubjects(res.data)).catch(() => {});
+    getSubjects().then(res => setAllSubjects(res.data)).catch(() => { });
 
     // Check Zustand Store for AI draft
     if (aiDraft) {
@@ -148,7 +149,7 @@ export default function CreateExercisePage() {
 
   useEffect(() => {
     if (watchedSubjectId) {
-      getTopicsBySubject(watchedSubjectId).then(res => setTopics(res.data)).catch(() => {});
+      getTopicsBySubject(watchedSubjectId).then(res => setTopics(res.data)).catch(() => { });
     } else {
       setTopics([]);
     }
@@ -198,7 +199,7 @@ export default function CreateExercisePage() {
       router.push('/teacher/exercises');
     } catch (error) {
       console.error('Failed to create exercise:', error);
-      alert('Tạo bài tập thất bại');
+      notification.error('Tạo bài tập thất bại');
     }
   };
 

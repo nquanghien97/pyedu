@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeftIcon, SparklesIcon, FileTextIcon, UploadCloudIcon, Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
+import { notification } from '@/components/notification';
 
 // ---------- Schemas ----------
 const topicSchema = z.object({
@@ -36,11 +37,11 @@ type TopicFormValues = z.infer<typeof topicSchema>;
 export default function AIGeneratePage() {
   const router = useRouter();
   const { setAiDraft } = useAiStore();
-  
+
   const [activeTab, setActiveTab] = useState<'topic' | 'file'>('topic');
   const [isGenerating, setIsGenerating] = useState(false);
   const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
-  
+
   // File state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileGrade, setFileGrade] = useState('');
@@ -73,7 +74,7 @@ export default function AIGeneratePage() {
   const fileSubjects = allSubjects.filter(s => s.grade === Number(fileGrade));
 
   useEffect(() => {
-    getSubjects().then(res => setAllSubjects(res.data)).catch(() => {});
+    getSubjects().then(res => setAllSubjects(res.data)).catch(() => { });
   }, []);
 
   const handleTopicSubmit = async (data: TopicFormValues) => {
@@ -101,7 +102,7 @@ export default function AIGeneratePage() {
         router.push('/teacher/exercises/create');
       }
     } catch (error: any) {
-      alert(error.message || 'Lỗi khi gọi AI');
+      notification.error(error.message || 'Lỗi khi gọi AI');
     } finally {
       setIsGenerating(false);
     }
@@ -109,8 +110,8 @@ export default function AIGeneratePage() {
 
   const handleFileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) return alert('Vui lòng chọn một file đính kèm');
-    
+    if (!selectedFile) return notification.warning('Vui lòng chọn một file đính kèm');
+
     setIsGenerating(true);
     try {
       const gName = GRADES.find(g => g.id === fileGrade)?.name;
@@ -132,7 +133,7 @@ export default function AIGeneratePage() {
         router.push('/teacher/exercises/create');
       }
     } catch (error: any) {
-      alert(error.message || 'Lỗi khi gọi AI phân tích file');
+      notification.error(error.message || 'Lỗi khi gọi AI phân tích file');
     } finally {
       setIsGenerating(false);
     }
@@ -188,7 +189,7 @@ export default function AIGeneratePage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden shadow-[#3b82f6]/5">
-        
+
         {/* TOPIC TAB */}
         {activeTab === 'topic' && (
           <form onSubmit={handleSubmitTopic(handleTopicSubmit)} className="p-6 sm:p-8 space-y-6">

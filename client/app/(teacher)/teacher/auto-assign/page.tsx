@@ -8,6 +8,7 @@ import { getAutoAssignConfigs, createAutoAssignConfig, deleteAutoAssignConfig, u
 import { classService, ClassEntity } from "@/services/class";
 import { getSubjects } from "@/services/subject";
 import { SubjectEntity } from "@/entity/subject";
+import { notification } from "@/components/notification";
 
 export default function AutoAssignPage() {
   const [configs, setConfigs] = useState<AutoAssignConfig[]>([]);
@@ -65,8 +66,8 @@ export default function AutoAssignPage() {
   };
 
   const handleCreate = async () => {
-    if (!selectedClassId || !selectedSubjectId) return alert("Vui lòng chọn lớp học và môn học");
-    if (daysOfWeek.length === 0) return alert("Vui lòng chọn ít nhất 1 ngày giao bài");
+    if (!selectedClassId || !selectedSubjectId) return notification.warning("Vui lòng chọn lớp học và môn học");
+    if (daysOfWeek.length === 0) return notification.warning("Vui lòng chọn ít nhất 1 ngày giao bài");
 
     setSubmitting(true);
     try {
@@ -78,12 +79,12 @@ export default function AutoAssignPage() {
         isActive: true,
         daysOfWeek
       });
-      alert("Tạo cấu hình giao bài tự động thành công!");
+      notification.success("Tạo cấu hình giao bài tự động thành công!");
       setShowForm(false);
       resetForm();
       loadData();
     } catch (err: any) {
-      alert("Lỗi: " + (err.response?.data?.error || err.message));
+      notification.error("Lỗi: " + (err.response?.data?.error || err.message));
     } finally {
       setSubmitting(false);
     }
@@ -94,7 +95,7 @@ export default function AutoAssignPage() {
       await updateAutoAssignConfig(config.id, { isActive: !config.isActive });
       loadData();
     } catch (err) {
-      alert("Không thể cập nhật trạng thái");
+      notification.error("Không thể cập nhật trạng thái");
     }
   };
 
@@ -104,7 +105,7 @@ export default function AutoAssignPage() {
       await deleteAutoAssignConfig(id);
       loadData();
     } catch (err) {
-      alert("Không thể xóa");
+      notification.error("Không thể xóa");
     }
   };
 
@@ -113,9 +114,9 @@ export default function AutoAssignPage() {
     setSubmitting(true);
     try {
       const res = await triggerAutoAssign();
-      alert(`Đã chạy tự động thành công!\nTạo ra ${res.data?.assignmentsCreated || 0} bài tập mới.`);
+      notification.success(`Đã chạy tự động thành công!\nTạo ra ${res.data?.assignmentsCreated || 0} bài tập mới.`);
     } catch (err) {
-      alert("Có lỗi xảy ra khi chạy tự động");
+      notification.error("Có lỗi xảy ra khi chạy tự động");
     } finally {
       setSubmitting(false);
     }
@@ -220,11 +221,10 @@ export default function AutoAssignPage() {
                       <button
                         key={day.value}
                         onClick={() => handleToggleDay(day.value)}
-                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
-                          isSelected 
-                            ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                            : 'border-slate-100 text-slate-400 hover:border-slate-300'
-                        }`}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${isSelected
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-slate-100 text-slate-400 hover:border-slate-300'
+                          }`}
                       >
                         {day.label}
                       </button>
@@ -234,13 +234,13 @@ export default function AutoAssignPage() {
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
-              <button 
+              <button
                 onClick={() => setShowForm(false)}
                 className="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200"
               >
                 Hủy
               </button>
-              <button 
+              <button
                 onClick={handleCreate} disabled={submitting}
                 className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 flex items-center gap-2"
               >
@@ -273,24 +273,24 @@ export default function AutoAssignPage() {
                     </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer" 
-                      checked={config.isActive} 
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={config.isActive}
                       onChange={() => handleToggleActive(config)}
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
-                
+
                 <div className="p-5 flex-1 bg-slate-50/50">
                   <div className="grid grid-cols-2 gap-y-4 text-sm">
                     <div>
                       <p className="text-gray-400 text-xs font-bold uppercase mb-1">Mức độ ưu tiên</p>
                       <p className="font-semibold text-gray-800">
                         {config.difficultyLevel === 'easy' ? 'Dễ' :
-                         config.difficultyLevel === 'medium' ? 'Trung bình' :
-                         config.difficultyLevel === 'hard' ? 'Khó' : 'Ngẫu nhiên'}
+                          config.difficultyLevel === 'medium' ? 'Trung bình' :
+                            config.difficultyLevel === 'hard' ? 'Khó' : 'Ngẫu nhiên'}
                       </p>
                     </div>
                     <div>
@@ -301,13 +301,12 @@ export default function AutoAssignPage() {
                       <p className="text-gray-400 text-xs font-bold uppercase mb-1">Lịch giao bài (6:00 AM)</p>
                       <div className="flex gap-1.5 mt-2">
                         {WEEKDAYS.map(day => (
-                          <div 
+                          <div
                             key={day.value}
-                            className={`w-7 h-7 rounded flex items-center justify-center text-[10px] font-bold ${
-                              (config.daysOfWeek || []).includes(day.value)
-                                ? 'bg-indigo-100 text-indigo-700'
-                                : 'bg-gray-100 text-gray-300'
-                            }`}
+                            className={`w-7 h-7 rounded flex items-center justify-center text-[10px] font-bold ${(config.daysOfWeek || []).includes(day.value)
+                              ? 'bg-indigo-100 text-indigo-700'
+                              : 'bg-gray-100 text-gray-300'
+                              }`}
                           >
                             {day.label}
                           </div>
@@ -318,7 +317,7 @@ export default function AutoAssignPage() {
                 </div>
 
                 <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 text-sm font-semibold">
-                  <button 
+                  <button
                     onClick={() => handleDelete(config.id)}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >

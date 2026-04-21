@@ -15,6 +15,8 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { USER_ROLE } from "@/entity/user";
 import { withGuest } from "@/hoc/withGuest";
+import LoadingIcon from "@/assets/loadingIcon";
+import { notification } from "@/components/notification";
 
 const schema = z.object({
   email: z.string().min(1, "email is required"),
@@ -48,6 +50,7 @@ function LoginPage() {
     setIsLoading(true)
     try {
       const res: any = await login(data)
+      notification.success("Đăng nhập thành công!");
       const userData = res.user as UserEntity | null;
       if (userData) {
         // Lưu data user vào store
@@ -68,7 +71,7 @@ function LoginPage() {
       }
     } catch (err) {
       console.log(err)
-      alert("Đăng nhập thất bại, vui lòng thử lại!");
+      notification.error("Đăng nhập thất bại, vui lòng thử lại!");
     } finally {
       setIsLoading(false)
     }
@@ -96,7 +99,10 @@ function LoginPage() {
               render={({ field }) => <Input {...field} placeholder="Password" type="password" className="mb-4" />}
             />
             <div className="flex justify-center mb-2">
-              <Button variant="outline" className="bg-[#3b82f6] px-8 cursor-pointer text-white hover:text-white hover:bg-[#2563eb]">Login</Button>
+              <Button disabled={isLoading} variant="outline" className="bg-[#3b82f6] px-8 cursor-pointer text-white hover:text-white hover:bg-[#2563eb]">
+                Đăng nhập
+                {isLoading && <LoadingIcon />}
+              </Button>
             </div>
             <p className="text-center text-sm text-muted-foreground">
               Bạn chưa có tài khoản?{' '}

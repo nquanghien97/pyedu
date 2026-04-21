@@ -30,6 +30,7 @@ import {
   SaveIcon,
   XIcon,
 } from 'lucide-react';
+import { notification } from '@/components/notification';
 
 // Danh sách khối lớp cố định
 export const GRADES = Array.from({ length: 12 }, (_, i) => ({
@@ -126,7 +127,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to update exercise:', error);
-      alert('Cập nhật thất bại');
+      notification.error('Cập nhật thất bại');
     } finally {
       setSaving(false);
     }

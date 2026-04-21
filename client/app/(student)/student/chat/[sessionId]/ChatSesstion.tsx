@@ -6,6 +6,7 @@ import ChatInput from '@/components/shared/chat/ChatInput';
 import { Loader2 } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useEffect, useRef, useState } from 'react';
+import { notification } from '@/components/notification';
 
 function ChatSesstion({ sessionId }: { sessionId: string }) {
   const { messages, fetchMessages, updateLastMessageContent, addMessage } = useChatStore();
@@ -82,7 +83,7 @@ function ChatSesstion({ sessionId }: { sessionId: string }) {
       }
     } catch (error) {
       console.error(error);
-      alert('Đã có lỗi xảy ra khi gửi tin nhắn.');
+      notification.error('Đã có lỗi xảy ra khi gửi tin nhắn.');
     } finally {
       setIsSending(false);
       setTimeout(() => fetchMessages(sessionId), 1000);

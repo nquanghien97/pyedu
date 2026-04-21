@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { PlusIcon, Users, Loader2, BookOpen, TrashIcon, UserPlus } from "lucide-react";
 import { ClassEntity, ClassEnrollmentEntity, classService } from "@/services/class";
 import { DropdownStudent, getTeacherStudents } from "@/services/meta";
+import { notification } from "@/components/notification";
 
 const GRADES = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
 
@@ -50,7 +51,7 @@ export default function ClassesPage() {
       fetchClasses();
     } catch (e) {
       console.error(e);
-      alert('Tạo lớp thất bại');
+      notification.error('Tạo lớp thất bại');
     } finally {
       setCreating(false);
     }
@@ -83,7 +84,7 @@ export default function ClassesPage() {
       fetchClasses(); // Update count
     } catch (e) {
       console.error(e);
-      alert('Không thể gán học sinh vào lớp. Có thể học sinh đã nằm trong lớp này.');
+      notification.error('Không thể gán học sinh vào lớp. Có thể học sinh đã nằm trong lớp này.');
     }
   };
 
@@ -108,7 +109,7 @@ export default function ClassesPage() {
             <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Quản lý Lớp học</h1>
             <p className="text-sm text-gray-500">Tạo lớp học theo khối và kiểm soát thành viên dễ dàng.</p>
           </div>
-          <button 
+          <button
             onClick={() => setIsCreateOpen(true)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center gap-2 transition-colors shadow-blue-500/30 shadow-lg"
           >
@@ -141,13 +142,13 @@ export default function ClassesPage() {
                 ))}
               </select>
             </div>
-            <button 
+            <button
               onClick={handleCreate} disabled={creating}
               className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold h-[44px] hover:bg-black disabled:opacity-50 flex items-center gap-2"
             >
               {creating ? <Loader2 size={16} className="animate-spin" /> : 'Lưu lại'}
             </button>
-            <button 
+            <button
               onClick={() => setIsCreateOpen(false)}
               className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold h-[44px] hover:bg-gray-200"
             >
@@ -181,7 +182,7 @@ export default function ClassesPage() {
                     {cls._count?.enrollments || 0} học sinh
                   </div>
                   <div className="mt-5 pt-4 border-t border-gray-50 flex gap-2">
-                    <button 
+                    <button
                       onClick={() => openManageClass(cls)}
                       className="flex-1 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-bold rounded-xl transition-colors flex justify-center items-center gap-2"
                     >
@@ -198,7 +199,7 @@ export default function ClassesPage() {
         {manageClass && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-3xl w-full max-w-[600px] flex flex-col h-[600px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-              
+
               <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Thành viên lớp {manageClass.name}</h2>
@@ -208,14 +209,14 @@ export default function ClassesPage() {
               </div>
 
               <div className="p-6 border-b border-gray-100 flex gap-3">
-                <select 
+                <select
                   value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)}
                   className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl font-medium text-sm outline-none focus:border-blue-400"
                 >
                   <option value="" disabled>-- Chọn học sinh từ hệ thống --</option>
                   {allStudents.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}
                 </select>
-                <button 
+                <button
                   onClick={handleAddStudent}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-blue-500/30 flex items-center gap-2"
                 >
@@ -233,15 +234,15 @@ export default function ClassesPage() {
                     {enrollments.map(e => (
                       <div key={e.id} className="p-4 rounded-xl border border-gray-100 flex justify-between items-center hover:bg-gray-50 transition-colors">
                         <div className="flex gap-3 items-center">
-                           <div className="w-10 h-10 bg-indigo-100 rounded-full flex justify-center items-center text-indigo-700 font-bold uppercase">
-                             {(e.student?.user?.name || '?').charAt(0)}
-                           </div>
-                           <div>
-                             <p className="font-bold text-gray-900 text-sm">{e.student?.user?.name}</p>
-                             <p className="text-xs text-gray-500">{e.student?.user?.email}</p>
-                           </div>
+                          <div className="w-10 h-10 bg-indigo-100 rounded-full flex justify-center items-center text-indigo-700 font-bold uppercase">
+                            {(e.student?.user?.name || '?').charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-sm">{e.student?.user?.name}</p>
+                            <p className="text-xs text-gray-500">{e.student?.user?.email}</p>
+                          </div>
                         </div>
-                        <button 
+                        <button
                           onClick={() => handleRemoveStudent(e.studentId)}
                           className="w-8 h-8 rounded-lg hover:bg-red-100 text-gray-400 hover:text-red-600 flex justify-center items-center transition-colors"
                         >

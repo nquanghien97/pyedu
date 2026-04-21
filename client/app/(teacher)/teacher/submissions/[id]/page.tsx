@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, CheckCircle2, AlertTriangle, MessageSquare, Save, Loader2 
+import {
+  ArrowLeft, CheckCircle2, AlertTriangle, MessageSquare, Save, Loader2
 } from 'lucide-react';
 import { getSubmissionById, updateSubmissionGrade } from '@/services/submission';
+import { notification } from '@/components/notification';
 
 export default function TeacherSubmissionDetailPage() {
   const params = useParams();
@@ -68,7 +69,7 @@ export default function TeacherSubmissionDetailPage() {
         totalPossible += pointsAvailable;
 
         let points = edit.pointsEarned !== null ? edit.pointsEarned : (ans.pointsEarned || 0);
-        
+
         // Ensure points do not exceed max
         if (points > pointsAvailable) points = pointsAvailable;
         if (points < 0) points = 0;
@@ -93,10 +94,10 @@ export default function TeacherSubmissionDetailPage() {
         percentage,
         answerUpdates
       });
-      alert('Đã cập nhật điểm thành công');
+      notification.success('Đã cập nhật điểm thành công');
       fetchData();
     } catch (error: any) {
-      alert('Lỗi: ' + (error.message || 'Không thể lưu'));
+      notification.error('Lỗi: ' + (error.message || 'Không thể lưu'));
     } finally {
       setSaving(false);
     }
@@ -163,7 +164,7 @@ export default function TeacherSubmissionDetailPage() {
                     {ans.question.questionType === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}
                   </span>
                 </div>
-                
+
                 <div className="p-6">
                   <div className="mb-4">
                     <p className="text-sm text-gray-800 font-medium" dangerouslySetInnerHTML={{ __html: ans.question.content }} />
@@ -185,8 +186,8 @@ export default function TeacherSubmissionDetailPage() {
                       {/* Points */}
                       <div className="w-1/4">
                         <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block mb-2">Điểm (Max: {pointsPossible})</label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           min="0" max={pointsPossible} step="0.5"
                           value={edit.pointsEarned ?? ''}
                           className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-blue-500 transition-colors font-bold text-gray-800"
@@ -194,11 +195,11 @@ export default function TeacherSubmissionDetailPage() {
                           onChange={e => handleEditChange(ans.id, 'pointsEarned', parseFloat(e.target.value) || 0)}
                         />
                       </div>
-                      
+
                       {/* Feedback */}
                       <div className="w-3/4">
                         <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block mb-2">Nhận xét của GV</label>
-                        <textarea 
+                        <textarea
                           rows={2}
                           value={edit.feedback || ''}
                           onChange={e => handleEditChange(ans.id, 'feedback', e.target.value)}
@@ -213,7 +214,7 @@ export default function TeacherSubmissionDetailPage() {
             );
           })}
         </div>
-        
+
         {/* Save button sticky bottom */}
         <div className="mt-8 flex justify-end sticky bottom-6 z-10 transition-transform">
           <button
