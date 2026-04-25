@@ -40,6 +40,21 @@ model User {
 
   courses      Course[]
   chatSessions ChatSession[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @db.Char(36)
+  token     String   @unique @db.VarChar(512)
+  userId    Int      @db.Integer
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
 }
 
 model Student {

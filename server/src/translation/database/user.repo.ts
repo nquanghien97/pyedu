@@ -39,5 +39,19 @@ export const userRepository = {
       role: user.role,
       createdAt: user.createdAt,
     };
+  },
+
+  async getUserById(id: number): Promise<BasicUser | undefined> {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return undefined;
+    }
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    };
   }
 }

@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 import Cookies from 'js-cookie';
 
 export async function logout() {
@@ -10,7 +11,7 @@ export async function logout() {
   } catch (error) {
     console.error('Logout failed:', error);
   } finally {
-    Cookies.remove('role');
+    useAuthStore.setState({ user: null, me: null, accessToken: null });
   }
 }
 

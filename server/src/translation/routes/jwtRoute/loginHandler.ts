@@ -1,8 +1,7 @@
 import { RequestHandler } from 'express';
-import * as jwt from 'jsonwebtoken';
 import { withAsyncErrorHandling } from '../../withAsyncErrorHandling';
 import { userRepository } from '../../database/user.repo';
-import { ENV_VARS } from '../../../config/env';
+import { tokenService } from '../../../services/token.service';
 
 export const loginHandler: RequestHandler = withAsyncErrorHandling(
   async (req, res) => {
@@ -16,30 +15,32 @@ export const loginHandler: RequestHandler = withAsyncErrorHandling(
       return;
     }
 
-    const token = jwt.sign(
-      {
-        user,
-      },
-      ENV_VARS.jwtSecret,
-      {
-        algorithm: 'HS256',
-        expiresIn: '24h',
-      }
-    );
+    // Access token -> response body
+    const accessToken = tokenService.generateAccessToken(user);
+
+    // Refresh token (JWT) -> cookie httpOnly
+    const refreshToken = await tokenService.generateRefreshToken(user.id, user.role);
 
     const isSecure = req.secure || req.headers["x-forwarded-proto"] === "https";
 
-    res.cookie("accessToken", token, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isSecure,
-      sameSite: "lax",
+      sameSite: "strict",
+      path: "/",
       domain: isSecure ? ".nongsanviet.site" : undefined,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    // Clear legacy role cookie if it exists
+    res.clearCookie("role");
+
     res.status(200).json({
-      user,
-      accessToken: token,
+      success: true,
+      data: {
+        user,
+        accessToken,
+      }
     });
   }
 );

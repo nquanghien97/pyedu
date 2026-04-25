@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { USER_ROLE } from '@/entity/user';
-import Cookies from 'js-cookie';
+import { useAuthStore } from '@/stores/auth.store';
 
 export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
@@ -11,20 +11,21 @@ export function withAuth<P extends object>(
 ) {
   return function WithAuth(props: P) {
     const router = useRouter();
+    const { user } = useAuthStore();
     const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
-      const role = Cookies.get('role') as USER_ROLE;
+      if (!user) return; // Chờ cho đến khi user được load xong
 
-      if (!role) {
-        router.replace('/login');
-      } else if (!allowedRoles.includes(role)) {
+      const role = user.role;
+
+      if (!allowedRoles.includes(role)) {
         // Redirect về trang chủ nếu không có quyền
         router.replace('/');
       } else {
         setIsAuthorized(true);
       }
-    }, [router]);
+    }, [user, router]);
 
     if (!isAuthorized) {
       return null;

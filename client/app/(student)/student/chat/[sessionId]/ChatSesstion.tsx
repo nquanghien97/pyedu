@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useEffect, useRef, useState } from 'react';
 import { notification } from '@/components/notification';
+import { useAuthStore } from '@/stores/auth.store';
 
 function ChatSesstion({ sessionId }: { sessionId: string }) {
   const { messages, fetchMessages, updateLastMessageContent, addMessage } = useChatStore();
@@ -48,9 +49,13 @@ function ChatSesstion({ sessionId }: { sessionId: string }) {
       });
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const { accessToken } = useAuthStore.getState();
       const response = await fetch(`${API_BASE_URL}/api/v1/chat-sessions/${sessionId}/messages`, {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
         body: formData,
       });
 

@@ -51,12 +51,15 @@ function LoginPage() {
     try {
       const res: any = await login(data)
       notification.success("Đăng nhập thành công!");
-      const userData = res.user as UserEntity | null;
-      if (userData) {
-        // Lưu data user vào store
+      
+      const userData = res.data.user as UserEntity | null;
+      const accessToken = res.data.accessToken as string | null;
+
+      if (userData && accessToken) {
+        // Lưu data user và token vào store (memory)
         setUser(userData);
-        // Lưu role vào js-cookie để Client/HOC/Middleware cùng đọc được
-        Cookies.set('role', userData.role, { expires: 1 }); // expires in 1 day to match accessToken
+        useAuthStore.setState({ me: userData });
+        useAuthStore.getState().setAccessToken(accessToken);
 
         // Redirect theo role
         if (userData.role === USER_ROLE.TEACHER) {

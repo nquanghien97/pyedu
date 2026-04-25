@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { loginHandler } from './loginHandler';
 import { logoutHandler } from './logoutHandler';
+import { refreshHandler } from './refreshHandler';
 import { getClasses, createClass, getClassStudents, enrollStudent, removeStudent } from './classHandler';
 import { chatbotHandler } from './chatbotHandler';
 import { getSubjects, getSubjectById, createSubject, updateSubject, deleteSubject } from './subjectHandler';
@@ -16,6 +17,7 @@ import { submitAssignment, getSubmissionById, getAssignmentSubmissions, getMySub
 import { getMyProgress, getStudentsProgress, getStudentProgressDetail } from './progressHandler';
 import { getTeacherClasses, getTeacherStudents } from './metaHandler';
 import { getAutoAssignConfigs, createAutoAssignConfig, updateAutoAssignConfig, deleteAutoAssignConfig, triggerAutoAssign } from './autoAssignHandler';
+import { getMe } from './userHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -23,10 +25,14 @@ export const jwtRouter = express.Router();
 // Public routes
 jwtRouter.post('/login', loginHandler);
 jwtRouter.post('/logout', logoutHandler);
+jwtRouter.post('/auth/refresh', refreshHandler);
 
 // Protected routes - require JWT auth
 const protectedRouter = express.Router();
 protectedRouter.use(authMiddleware('jwt'));
+
+// User
+protectedRouter.get('/users/me', getMe);
 
 // Chat
 protectedRouter.post('/chat', chatbotHandler);

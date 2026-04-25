@@ -6,6 +6,8 @@ import { UserEntity } from '@/entity/user';
 
 interface AuthStoreType {
   user: UserEntity | null;
+  accessToken: string | null;
+  setAccessToken: (token: string | null) => void;
   getUser: () => void;
   setUser: (
     user: UserEntity | ((prev: UserEntity | null) => UserEntity) | null
@@ -18,10 +20,10 @@ interface AuthStoreType {
 
 export const useAuthStore = create<AuthStoreType>()((set) => ({
   user: null,
+  accessToken: null,
+  setAccessToken: (token) => set({ accessToken: token }),
   getUser: () => {
-    const token = Cookies.get('token');
-    const dataParse = parseJwt(token || '');
-    set({ user: dataParse?.user || null });
+    // Không dùng cookie token cũ nữa
   },
   setUser: (item) =>
     set((state) => ({

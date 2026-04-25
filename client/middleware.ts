@@ -3,13 +3,26 @@ import type { NextRequest } from "next/server";
 import { USER_ROLE } from "./entity/user";
 
 export default function middleware(req: NextRequest) {
-  const token = req.cookies.get("accessToken")?.value;
-  const role = req.cookies.get("role")?.value;
+  const refreshToken = req.cookies.get("refreshToken")?.value;
+  let role = null;
+
+  if (refreshToken) {
+    try {
+      // Decode JWT payload (part 2) - handle base64url
+      const base64Url = refreshToken.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = atob(base64);
+      const payload = JSON.parse(jsonPayload);
+      role = payload.role;
+    } catch (e) {
+      console.error("Middleware token decode error:", e);
+    }
+  }
 
   const { pathname } = req.nextUrl;
 
   // Nếu chưa login mà vào dashboard
-  if (!token && (
+  if (!role && (
     pathname.startsWith("/student") ||
     pathname.startsWith("/teacher") ||
     pathname.startsWith("/admin")
@@ -17,8 +30,8 @@ export default function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Đã login (có đủ token và role) nhưng lại cố truy cập vào trang login/register -> đẩy về dashboard
-  if (token && role && (pathname === "/login" || pathname === "/register")) {
+  // Đã login nhưng lại cố truy cập vào trang login/register -> đẩy về dashboard
+  if (role && (pathname === "/login" || pathname === "/register")) {
     if (role === USER_ROLE.TEACHER) return NextResponse.redirect(new URL("/teacher", req.url));
     if (role === USER_ROLE.STUDENT) return NextResponse.redirect(new URL("/student", req.url));
     if (role === USER_ROLE.ADMIN) return NextResponse.redirect(new URL("/admin", req.url));

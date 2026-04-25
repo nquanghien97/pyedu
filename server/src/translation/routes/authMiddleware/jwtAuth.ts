@@ -31,13 +31,10 @@ const verifyToken = async (
 };
 
 const jwtAuth = async (req: Request): Promise<boolean> => {
-  // Đọc từ Authorization header
+  // Đọc từ Authorization header (Access Token)
   const headerToken = req.headers['authorization']?.split('Bearer ')?.[1];
 
-  // Đọc từ cookie - tên là 'accessToken'
-  const cookieToken = req.cookies?.accessToken;
-
-  const token = headerToken ?? cookieToken;
+  const token = headerToken;
 
   if (!token) {
     return false;
