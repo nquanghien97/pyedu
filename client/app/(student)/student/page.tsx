@@ -1,27 +1,26 @@
 'use client';
 
-import { useState } from "react";
-import { CheckCircle2, Star, Flame, ChevronDown, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/auth.store";
+import { CheckCircle2, Star, Flame, ChevronDown, Sparkles, Clock, Trophy } from "lucide-react";
 import { WeeklyChart } from "./Chart";
+import { getStudentDashboardStats } from "@/services/dashboard";
+import Link from "next/link";
 
-
-// ── Difficulty dots ──────────────────────────────────────────────
-function DifficultyDots({ level }: { level: number }) {
-  const colors = ["#EF4444", "#F59E0B", "#22C55E"];
-  return (
-    <div style={{ display: "flex", gap: 4 }}>
-      {[0, 1, 2].map(i => (
-        <span key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i < level ? colors[Math.min(level - 1, 2)] : "#E5E7EB", display: "inline-block" }} />
-      ))}
-    </div>
-  );
+interface DashboardStats {
+  pendingAssignments: number;
+  averageScore: number;
+  completedAssignments: number;
+  totalAssignments: number;
+  recentSubmissions: {
+    id: string;
+    exerciseName: string;
+    score: number | null;
+    status: string | null;
+    submittedAt: string | null;
+    attemptCount: number;
+  }[];
 }
-
-const assignments = [
-  { id: 1, subject: "Toán học", sub: "Đạo hàm & Tích phân", deadline: "Hôm nay, 20:00", level: 3, status: "urgent", initial: "M", color: "#EF4444", bg: "#FEF2F2" },
-  { id: 2, subject: "Vật lý", sub: "Dòng điện xoay chiều", deadline: "Ngày mai", level: 2, status: "normal", initial: "P", color: "#6366F1", bg: "#EEF2FF" },
-  { id: 3, subject: "Tiếng Anh", sub: "Reading: IELTS Unit 8", deadline: "15 Thg 10", level: 1, status: "normal", initial: "E", color: "#22C55E", bg: "#F0FDF4" },
-];
 
 const activities = [
   { text: "Hoàn thành bài tập Hóa học", meta: "1 giờ trước • Điểm: 9.0", dot: "#22C55E" },
@@ -31,8 +30,51 @@ const activities = [
 
 const avatarColors = ["#BFDBFE", "#DDD6FE", "#FDE68A", "#BBF7D0", "#FECACA"];
 
+function formatSubmittedAt(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffHours < 1) return "Vừa xong";
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  if (diffDays < 7) return `${diffDays} ngày trước`;
+  return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "short" });
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  submitted: "Đã nộp",
+  graded: "Đã chấm",
+  late: "Nộp muộn",
+};
+
 export default function StudentDashboard() {
+  const { user } = useAuthStore();
   const [weekFilter] = useState("Tuần này");
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await getStudentDashboardStats();
+        if (res.success) {
+          setStats(res.data);
+        }
+      } catch (error) {
+        // Silent fail
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Greeting based on time
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Chào buổi sáng" : hour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
 
   return (
     <div className="min-h-screen bg-slate-50 p-7">
@@ -40,55 +82,86 @@ export default function StudentDashboard() {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Chào buổi sáng, Nam! 👋</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{greeting}, {user?.name || 'bạn'}! 👋</h1>
           <p className="text-sm text-gray-400 mt-1">
-            Hôm nay bạn có 3 bài tập quan trọng cần hoàn thành để duy trì chuỗi học tập.
+            {stats && stats.pendingAssignments > 0
+              ? `Hôm nay bạn có ${stats.pendingAssignments} bài tập cần hoàn thành.`
+              : "Tuyệt vời! Bạn đã hoàn thành tất cả bài tập."}
           </p>
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-          {/* Bài tập cần làm */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
-            <div className="flex justify-between items-start mb-3.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-50">
-                <CheckCircle2 size={20} color="#3B82F6" />
+          {loading ? (
+            <>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 h-[120px] animate-pulse">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl mb-3" />
+                  <div className="w-20 h-3 bg-gray-100 rounded mb-2" />
+                  <div className="w-12 h-6 bg-gray-100 rounded" />
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              {/* Bài tập cần làm */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+                <div className="flex justify-between items-start mb-3.5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-50">
+                    <CheckCircle2 size={20} color="#3B82F6" />
+                  </div>
+                  {stats && stats.pendingAssignments > 0 && (
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700">
+                      {stats.pendingAssignments} cần làm
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mb-1">Bài tập cần làm</p>
+                <p className="text-2xl font-extrabold text-gray-900">
+                  {stats?.pendingAssignments ?? 0}{" "}
+                  <span className="text-sm font-normal text-gray-400">bài</span>
+                </p>
               </div>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-green-50 text-green-700">+2 mới</span>
-            </div>
-            <p className="text-xs text-gray-400 mb-1">Bài tập cần làm</p>
-            <p className="text-2xl font-extrabold text-gray-900">
-              05 <span className="text-sm font-normal text-gray-400">bài</span>
-            </p>
-          </div>
 
-          {/* Điểm trung bình */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
-            <div className="flex justify-between items-start mb-3.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-50">
-                <Star size={20} color="#8B5CF6" />
+              {/* Điểm trung bình */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+                <div className="flex justify-between items-start mb-3.5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-50">
+                    <Star size={20} color="#8B5CF6" />
+                  </div>
+                  {stats && stats.averageScore > 0 && (
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-green-50 text-green-700">
+                      {stats.averageScore >= 8 ? "Giỏi" : stats.averageScore >= 6.5 ? "Khá" : "TB"}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mb-1">Điểm trung bình</p>
+                <p className="text-2xl font-extrabold text-gray-900">
+                  {stats?.averageScore ?? 0}{" "}
+                  <span className="text-sm font-normal text-gray-400">/10</span>
+                </p>
               </div>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-green-50 text-green-700">+0.2đ</span>
-            </div>
-            <p className="text-xs text-gray-400 mb-1">Điểm trung bình</p>
-            <p className="text-2xl font-extrabold text-gray-900">
-              8.5 <span className="text-sm font-normal text-gray-400">/10</span>
-            </p>
-          </div>
 
-          {/* Streak */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
-            <div className="flex justify-between items-start mb-3.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-50">
-                <Flame size={20} color="#F97316" />
+              {/* Completed / Total */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+                <div className="flex justify-between items-start mb-3.5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-green-50">
+                    <Trophy size={20} color="#22C55E" />
+                  </div>
+                  {stats && stats.totalAssignments > 0 && (
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                      {Math.round((stats.completedAssignments / stats.totalAssignments) * 100)}%
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mb-1">Đã hoàn thành</p>
+                <p className="text-2xl font-extrabold text-gray-900">
+                  {stats?.completedAssignments ?? 0}{" "}
+                  <span className="text-sm font-normal text-gray-400">/ {stats?.totalAssignments ?? 0} bài</span>
+                </p>
               </div>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700">Top 5%</span>
-            </div>
-            <p className="text-xs text-gray-400 mb-1">Streak học tập</p>
-            <p className="text-2xl font-extrabold text-gray-900">
-              12 <span className="text-sm font-normal text-gray-400">ngày</span>
-            </p>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Main content grid */}
@@ -108,108 +181,104 @@ export default function StudentDashboard() {
               <WeeklyChart />
             </div>
 
-            {/* Priority assignments */}
+            {/* Recent submissions */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-base font-bold text-gray-900">Bài tập ưu tiên</span>
-                <button className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors">Xem tất cả</button>
+                <span className="text-base font-bold text-gray-900">Bài nộp gần đây</span>
+                <Link href="/student/assignments" className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors">
+                  Xem tất cả
+                </Link>
               </div>
-
-              {/* Table head */}
-              <div className="grid grid-cols-4 gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-200">
-                {["MÔN HỌC", "HẠN CHÓT", "ĐỘ KHÓ", "TRẠNG THÁI"].map(h => (
-                  <span key={h} className="text-xs font-bold text-slate-500 tracking-wide">{h}</span>
-                ))}
-              </div>
-
-              {assignments.map((a, i) => (
-                <div key={a.id}
-                  style={{
-                    display: "grid", gridTemplateColumns: "2fr 1fr 0.8fr 1fr",
-                    padding: "14px 22px", alignItems: "center",
-                    borderBottom: i < assignments.length - 1 ? "1px solid #F9FAFB" : "none",
-                    transition: "background 0.15s",
-                  }}
-                  className={`grid grid-cols-4 gap-4 px-5 py-2.5 bg-slate-50  ${i < assignments.length - 1 && 'border-b border-[#F9FAFB]'} duration-300`}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#FAFAFA")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                >
-                  <div className="flex items-center gap-2">
-                    <div style={{ width: 32, height: 32, borderRadius: 9, background: a.bg, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, color: a.color, flexShrink: 0 }}>
-                      {a.initial}
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: "#111827", margin: 0 }}>{a.subject}</p>
-                      <p style={{ fontSize: 11, color: "#9CA3AF", margin: "2px 0 0" }}>{a.sub}</p>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 13, color: a.status === "urgent" ? "#EF4444" : "#6B7280", fontWeight: a.status === "urgent" ? 600 : 400 }}>{a.deadline}</span>
-                  <DifficultyDots level={a.level} />
-                  <div>
-                    {a.status === "urgent" ? (
-                      <button style={{
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                        border: "none", borderRadius: 8, padding: "6px 16px",
-                        fontSize: 12, fontWeight: 700, color: "#fff", cursor: "pointer",
-                        boxShadow: "0 2px 8px rgba(59,130,246,0.3)",
-                      }}>Làm ngay</button>
-                    ) : (
-                      <button style={{ background: "none", border: "none", fontSize: 13, color: "#3B82F6", fontWeight: 500, cursor: "pointer" }}>Chi tiết</button>
-                    )}
-                  </div>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
                 </div>
-              ))}
+              ) : stats && stats.recentSubmissions.length > 0 ? (
+                <div className="space-y-3">
+                  {stats.recentSubmissions.map((s) => (
+                    <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                        <CheckCircle2 size={16} className="text-blue-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">{s.exerciseName}</p>
+                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                          <Clock size={10} />
+                          {formatSubmittedAt(s.submittedAt)}
+                          {s.score !== null && ` • Điểm: ${(s.score / 10).toFixed(1)}`}
+                          {s.attemptCount > 1 && (
+                            <span className="ml-1 px-1.5 py-0 rounded bg-purple-50 text-purple-600 font-medium">
+                              Lần {s.attemptCount}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        s.status === "graded"
+                          ? "bg-green-50 text-green-600"
+                          : "bg-blue-50 text-blue-600"
+                      }`}>
+                        {STATUS_LABELS[s.status || ""] || s.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-sm text-gray-400">
+                  <p>Chưa có bài nộp nào</p>
+                  <Link href="/student/assignments" className="text-blue-500 text-xs mt-1 hover:text-blue-600">
+                    Xem bài tập được giao →
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
           {/* RIGHT */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="flex flex-col gap-4">
 
             {/* AI suggestion */}
-            <div style={{
-              background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
-              borderRadius: 16, padding: "20px 20px",
-              boxShadow: "0 4px 16px rgba(59,130,246,0.35)",
-              position: "relative", overflow: "hidden",
-            }}>
-              <svg style={{ position: "absolute", top: 0, right: 0, opacity: 0.1 }} width="120" height="120" viewBox="0 0 120 120">
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-5 shadow-md">
+              <svg className="absolute top-0 right-0 opacity-10" width="120" height="120" viewBox="0 0 120 120">
                 <circle cx="80" cy="20" r="60" fill="#fff" />
               </svg>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 14 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div className="flex items-center gap-2 mb-3.5">
+                <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
                   <Sparkles size={14} color="#fff" />
                 </div>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>Gợi ý từ AI</span>
+                <span className="text-sm font-bold text-white">Gợi ý từ AI</span>
               </div>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", lineHeight: 1.6, margin: "0 0 10px" }}>
-                Dựa trên kết quả tuần này, bạn đang gặp khó khăn ở phần <b>Số phức (Toán)</b>.
+              <p className="text-sm text-white/90 leading-relaxed mb-2">
+                {stats && stats.averageScore < 7
+                  ? "Hãy tập trung vào các bài tập cơ bản để nâng cao điểm trung bình nhé!"
+                  : "Bạn đang học rất tốt! Hãy thử thách bản thân với các bài tập nâng cao."}
               </p>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, margin: "0 0 16px" }}>
-                Bạn nên dành 30 phút luyện tập thêm các bài toán cơ bản để củng cố nền tảng.
+              <p className="text-xs text-white/70 leading-relaxed mb-4">
+                {stats && stats.pendingAssignments > 0
+                  ? `Còn ${stats.pendingAssignments} bài tập chưa hoàn thành. Hãy ưu tiên bài sắp hết hạn!`
+                  : "Tuyệt vời! Bạn đã hoàn thành tất cả bài tập. Hãy ôn lại kiến thức cũ."}
               </p>
-              <button style={{
-                width: "100%", padding: "10px",
-                background: "#fff", border: "none", borderRadius: 10,
-                fontSize: 13, fontWeight: 700, color: "#2563EB",
-                cursor: "pointer", transition: "opacity 0.2s",
-              }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "0.9")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              <Link
+                href="/student/chat"
+                className="block w-full py-2.5 bg-white rounded-xl text-sm font-bold text-blue-600 text-center hover:opacity-90 transition-opacity"
               >
-                Luyện tập ngay
-              </button>
+                Hỏi AI ngay
+              </Link>
             </div>
 
             {/* Recent activity */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "18px 20px" }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: "0 0 16px" }}>Hoạt động gần đây</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+              <p className="text-base font-bold text-gray-900 mb-4">Hoạt động gần đây</p>
+              <div className="space-y-3.5">
                 {activities.map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <span style={{ width: 9, height: 9, borderRadius: "50%", background: a.dot, flexShrink: 0, marginTop: 4 }} />
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 mt-1"
+                      style={{ background: a.dot }}
+                    />
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0 }}>{a.text}</p>
-                      <p style={{ fontSize: 11, color: "#9CA3AF", margin: "2px 0 0" }}>{a.meta}</p>
+                      <p className="text-sm font-semibold text-gray-800">{a.text}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{a.meta}</p>
                     </div>
                   </div>
                 ))}
@@ -217,31 +286,40 @@ export default function StudentDashboard() {
             </div>
 
             {/* Online friends */}
-            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "18px 20px" }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: "0 0 14px" }}>Bạn bè trực tuyến</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 10 }}>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+              <p className="text-base font-bold text-gray-900 mb-3.5">Bạn bè trực tuyến</p>
+              <div className="flex items-center mb-2.5">
                 {avatarColors.map((c, i) => (
-                  <div key={i} style={{
-                    width: 34, height: 34, borderRadius: "50%",
-                    background: c, border: "2px solid #fff",
-                    marginLeft: i === 0 ? 0 : -10,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: 700, color: "#374151",
-                    zIndex: avatarColors.length - i,
-                    position: "relative",
-                  }}>
+                  <div
+                    key={i}
+                    className="flex items-center justify-center text-xs font-bold text-gray-700 rounded-full border-2 border-white"
+                    style={{
+                      width: 34,
+                      height: 34,
+                      background: c,
+                      marginLeft: i === 0 ? 0 : -10,
+                      zIndex: avatarColors.length - i,
+                      position: "relative",
+                    }}
+                  >
                     {String.fromCharCode(65 + i)}
                   </div>
                 ))}
-                <div style={{
-                  width: 34, height: 34, borderRadius: "50%",
-                  background: "#EFF6FF", border: "2px solid #fff",
-                  marginLeft: -10, display: "flex", alignItems: "center",
-                  justifyContent: "center", fontSize: 11, fontWeight: 700,
-                  color: "#3B82F6", position: "relative", zIndex: 0,
-                }}>+12</div>
+                <div
+                  className="flex items-center justify-center text-xs font-bold text-blue-500 rounded-full border-2 border-white"
+                  style={{
+                    width: 34,
+                    height: 34,
+                    background: "#EFF6FF",
+                    marginLeft: -10,
+                    position: "relative",
+                    zIndex: 0,
+                  }}
+                >
+                  +12
+                </div>
               </div>
-              <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>
+              <p className="text-xs text-gray-400">
                 Nhóm 12A1 hiện có 5 bạn đang cùng học môn Toán.
               </p>
             </div>

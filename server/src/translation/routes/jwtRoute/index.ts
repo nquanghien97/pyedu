@@ -18,6 +18,8 @@ import { getMyProgress, getStudentsProgress, getStudentProgressDetail } from './
 import { getTeacherClasses, getTeacherStudents } from './metaHandler';
 import { getAutoAssignConfigs, createAutoAssignConfig, updateAutoAssignConfig, deleteAutoAssignConfig, triggerAutoAssign } from './autoAssignHandler';
 import { getMe } from './userHandler';
+import { requireAdmin, getDashboardStats, getAllUsers, createUser, updateUser, deleteUser } from './adminHandler';
+import { getTeacherDashboardStats, getStudentDashboardStats } from './dashboardHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -89,6 +91,10 @@ protectedRouter.post('/ai/generate-exercise-by-file', upload.single('file'), gen
 protectedRouter.get('/teacher/classes', getTeacherClasses);
 protectedRouter.get('/teacher/students', getTeacherStudents);
 
+// Dashboard Stats
+protectedRouter.get('/teacher/dashboard-stats', getTeacherDashboardStats);
+protectedRouter.get('/student/dashboard-stats', getStudentDashboardStats);
+
 // Teacher Assignments
 protectedRouter.post('/teacher/assignments', createTeacherAssignment);
 protectedRouter.get('/teacher/assignments', getTeacherAssignments);
@@ -114,5 +120,12 @@ protectedRouter.post('/auto-assign', createAutoAssignConfig);
 protectedRouter.put('/auto-assign/:id', updateAutoAssignConfig);
 protectedRouter.delete('/auto-assign/:id', deleteAutoAssignConfig);
 protectedRouter.post('/auto-assign/run', triggerAutoAssign);
+
+// Admin routes
+protectedRouter.get('/admin/stats', requireAdmin, getDashboardStats);
+protectedRouter.get('/admin/users', requireAdmin, getAllUsers);
+protectedRouter.post('/admin/users', requireAdmin, createUser);
+protectedRouter.put('/admin/users/:id', requireAdmin, updateUser);
+protectedRouter.delete('/admin/users/:id', requireAdmin, deleteUser);
 
 jwtRouter.use(protectedRouter);

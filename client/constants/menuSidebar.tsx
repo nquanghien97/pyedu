@@ -1,5 +1,5 @@
 import { USER_ROLE } from "@/entity/user";
-import { AtomIcon, BookOpenIcon, FileChartColumn, LayoutDashboard, NotepadText, User, Users, } from "lucide-react";
+import { AtomIcon, BookOpenIcon, FileChartColumn, LayoutDashboard, NotepadText, Shield, User, Users, } from "lucide-react";
 
 
 export interface DataSidebarType {
@@ -91,12 +91,6 @@ export const menuSidebarStudent: DataSidebarType[] = [
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
   },
   {
-    title: 'Gia sư',
-    url: '/student/tutors',
-    icon: <User width={16} height={16} />,
-    allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
-  },
-  {
     title: 'Chat bot AI',
     url: '/student/chat',
     icon: <AtomIcon width={16} height={16} />,
@@ -107,5 +101,20 @@ export const menuSidebarStudent: DataSidebarType[] = [
     url: '/student/reports',
     icon: <FileChartColumn width={16} height={16} />,
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
+  },
+]
+
+export const menuSidebarAdmin: DataSidebarType[] = [
+  {
+    title: 'Tổng quan',
+    url: '/admin',
+    icon: <LayoutDashboard width={16} height={16} />,
+    allowRole: USER_ROLE.ADMIN,
+  },
+  {
+    title: 'Quản lý người dùng',
+    url: '/admin/users',
+    icon: <Users width={16} height={16} />,
+    allowRole: USER_ROLE.ADMIN,
   },
 ]

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/auth.store";
 import {
   Users,
   ClipboardList,
@@ -13,6 +14,7 @@ import {
   MoreHorizontal,
   ChevronDown,
   Minus,
+  Clock,
 } from "lucide-react";
 import {
   AreaChart,
@@ -25,6 +27,8 @@ import {
 } from "recharts";
 import StatCard from "./StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { getTeacherDashboardStats } from "@/services/dashboard";
+import Link from "next/link";
 
 const weeklyData = [
   { day: "Thứ 2", value: 30 },
@@ -43,39 +47,18 @@ const students: { name: string, class: string, score: number, trend: string }[] 
   { name: "Phạm Minh D", class: "Lớp 10C5", score: 92, trend: "flat" },
 ];
 
-const assignments = [
-  {
-    id: 1,
-    name: "Luyện tập Python Cơ bản – Biến và Kiểu dữ liệu",
-    class: "Lớp Công nghệ 1",
-    deadline: "12:00, 25 Th10",
-    status: "Đang diễn ra",
-    statusColor: "blue",
-  },
-  {
-    id: 2,
-    name: "Bài kiểm tra Toán – Chương 3",
-    class: "Lớp 12A1",
-    deadline: "08:00, 28 Th10",
-    status: "Chưa bắt đầu",
-    statusColor: "gray",
-  },
-  {
-    id: 3,
-    name: "Viết đoạn văn Tiếng Anh – Topic: Environment",
-    class: "Lớp 11B2",
-    deadline: "17:00, 26 Th10",
-    status: "Đã kết thúc",
-    statusColor: "green",
-  },
-];
-
 const avatarColors = [
   "bg-blue-100 text-blue-600",
   "bg-purple-100 text-purple-600",
   "bg-green-100 text-green-600",
   "bg-orange-100 text-orange-600",
 ];
+
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  active: { label: "Đang diễn ra", color: "blue" },
+  completed: { label: "Đã kết thúc", color: "green" },
+  draft: { label: "Chưa bắt đầu", color: "gray" },
+};
 
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
   if (active && payload && payload.length) {
@@ -89,9 +72,57 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   return null;
 };
 
+function formatDueDate(dateStr: string | null): string {
+  if (!dateStr) return "Chưa đặt";
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "short",
+  });
+}
+
+interface DashboardStats {
+  totalStudents: number;
+  totalAssignments: number;
+  completionRate: number;
+  pendingGrading: number;
+  recentAssignments: {
+    id: string;
+    name: string;
+    assignedToType: string | null;
+    dueDate: string | null;
+    status: string | null;
+  }[];
+}
+
 export default function TeacherPage() {
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState("Tháng này");
   const [openPopover, setOpenPopover] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await getTeacherDashboardStats();
+        if (res.success) {
+          setStats(res.data);
+        }
+      } catch (error) {
+        // Silent fail, keep mock data
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Greeting based on time
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Chào buổi sáng" : hour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
 
   return (
     <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
@@ -99,53 +130,68 @@ export default function TeacherPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">
-            Chào buổi sáng, Thầy cô!
+            {greeting}, {user?.name || 'Thầy cô'}! 👋
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">
             Dưới đây là tiến độ học tập trong tuần này của học sinh.
           </p>
         </div>
-        <button className="cursor-pointer flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md active:scale-95">
+        <Link
+          href="/teacher/assignments/assign"
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md active:scale-95"
+        >
           <Plus size={16} />
           Giao bài tập mới
-        </button>
+        </Link>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          icon={Users}
-          iconBg="bg-blue-50 text-blue-500"
-          label="Tổng học sinh"
-          value="1,250"
-          badge="+5.2%"
-          badgeType="up"
-        />
-        <StatCard
-          icon={ClipboardList}
-          iconBg="bg-purple-50 text-purple-500"
-          label="Bài tập đã giao"
-          value="48"
-          badge="+12%"
-          badgeType="up"
-        />
-        <StatCard
-          icon={CheckCircle}
-          iconBg="bg-green-50 text-green-500"
-          label="Tỉ lệ hoàn thành"
-          value="85%"
-          badge="-1.5%"
-          badgeType="down"
-        />
-        <StatCard
-          icon={BookOpen}
-          iconBg="bg-orange-50 text-orange-500"
-          label="Bài tập cần chấm"
-          value="12"
-          badge="+4 mới"
-          badgeType="new"
-        />
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 h-[120px] animate-pulse">
+              <div className="w-10 h-10 bg-gray-100 rounded-xl mb-3" />
+              <div className="w-16 h-3 bg-gray-100 rounded mb-2" />
+              <div className="w-12 h-6 bg-gray-100 rounded" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <StatCard
+            icon={Users}
+            iconBg="bg-blue-50 text-blue-500"
+            label="Tổng học sinh"
+            value={stats?.totalStudents ?? 0}
+            badge={stats?.totalStudents ? `${stats.totalStudents}` : "0"}
+            badgeType="up"
+          />
+          <StatCard
+            icon={ClipboardList}
+            iconBg="bg-purple-50 text-purple-500"
+            label="Bài tập đã giao"
+            value={stats?.totalAssignments ?? 0}
+            badge={`${stats?.totalAssignments ?? 0} bài`}
+            badgeType="up"
+          />
+          <StatCard
+            icon={CheckCircle}
+            iconBg="bg-green-50 text-green-500"
+            label="Tỉ lệ hoàn thành"
+            value={`${stats?.completionRate ?? 0}%`}
+            badge={`${stats?.completionRate ?? 0}%`}
+            badgeType={stats && stats.completionRate >= 50 ? "up" : "down"}
+          />
+          <StatCard
+            icon={BookOpen}
+            iconBg="bg-orange-50 text-orange-500"
+            label="Bài tập cần chấm"
+            value={stats?.pendingGrading ?? 0}
+            badge={stats?.pendingGrading ? `${stats.pendingGrading} bài` : "0"}
+            badgeType="new"
+          />
+        </div>
+      )}
 
       {/* Chart + Top Students */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -254,19 +300,19 @@ export default function TeacherPage() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
           <h2 className="font-semibold text-gray-800">Bài tập mới nhất</h2>
           <div className="flex items-center gap-2">
-            <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-colors">
-              <SlidersHorizontal size={15} />
-            </button>
-            <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-colors">
-              <MoreHorizontal size={15} />
-            </button>
+            <Link
+              href="/teacher/assignments/assign"
+              className="text-xs text-blue-500 font-medium hover:text-blue-600 transition-colors"
+            >
+              Xem tất cả
+            </Link>
           </div>
         </div>
 
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-50">
-              {["TÊN BÀI TẬP", "LỚP", "THỜI HẠN", "TRẠNG THÁI", "HÀNH ĐỘNG"].map((h) => (
+              {["TÊN BÀI TẬP", "LOẠI", "THỜI HẠN", "TRẠNG THÁI", "HÀNH ĐỘNG"].map((h) => (
                 <th
                   key={h}
                   className="text-left text-xs font-semibold text-gray-400 tracking-wide px-5 py-3"
@@ -277,36 +323,59 @@ export default function TeacherPage() {
             </tr>
           </thead>
           <tbody>
-            {assignments.map((a, i) => (
-              <tr
-                key={a.id}
-                className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors ${i % 2 === 0 ? "" : ""
-                  }`}
-              >
-                <td className="px-5 py-4 text-sm text-gray-700 font-medium max-w-xs">
-                  {a.name}
-                </td>
-                <td className="px-5 py-4 text-sm text-gray-500">{a.class}</td>
-                <td className="px-5 py-4 text-sm text-gray-500">{a.deadline}</td>
-                <td className="px-5 py-4">
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${a.statusColor === "blue"
-                      ? "bg-blue-50 text-blue-600"
-                      : a.statusColor === "green"
-                        ? "bg-green-50 text-green-600"
-                        : "bg-gray-100 text-gray-500"
-                      }`}
-                  >
-                    {a.status}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  <button className="text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
-                    Chi tiết
-                  </button>
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-10 text-center">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+                  </div>
                 </td>
               </tr>
-            ))}
+            ) : stats && stats.recentAssignments.length > 0 ? (
+              stats.recentAssignments.map((a) => {
+                const statusInfo = STATUS_MAP[a.status || "draft"] || STATUS_MAP.draft;
+                return (
+                  <tr
+                    key={a.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
+                  >
+                    <td className="px-5 py-4 text-sm text-gray-700 font-medium max-w-xs truncate">
+                      {a.name}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-500">
+                      {a.assignedToType === "class" ? "Cả lớp" : a.assignedToType === "student" ? "Cá nhân" : "—"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-500 flex items-center gap-1">
+                      <Clock size={13} className="text-gray-400" />
+                      {formatDueDate(a.dueDate)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusInfo.color === "blue"
+                          ? "bg-blue-50 text-blue-600"
+                          : statusInfo.color === "green"
+                            ? "bg-green-50 text-green-600"
+                            : "bg-gray-100 text-gray-500"
+                          }`}
+                      >
+                        {statusInfo.label}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <button className="text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
+                        Chi tiết
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-400">
+                  Chưa có bài tập nào. Hãy bắt đầu giao bài tập cho học sinh!
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
