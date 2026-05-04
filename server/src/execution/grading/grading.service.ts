@@ -1,11 +1,14 @@
 import { AnswerData } from '../../entities/submission';
+import { geminiService } from '../ai/gemini.service';
 
 interface QuestionData {
   id: string;
+  questionText: string | null;
   questionType: string | null;
   points: number | null;
   content: unknown;
   autoGrade: boolean;
+  aiGradingEnabled: boolean;
 }
 
 interface GradingResult {
@@ -18,11 +21,17 @@ interface GradingResult {
 /**
  * Auto-grade a single question answer based on its type
  */
-function gradeQuestion(
+async function gradeQuestion(
   question: QuestionData,
   answerData: AnswerData
-): GradingResult {
+): Promise<GradingResult> {
   const maxPoints = Number(question.points ?? 0);
+
+  // Essay với AI grading enabled → gọi Gemini chấm
+  const normalizedType = (question.questionType ?? '').replace(/-/g, '_');
+  if (normalizedType === 'essay' && question.aiGradingEnabled) {
+    return gradeEssayWithAI(question, answerData, maxPoints);
+  }
 
   // If question doesn't support auto-grading, mark as pending review
   if (!question.autoGrade) {
@@ -43,9 +52,6 @@ function gradeQuestion(
       feedback: 'Không có dữ liệu đáp án để chấm.',
     };
   }
-
-  // Normalize questionType: handle both 'multiple-choice' and 'multiple_choice'
-  const normalizedType = (question.questionType ?? '').replace(/-/g, '_');
 
   switch (normalizedType) {
     case 'multiple_choice':
@@ -248,22 +254,61 @@ function gradeFillBlank(
 }
 
 /**
+ * AI chấm câu tự luận essay
+ */
+async function gradeEssayWithAI(
+  question: QuestionData,
+  answerData: AnswerData,
+  maxPoints: number
+): Promise<GradingResult> {
+  const studentAnswer = answerData.text || '';
+  if (!studentAnswer.trim()) {
+    return {
+      questionId: question.id,
+      isCorrect: false,
+      pointsEarned: 0,
+      feedback: 'Học sinh chưa trả lời câu hỏi này.',
+    };
+  }
+
+  const content = question.content as Record<string, unknown> | null;
+  const sampleAnswer = (content?.sampleAnswer as string) || undefined;
+
+  const result = await geminiService.gradeEssay({
+    questionText: question.questionText || 'Câu hỏi tự luận',
+    sampleAnswer,
+    studentAnswer,
+    maxPoints,
+  });
+
+  return {
+    questionId: question.id,
+    isCorrect: result.isCorrect,
+    pointsEarned: result.pointsEarned,
+    feedback: result.feedback,
+  };
+}
+
+/**
  * Grade all answers for an exercise submission
  */
-export function gradeSubmission(
+export async function gradeSubmission(
   questions: QuestionData[],
   answers: { questionId: string; answerData: AnswerData }[]
-): GradingResult[] {
-  return answers.map((answer) => {
-    const question = questions.find((q) => q.id === answer.questionId);
-    if (!question) {
-      return {
-        questionId: answer.questionId,
-        isCorrect: null,
-        pointsEarned: null,
-        feedback: 'Câu hỏi không tồn tại.',
-      };
-    }
-    return gradeQuestion(question, answer.answerData);
-  });
+): Promise<GradingResult[]> {
+  const results = await Promise.all(
+    answers.map(async (answer) => {
+      const question = questions.find((q) => q.id === answer.questionId);
+      if (!question) {
+        return {
+          questionId: answer.questionId,
+          isCorrect: null,
+          pointsEarned: null,
+          feedback: 'Câu hỏi không tồn tại.',
+        };
+      }
+      return gradeQuestion(question, answer.answerData);
+    })
+  );
+  return results;
 }

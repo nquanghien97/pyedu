@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   BookOpen, Calendar, Clock, CheckCircle2, History,
   ChevronDown, Search, Loader2, Target, Users, User as UserIcon
@@ -17,6 +18,7 @@ type AssignTarget = "class" | "student";
 type Tab = "new" | "history";
 
 export default function AssignPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("new");
 
   // Meta data
@@ -321,7 +323,11 @@ export default function AssignPage() {
                           : students.find(s => s.id === a.assignedToId)?.name || 'Học sinh ẩn';
 
                         return (
-                          <tr key={a.id} className="border-b border-gray-50 hover:bg-slate-50 transition-colors">
+                          <tr 
+                            key={a.id} 
+                            onClick={() => router.push(`/teacher/assignments/${a.id}`)}
+                            className="border-b border-gray-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                          >
                             <td className="px-6 py-4">
                               <p className="font-bold text-sm text-gray-900">{a.exercise?.title}</p>
                               <p className="text-[11px] text-gray-400 mt-0.5">{a.exercise?.subject?.name}</p>

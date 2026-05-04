@@ -34,6 +34,7 @@ const questionSchema = z.object({
   content: z.any().default({}),
   explanation: z.string().default(''),
   hints: z.array(z.string()).default([]),
+  aiGradingEnabled: z.boolean().default(false),
 });
 
 const exerciseFormSchema = z.object({
@@ -164,6 +165,7 @@ export default function CreateExercisePage() {
       content: { options: ['', '', '', ''], correctAnswer: 0 },
       explanation: '',
       hints: [],
+      aiGradingEnabled: false,
     });
   };
 
@@ -186,17 +188,24 @@ export default function CreateExercisePage() {
         difficultyLevel: data.difficultyLevel || undefined,
         totalPoints: data.totalPoints || undefined,
         timeLimitMinutes: data.timeLimitMinutes || undefined,
-        questions: data.questions.map((q, index) => ({
-          questionText: q.questionText,
-          questionType: q.questionType,
-          orderIndex: index + 1,
-          points: q.points,
-          content: q.content,
-          explanation: q.explanation || undefined,
-          hints: q.hints.length > 0 ? q.hints : undefined,
-        })),
+        questions: data.questions.map((q, index) => {
+          // Trích xuất aiGradingEnabled từ content nếu có (do QuestionContentEditor lưu vào content)
+          const contentObj = (q.content as Record<string, unknown>) || {};
+          const isAiEnabled = (contentObj.aiGradingEnabled as boolean) || false;
+
+          return {
+            questionText: q.questionText,
+            questionType: q.questionType,
+            orderIndex: index + 1,
+            points: q.points,
+            content: q.content,
+            explanation: q.explanation || undefined,
+            hints: q.hints.length > 0 ? q.hints : undefined,
+            aiGradingEnabled: isAiEnabled || q.aiGradingEnabled,
+          };
+        }),
       });
-      router.push('/teacher/exercises');
+      router.push('/teacher/assignments/exercises');
     } catch (error) {
       console.error('Failed to create exercise:', error);
       notification.error('Tạo bài tập thất bại');
@@ -576,18 +585,48 @@ function QuestionContentEditor({
         </div>
       );
     }
-    case 'essay':
+    case 'essay': {
+      const maxWords = (content.maxWords as number) || 500;
+      const sampleAnswer = (content.sampleAnswer as string) || '';
+      const aiGradingEnabled = (content.aiGradingEnabled as boolean) ?? false;
+
       return (
-        <div>
-          <label className="text-xs text-gray-500 block mb-1">Giới hạn từ</label>
-          <Input
-            type="number"
-            value={(content.maxWords as number) || 500}
-            onChange={e => onChange({ maxWords: Number(e.target.value) })}
-            className="w-32 h-8 text-sm"
-          />
+        <div className="space-y-4 bg-gray-50 p-3 rounded border">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-gray-500">Giới hạn từ:</label>
+              <Input
+                type="number"
+                value={maxWords}
+                onChange={(e) => onChange({ ...content, maxWords: Number(e.target.value) })}
+                className="w-20 h-8 text-sm bg-white"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={aiGradingEnabled}
+                onChange={(e) => onChange({ ...content, aiGradingEnabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <span className="text-xs font-medium text-gray-600">Bật chấm điểm AI</span>
+            </label>
+          </div>
+          {aiGradingEnabled && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 block mb-1">Đáp án mẫu (Dùng để AI chấm điểm)</label>
+              <textarea
+                value={sampleAnswer}
+                onChange={(e) => onChange({ ...content, sampleAnswer: e.target.value })}
+                placeholder="Nhập đáp án mẫu để AI so sánh..."
+                className="w-full border rounded-md px-3 py-2 text-sm min-h-[60px] bg-white resize-y"
+                rows={2}
+              />
+            </div>
+          )}
         </div>
       );
+    }
     default:
       return <p className="text-xs text-gray-400">Cấu hình nội dung cho loại câu hỏi này...</p>;
   }

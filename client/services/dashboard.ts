@@ -25,7 +25,7 @@ interface StudentDashboardStats {
     score: number | null;
     status: string | null;
     submittedAt: string | null;
-    attemptCount: number;
+    attemptNumber: number;
   }[];
 }
 

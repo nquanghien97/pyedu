@@ -34,6 +34,13 @@ export async function generateExerciseByAI(req: Request, res: Response) {
     }
 
     console.error('[AI Handler] Error generating exercise:', error);
+    const status = error?.status;
+    if (status === 503) {
+      return res.status(503).json({
+        success: false,
+        error: 'AI đang quá tải, vui lòng thử lại sau ít phút.',
+      });
+    }
     return res.status(500).json({
       success: false,
       error: 'Lỗi khi gọi AI Provider. Vui lòng thử lại sau.',
@@ -64,6 +71,13 @@ export async function generateExerciseFromFile(req: Request, res: Response) {
     });
   } catch (error: any) {
     console.error('[AI Handler] Error generating exercise from file:', error);
+    const status = error?.status;
+    if (status === 503) {
+      return res.status(503).json({
+        success: false,
+        error: 'AI đang quá tải, vui lòng thử lại sau ít phút.',
+      });
+    }
     return res.status(500).json({
       success: false,
       error: 'Lỗi khi xử lý file mẫu hoặc gọi AI Provider. Vui lòng kiểm tra lại.',

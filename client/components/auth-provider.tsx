@@ -12,7 +12,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     // Không chạy initAuth trên các trang public để tránh vòng lặp redirect
-    if (pathname === '/login' || pathname === '/register') {
+    const publicPaths = ['/', '/login', '/register'];
+    if (publicPaths.includes(pathname)) {
       setIsInitializing(false);
       return;
     }

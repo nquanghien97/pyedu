@@ -71,8 +71,6 @@ export default function AIGeneratePage() {
   const watchedGradeId = watchTopic('grade');
   const topicSubjects = allSubjects.filter(s => s.grade === Number(watchedGradeId));
 
-  const fileSubjects = allSubjects.filter(s => s.grade === Number(fileGrade));
-
   useEffect(() => {
     getSubjects().then(res => setAllSubjects(res.data)).catch(() => { });
   }, []);
@@ -99,7 +97,7 @@ export default function AIGeneratePage() {
           grade: data.grade,
           subjectId: data.subjectId,
         });
-        router.push('/teacher/exercises/create');
+        router.push('/teacher/assignments/exercises/create');
       }
     } catch (error: any) {
       notification.error(error.message || 'Lỗi khi gọi AI');
@@ -115,7 +113,7 @@ export default function AIGeneratePage() {
     setIsGenerating(true);
     try {
       const gName = GRADES.find(g => g.id === fileGrade)?.name;
-      const sName = fileSubjects.find(s => s.id === fileSubjectId)?.name;
+      const sName = allSubjects.find(s => s.id === fileSubjectId)?.name;
 
       const res = await aiGenerateService.generateByFile({
         file: selectedFile,
@@ -130,7 +128,7 @@ export default function AIGeneratePage() {
           grade: fileGrade,
           subjectId: fileSubjectId,
         });
-        router.push('/teacher/exercises/create');
+        router.push('/teacher/assignments/exercises/create');
       }
     } catch (error: any) {
       notification.error(error.message || 'Lỗi khi gọi AI phân tích file');
@@ -214,9 +212,9 @@ export default function AIGeneratePage() {
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Môn học</label>
-                  <select {...registerTopic('subjectId')} disabled={!watchedGradeId} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6] disabled:opacity-50 transition-shadow">
+                  <select {...registerTopic('subjectId')} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6] disabled:opacity-50 transition-shadow">
                     <option value="">-- Mặc định --</option>
-                    {topicSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    {allSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
               </div>
@@ -304,7 +302,7 @@ export default function AIGeneratePage() {
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Môn học</label>
                   <select value={fileSubjectId} onChange={e => setFileSubjectId(e.target.value)} disabled={!fileGrade} className="w-full flex h-10 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50">
                     <option value="">-- Để AI phán đoán --</option>
-                    {fileSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    {allSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
               </div>

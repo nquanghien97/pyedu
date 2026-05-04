@@ -8,6 +8,62 @@ import {
 import { getSubmissionById, updateSubmissionGrade } from '@/services/submission';
 import { notification } from '@/components/notification';
 
+function normalizeOptions(
+  rawOptions: unknown[]
+): Array<{ id: string; text: string }> {
+  if (!rawOptions || !Array.isArray(rawOptions)) return [];
+
+  return rawOptions.map((opt: unknown, index: number) => {
+    if (typeof opt === 'string') {
+      return { id: String(index), text: opt };
+    }
+    const o = opt as Record<string, unknown>;
+    const id = (o.id as string) ?? (o.value as string) ?? String(index);
+    const text = (o.text as string) ?? (o.label as string) ?? '';
+    return { id, text };
+  });
+}
+
+function renderStudentAnswer(ans: any) {
+  if (!ans.answerData) return '—';
+  const type = ans.question?.questionType?.replace(/-/g, '_');
+  const content = ans.question?.content as Record<string, unknown> | null;
+  const options = normalizeOptions((content?.options as unknown[]) ?? []);
+
+  try {
+    switch (type) {
+      case 'multiple_choice': {
+        const selectedId = ans.answerData.selectedOption;
+        const opt = options.find(o => o.id === selectedId);
+        return opt ? opt.text : `[ID: ${selectedId}]`;
+      }
+      case 'multiple_select': {
+        const selectedIds = ans.answerData.selectedOptions || [];
+        const texts = selectedIds.map((id: string) => {
+          const opt = options.find(o => o.id === id);
+          return opt ? opt.text : `[ID: ${id}]`;
+        });
+        return texts.length > 0 ? texts.join('; ') : '—';
+      }
+      case 'true_false':
+        if (ans.answerData.selectedValue === true) return 'Đúng';
+        if (ans.answerData.selectedValue === false) return 'Sai';
+        return '—';
+      case 'fill_blank': {
+        const blanks = ans.answerData.blanks || [];
+        if (blanks.length === 0) return '—';
+        return blanks.map((b: any) => `Ô ${b.id}: ${b.value}`).join(', ');
+      }
+      case 'essay':
+        return ans.answerData.text || '—';
+      default:
+        return JSON.stringify(ans.answerData.value || ans.answerData);
+    }
+  } catch (e) {
+    return JSON.stringify(ans.answerData);
+  }
+}
+
 export default function TeacherSubmissionDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -167,7 +223,7 @@ export default function TeacherSubmissionDetailPage() {
 
                 <div className="p-6">
                   <div className="mb-4">
-                    <p className="text-sm text-gray-800 font-medium" dangerouslySetInnerHTML={{ __html: ans.question.content }} />
+                    <p className="text-sm text-gray-800 font-medium" dangerouslySetInnerHTML={{ __html: ans.question.questionText || '' }} />
                   </div>
 
                   {/* Answer display based on type */}
@@ -176,7 +232,7 @@ export default function TeacherSubmissionDetailPage() {
                     {ans.question.questionType === 'essay' ? (
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">{ans.answerData?.text || '—'}</p>
                     ) : (
-                      <p className="text-sm text-gray-700 font-semibold">{JSON.stringify(ans.answerData?.value || ans.answerData)}</p>
+                      <p className="text-sm text-gray-700 font-semibold whitespace-pre-wrap">{renderStudentAnswer(ans)}</p>
                     )}
                   </div>
 

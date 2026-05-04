@@ -18,7 +18,7 @@ interface DashboardStats {
     score: number | null;
     status: string | null;
     submittedAt: string | null;
-    attemptCount: number;
+    attemptNumber: number;
   }[];
 }
 
@@ -206,9 +206,9 @@ export default function StudentDashboard() {
                           <Clock size={10} />
                           {formatSubmittedAt(s.submittedAt)}
                           {s.score !== null && ` • Điểm: ${(s.score / 10).toFixed(1)}`}
-                          {s.attemptCount > 1 && (
+                          {s.attemptNumber > 1 && (
                             <span className="ml-1 px-1.5 py-0 rounded bg-purple-50 text-purple-600 font-medium">
-                              Lần {s.attemptCount}
+                              Lần {s.attemptNumber}
                             </span>
                           )}
                         </p>

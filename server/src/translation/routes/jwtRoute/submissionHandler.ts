@@ -74,14 +74,16 @@ export const submitAssignment: RequestHandler = withAsyncErrorHandling(
       }
     }
 
-    // Auto-grade the answers
-    const gradingResults = gradeSubmission(
+    // Auto-grade the answers (bao gồm cả AI chấm essay nếu aiGradingEnabled)
+    const gradingResults = await gradeSubmission(
       assignment.exercise.questions.map((q) => ({
         id: q.id,
+        questionText: q.questionText,
         questionType: q.questionType,
         points: q.points ? Number(q.points) : null,
         content: q.content,
         autoGrade: q.autoGrade,
+        aiGradingEnabled: q.aiGradingEnabled,
       })),
       parsed.data.answers.map((a) => ({
         questionId: a.questionId,

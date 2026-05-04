@@ -131,10 +131,16 @@ export const getStudentDashboardStats: RequestHandler = withAsyncErrorHandling(
         },
       }),
 
-      // 5 submission gần nhất
+      // 5 submission gần nhất (lấy kèm attemptNumber từ DB)
       prisma.exerciseSubmission.findMany({
         where: { studentId: student.id },
-        include: {
+        select: {
+          id: true,
+          assignmentId: true,
+          percentage: true,
+          status: true,
+          submittedAt: true,
+          attemptNumber: true,
           assignment: {
             include: {
               exercise: {
@@ -193,15 +199,6 @@ export const getStudentDashboardStats: RequestHandler = withAsyncErrorHandling(
 
     const pendingAssignments = totalAssignments - completedAssignments;
 
-    // Tính attemptCount cho recent submissions
-    const submissionCountByAssignment = new Map<string, number>();
-    for (const sub of allSubmissions) {
-      submissionCountByAssignment.set(
-        sub.assignmentId,
-        (submissionCountByAssignment.get(sub.assignmentId) || 0) + 1
-      );
-    }
-
     res.status(200).json({
       success: true,
       data: {
@@ -215,7 +212,7 @@ export const getStudentDashboardStats: RequestHandler = withAsyncErrorHandling(
           score: s.percentage ? Number(s.percentage) : null,
           status: s.status,
           submittedAt: s.submittedAt,
-          attemptCount: submissionCountByAssignment.get(s.assignmentId) || 1,
+          attemptNumber: s.attemptNumber ?? 1,
         })),
       },
     });
