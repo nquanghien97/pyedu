@@ -5,6 +5,9 @@ import { PlusIcon, Users, Loader2, BookOpen, TrashIcon, UserPlus } from "lucide-
 import { ClassEntity, ClassEnrollmentEntity, classService } from "@/services/class";
 import { DropdownStudent, getTeacherStudents } from "@/services/meta";
 import { notification } from "@/components/notification";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, H2, H3, P } from "@/components/ui/typography";
 
 const GRADES = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
 
@@ -103,26 +106,26 @@ export default function ClassesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans">
-      <div className="max-w-[1000px] mx-auto">
+      <div className="max-w-250 mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Quản lý Lớp học</h1>
-            <p className="text-sm text-gray-500">Tạo lớp học theo khối và kiểm soát thành viên dễ dàng.</p>
+            <H1 className="mb-1">Quản lý Lớp học</H1>
+            <P className="text-sm text-gray-500">Tạo lớp học theo khối và kiểm soát thành viên dễ dàng.</P>
           </div>
-          <button
+          <Button
             onClick={() => setIsCreateOpen(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center gap-2 transition-colors shadow-blue-500/30 shadow-lg"
+            className="px-4 py-2"
           >
             <PlusIcon size={18} />
             Tạo lớp mới
-          </button>
+          </Button>
         </div>
 
         {isCreateOpen && (
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-6 flex gap-4 items-end">
             <div className="flex-1">
               <label className="text-xs font-bold text-gray-700 block mb-2">Tên Lớp học</label>
-              <input
+              <Input
                 value={newClassName}
                 onChange={e => setNewClassName(e.target.value)}
                 placeholder="VD: Lớp 10A1 Toán..."
@@ -142,18 +145,15 @@ export default function ClassesPage() {
                 ))}
               </select>
             </div>
-            <button
-              onClick={handleCreate} disabled={creating}
-              className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold h-[44px] hover:bg-black disabled:opacity-50 flex items-center gap-2"
-            >
+            <Button onClick={handleCreate} disabled={creating} className="py-2.5 bg-gray-900 rounded-xl font-bold h-[44px] hover:bg-black disabled:opacity-50 flex items-center gap-2">
               {creating ? <Loader2 size={16} className="animate-spin" /> : 'Lưu lại'}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setIsCreateOpen(false)}
               className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold h-[44px] hover:bg-gray-200"
             >
               Hủy
-            </button>
+            </Button>
           </div>
         )}
 
@@ -163,7 +163,7 @@ export default function ClassesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {classes.length === 0 ? (
               <div className="col-span-3 text-center py-20 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
-                Chưa có lớp học nào. Nhấn "Tạo lớp mới" để bắt đầu.
+                Chưa có lớp học nào. Nhấn &quot;Tạo lớp mới&quot; để bắt đầu.
               </div>
             ) : (
               classes.map(cls => (
@@ -176,18 +176,18 @@ export default function ClassesPage() {
                       Khối {cls.grade}
                     </div>
                   </div>
-                  <h3 className="font-extrabold text-lg text-gray-900 truncate mb-1">{cls.name}</h3>
+                  <H3 className="mb-1">{cls.name}</H3>
                   <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                     <Users size={16} />
                     {cls._count?.enrollments || 0} học sinh
                   </div>
                   <div className="mt-5 pt-4 border-t border-gray-50 flex gap-2">
-                    <button
+                    <Button
                       onClick={() => openManageClass(cls)}
                       className="flex-1 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-bold rounded-xl transition-colors flex justify-center items-center gap-2"
                     >
                       <UserPlus size={16} /> Quản lý học sinh
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))
@@ -202,10 +202,10 @@ export default function ClassesPage() {
 
               <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Thành viên lớp {manageClass.name}</h2>
-                  <p className="text-sm text-gray-500 mt-1">Gán học sinh vào để họ có thể nhận được bài tập giao cho lớp.</p>
+                  <H2>Thành viên lớp {manageClass.name}</H2>
+                  <P className="text-sm text-gray-500 mt-1">Gán học sinh vào để họ có thể nhận được bài tập giao cho lớp.</P>
                 </div>
-                <button onClick={() => setManageClass(null)} className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold">✕</button>
+                <Button onClick={() => setManageClass(null)} className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold">✕</Button>
               </div>
 
               <div className="p-6 border-b border-gray-100 flex gap-3">
@@ -216,12 +216,9 @@ export default function ClassesPage() {
                   <option value="" disabled>-- Chọn học sinh từ hệ thống --</option>
                   {allStudents.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}
                 </select>
-                <button
-                  onClick={handleAddStudent}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-blue-500/30 flex items-center gap-2"
-                >
+                <Button onClick={handleAddStudent} className="rounded-xl text-sm font-bold shadow-blue-500/30 flex items-center gap-2">
                   <PlusIcon size={16} /> Thêm
-                </button>
+                </Button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 bg-white">
@@ -238,16 +235,16 @@ export default function ClassesPage() {
                             {(e.student?.user?.name || '?').charAt(0)}
                           </div>
                           <div>
-                            <p className="font-bold text-gray-900 text-sm">{e.student?.user?.name}</p>
-                            <p className="text-xs text-gray-500">{e.student?.user?.email}</p>
+                            <P className="font-bold text-gray-900 text-sm">{e.student?.user?.name}</P>
+                            <P className="text-xs text-gray-500">{e.student?.user?.email}</P>
                           </div>
                         </div>
-                        <button
+                        <Button
                           onClick={() => handleRemoveStudent(e.studentId)}
                           className="w-8 h-8 rounded-lg hover:bg-red-100 text-gray-400 hover:text-red-600 flex justify-center items-center transition-colors"
                         >
                           <TrashIcon size={16} />
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>

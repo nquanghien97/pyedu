@@ -1,3 +1,4 @@
+import { P } from "@/components/ui/typography";
 interface StatCardProps {
   icon: React.ComponentType<{ size?: number, color?: string }>; // the SVG/component you render
   iconBg: string;
@@ -21,8 +22,8 @@ export default function StatCard({ icon: Icon, iconBg, iconColor, label, value, 
           color: badgeUp ? "#16A34A" : "#DC2626",
         }}>{badge}</span>
       </div>
-      <p style={{ fontSize: 12, color: "#9CA3AF", margin: "0 0 6px" }}>{label}</p>
-      <p style={{ fontSize: 28, fontWeight: 800, color: "#111827", margin: 0 }}>{value}</p>
+      <P className="text-xs text-[#9CA3AF]">{label}</P>
+      <P className="text-2xl font-bold text-[#111827]">{value}</P>
     </div>
   );
 }

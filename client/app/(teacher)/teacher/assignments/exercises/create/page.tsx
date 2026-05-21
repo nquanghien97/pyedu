@@ -21,6 +21,7 @@ const GRADES = Array.from({ length: 12 }, (_, i) => ({
 import { useAiStore } from '@/stores/ai.store';
 import { MathText } from '@/components/ui/math-text';
 import { notification } from '@/components/notification';
+import { H1, H2, P } from "@/components/ui/typography";
 
 // ---------- Zod Schemas ----------
 
@@ -214,17 +215,17 @@ export default function CreateExercisePage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+      <Button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
         <ArrowLeftIcon className="w-4 h-4" />
         Quay lại
-      </button>
+      </Button>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Tạo bài tập mới</h1>
+      <H1 className="mb-6">Tạo bài tập mới</H1>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Basic Info */}
         <div className="bg-white rounded-lg border shadow-sm p-6 mb-4">
-          <h2 className="text-lg font-semibold mb-4">Thông tin cơ bản</h2>
+          <H2 className="mb-4">Thông tin cơ bản</H2>
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">Tiêu đề *</label>
@@ -232,7 +233,7 @@ export default function CreateExercisePage() {
                 {...register('title')}
                 placeholder="Nhập tiêu đề bài tập..."
               />
-              {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
+              {errors.title && <P className="text-xs text-red-500 mt-1">{errors.title.message}</P>}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -302,7 +303,7 @@ export default function CreateExercisePage() {
         {/* Questions */}
         <div className="bg-white rounded-lg border shadow-sm p-6 mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Câu hỏi ({fields.length})</h2>
+            <H2>Câu hỏi ({fields.length})</H2>
             <Button type="button" onClick={addQuestion} variant="outline" className="gap-2">
               <PlusIcon className="w-4 h-4" />
               Thêm câu hỏi
@@ -311,7 +312,7 @@ export default function CreateExercisePage() {
 
           {fields.length === 0 ? (
             <div className="text-center py-8 text-gray-400 border-2 border-dashed rounded-lg">
-              <p>Chưa có câu hỏi. Nhấn &quot;Thêm câu hỏi&quot; để bắt đầu.</p>
+              <P>Chưa có câu hỏi. Nhấn &quot;Thêm câu hỏi&quot; để bắt đầu.</P>
             </div>
           ) : (
             <div className="space-y-4">
@@ -333,7 +334,7 @@ export default function CreateExercisePage() {
           )}
 
           {errors.questions?.root && (
-            <p className="text-xs text-red-500 mt-2">{errors.questions.root.message}</p>
+            <P className="text-xs text-red-500 mt-2">{errors.questions.root.message}</P>
           )}
         </div>
 
@@ -391,12 +392,7 @@ function QuestionEditor({
         </select>
 
         <div className="flex items-center gap-1 ml-auto">
-          <Input
-            type="number"
-            {...register(`questions.${index}.points`)}
-            className="w-20 h-8 text-sm"
-            min={0}
-          />
+          <Input type="number" {...register(`questions.${index}.points`)} className="w-20 h-8" min={0}/>
           <span className="text-xs text-gray-400">điểm</span>
         </div>
 
@@ -419,7 +415,7 @@ function QuestionEditor({
               />
               {field.value && field.value.includes('$') && (
                 <div className="mt-1.5 p-2 bg-blue-50/70 rounded-md border border-blue-100">
-                  <span className="text-[10px] text-blue-400 font-medium block mb-0.5">XEM TRƯỚC</span>
+                  <span className="text-xs text-blue-400 font-medium block mb-0.5">XEM TRƯỚC</span>
                   <MathText text={field.value} as="div" className="text-sm text-gray-800" />
                 </div>
               )}
@@ -427,7 +423,7 @@ function QuestionEditor({
           )}
         />
         {questionErrors?.questionText && (
-          <p className="text-xs text-red-500 mt-0.5">{questionErrors.questionText.message}</p>
+          <P className="text-xs text-red-500 mt-0.5">{questionErrors.questionText.message}</P>
         )}
       </div>
 
@@ -453,7 +449,7 @@ function QuestionEditor({
               />
               {field.value && field.value.includes('$') && (
                 <div className="mt-1.5 p-2 bg-green-50/70 rounded-md border border-green-100">
-                  <span className="text-[10px] text-green-400 font-medium block mb-0.5">XEM TRƯỚC</span>
+                  <span className="text-xs text-green-400 font-medium block mb-0.5">XEM TRƯỚC</span>
                   <MathText text={field.value} as="div" className="text-sm text-green-800" />
                 </div>
               )}
@@ -488,7 +484,7 @@ function QuestionContentEditor({
           {options.map((opt: string, i: number) => (
             <div key={i} className="flex items-center gap-2">
               {type === 'multiple_choice' ? (
-                <input
+                <Input
                   type="radio"
                   name={`mc-correct-${type}`}
                   checked={correctAnswer === i}
@@ -496,7 +492,7 @@ function QuestionContentEditor({
                   className="w-4 h-4"
                 />
               ) : (
-                <input
+                <Input
                   type="checkbox"
                   checked={correctAnswers.includes(i)}
                   onChange={e => {
@@ -519,7 +515,7 @@ function QuestionContentEditor({
                 className="flex-1 h-8 text-sm"
               />
               {options.length > 2 && (
-                <button
+                <Button
                   type="button"
                   className="text-red-400 hover:text-red-600"
                   onClick={() => {
@@ -528,7 +524,7 @@ function QuestionContentEditor({
                   }}
                 >
                   <TrashIcon className="w-3 h-3" />
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -549,11 +545,11 @@ function QuestionContentEditor({
       return (
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm">
-            <input type="radio" checked={correctAnswer === true} onChange={() => onChange({ correctAnswer: true })} className="w-4 h-4" />
+            <Input type="radio" checked={correctAnswer === true} onChange={() => onChange({ correctAnswer: true })} className="w-4 h-4" />
             Đúng
           </label>
           <label className="flex items-center gap-2 text-sm">
-            <input type="radio" checked={correctAnswer === false} onChange={() => onChange({ correctAnswer: false })} className="w-4 h-4" />
+            <Input type="radio" checked={correctAnswer === false} onChange={() => onChange({ correctAnswer: false })} className="w-4 h-4" />
             Sai
           </label>
         </div>
@@ -563,7 +559,7 @@ function QuestionContentEditor({
       const blanks = (content.blanks as string[]) || [''];
       return (
         <div className="space-y-2">
-          <p className="text-xs text-gray-500">Nhập đáp án cho các chỗ trống (dùng ___ trong nội dung câu hỏi)</p>
+          <P className="text-xs text-gray-500">Nhập đáp án cho các chỗ trống (dùng ___ trong nội dung câu hỏi)</P>
           {blanks.map((blank: string, i: number) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-xs text-gray-400">{i + 1}.</span>
@@ -603,7 +599,7 @@ function QuestionContentEditor({
               />
             </div>
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
+              <Input
                 type="checkbox"
                 checked={aiGradingEnabled}
                 onChange={(e) => onChange({ ...content, aiGradingEnabled: e.target.checked })}
@@ -628,6 +624,6 @@ function QuestionContentEditor({
       );
     }
     default:
-      return <p className="text-xs text-gray-400">Cấu hình nội dung cho loại câu hỏi này...</p>;
+      return <P className="text-xs text-gray-400">Cấu hình nội dung cho loại câu hỏi này...</P>;
   }
 }

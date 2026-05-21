@@ -4,6 +4,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Bot } from 'lucide-react';
 import { ChatMessage } from '@/services/chat';
+import { P } from "@/components/ui/typography";
 
 export default function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user';
@@ -31,14 +32,14 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
           )}
           
           {isUser ? (
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <P className="whitespace-pre-wrap">{message.content}</P>
           ) : (
             <div className="pyedu-markdown text-sm">
               <ReactMarkdown
                 remarkPlugins={[remarkMath]}
                 rehypePlugins={[rehypeKatex]}
                 components={{
-                  p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                  p: ({node, ...props}) => <P className="mb-2 last:mb-0" {...props} />,
                   ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2" {...props} />,
                   ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2" {...props} />,
                   li: ({node, ...props}) => <li className="mb-1" {...props} />,
@@ -52,7 +53,7 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
           )}
         </div>
         {isUser && (
-           <div className="text-right text-[10px] text-gray-400 mt-1.5 pr-1">BẠN</div>
+           <div className="text-right text-xs text-gray-400 mt-1.5 pr-1">BẠN</div>
         )}
       </div>
     </div>

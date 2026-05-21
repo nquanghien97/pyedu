@@ -7,7 +7,7 @@ export default function StatisticsSection({ bgColor }: { bgColor?: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Con số <span className="text-[#3b82f6]">ấn tượng</span>
+            Con số <span className="text-primary">ấn tượng</span>
           </h2>
           <p className="text-gray-500 text-lg">
             PyEdu đang phát triển mỗi ngày cùng cộng đồng giáo dục.
@@ -43,9 +43,9 @@ export default function StatisticsSection({ bgColor }: { bgColor?: string }) {
           ].map((stat, index) => (
             <div
               key={stat.label}
-              className="relative group bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg hover:border-[#3b82f6]/20 transition-all duration-500 text-center"
+              className="relative group bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-500 text-center"
             >
-              <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center mx-auto mb-4 text-[#3b82f6] group-hover:bg-[#3b82f6] group-hover:text-white transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                 {stat.icon}
               </div>
               <div className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1">

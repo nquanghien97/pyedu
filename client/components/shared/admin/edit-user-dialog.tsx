@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { updateUserAdmin } from "@/services/admin";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
+import { P } from "@/components/ui/typography";
 
 interface EditUserDialogProps {
   open: boolean;
@@ -146,7 +147,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
               className={errors.name ? "border-red-400 focus:ring-red-500/20" : ""}
             />
             {errors.name && (
-              <p className="text-xs text-red-500">{errors.name}</p>
+              <P className="text-xs text-red-500">{errors.name}</P>
             )}
           </div>
 
@@ -167,7 +168,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
               className={errors.email ? "border-red-400 focus:ring-red-500/20" : ""}
             />
             {errors.email && (
-              <p className="text-xs text-red-500">{errors.email}</p>
+              <P className="text-xs text-red-500">{errors.email}</P>
             )}
           </div>
 
@@ -195,7 +196,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
               </SelectContent>
             </Select>
             {errors.role && (
-              <p className="text-xs text-red-500">{errors.role}</p>
+              <P className="text-xs text-red-500">{errors.role}</P>
             )}
           </div>
 
@@ -216,17 +217,17 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
                 }}
                 className={`pr-10 ${errors.password ? "border-red-400 focus:ring-red-500/20" : ""}`}
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+              </Button>
             </div>
             {errors.password && (
-              <p className="text-xs text-red-500">{errors.password}</p>
+              <P className="text-xs text-red-500">{errors.password}</P>
             )}
           </div>
         </div>
@@ -239,11 +240,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSuccess }: EditUser
           >
             Huỷ
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
+          <Button onClick={handleSubmit} disabled={loading}>
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

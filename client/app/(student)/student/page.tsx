@@ -6,6 +6,8 @@ import { CheckCircle2, Star, Flame, ChevronDown, Sparkles, Clock, Trophy } from 
 import { WeeklyChart } from "./Chart";
 import { getStudentDashboardStats } from "@/services/dashboard";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { H1, P } from "@/components/ui/typography";
 
 interface DashboardStats {
   pendingAssignments: number;
@@ -82,12 +84,12 @@ export default function StudentDashboard() {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">{greeting}, {user?.name || 'bạn'}! 👋</h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <H1>{greeting}, {user?.name || 'bạn'}! 👋</H1>
+          <P className="text-sm text-gray-400 mt-1">
             {stats && stats.pendingAssignments > 0
               ? `Hôm nay bạn có ${stats.pendingAssignments} bài tập cần hoàn thành.`
               : "Tuyệt vời! Bạn đã hoàn thành tất cả bài tập."}
-          </p>
+          </P>
         </div>
 
         {/* Stat cards */}
@@ -116,11 +118,11 @@ export default function StudentDashboard() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mb-1">Bài tập cần làm</p>
-                <p className="text-2xl font-extrabold text-gray-900">
+                <P className="text-xs text-gray-400 mb-1">Bài tập cần làm</P>
+                <P className="text-2xl font-extrabold text-gray-900">
                   {stats?.pendingAssignments ?? 0}{" "}
                   <span className="text-sm font-normal text-gray-400">bài</span>
-                </p>
+                </P>
               </div>
 
               {/* Điểm trung bình */}
@@ -135,11 +137,11 @@ export default function StudentDashboard() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mb-1">Điểm trung bình</p>
-                <p className="text-2xl font-extrabold text-gray-900">
+                <P className="text-xs text-gray-400 mb-1">Điểm trung bình</P>
+                <P className="text-2xl font-extrabold text-gray-900">
                   {stats?.averageScore ?? 0}{" "}
                   <span className="text-sm font-normal text-gray-400">/10</span>
-                </p>
+                </P>
               </div>
 
               {/* Completed / Total */}
@@ -154,11 +156,11 @@ export default function StudentDashboard() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mb-1">Đã hoàn thành</p>
-                <p className="text-2xl font-extrabold text-gray-900">
+                <P className="text-xs text-gray-400 mb-1">Đã hoàn thành</P>
+                <P className="text-2xl font-extrabold text-gray-900">
                   {stats?.completedAssignments ?? 0}{" "}
                   <span className="text-sm font-normal text-gray-400">/ {stats?.totalAssignments ?? 0} bài</span>
-                </p>
+                </P>
               </div>
             </>
           )}
@@ -174,9 +176,9 @@ export default function StudentDashboard() {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-base font-bold text-gray-900">Tiến độ mục tiêu tuần</span>
-                <button className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 font-medium cursor-pointer hover:bg-slate-100 transition-colors">
+                <Button variant="outline" className="flex items-center gap-2 bg-slate-50 border text-sm text-slate-600 font-medium hover:bg-slate-100">
                   {weekFilter} <ChevronDown size={12} color="#9CA3AF" />
-                </button>
+                </Button>
               </div>
               <WeeklyChart />
             </div>
@@ -201,8 +203,8 @@ export default function StudentDashboard() {
                         <CheckCircle2 size={16} className="text-blue-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">{s.exerciseName}</p>
-                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                        <P className="text-sm font-medium text-gray-800 truncate">{s.exerciseName}</P>
+                        <P className="text-xs text-gray-400 flex items-center gap-1">
                           <Clock size={10} />
                           {formatSubmittedAt(s.submittedAt)}
                           {s.score !== null && ` • Điểm: ${(s.score / 10).toFixed(1)}`}
@@ -211,7 +213,7 @@ export default function StudentDashboard() {
                               Lần {s.attemptNumber}
                             </span>
                           )}
-                        </p>
+                        </P>
                       </div>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         s.status === "graded"
@@ -225,7 +227,7 @@ export default function StudentDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-sm text-gray-400">
-                  <p>Chưa có bài nộp nào</p>
+                  <P>Chưa có bài nộp nào</P>
                   <Link href="/student/assignments" className="text-blue-500 text-xs mt-1 hover:text-blue-600">
                     Xem bài tập được giao →
                   </Link>
@@ -248,16 +250,16 @@ export default function StudentDashboard() {
                 </div>
                 <span className="text-sm font-bold text-white">Gợi ý từ AI</span>
               </div>
-              <p className="text-sm text-white/90 leading-relaxed mb-2">
+              <P className="text-sm text-white/90 leading-relaxed mb-2">
                 {stats && stats.averageScore < 7
                   ? "Hãy tập trung vào các bài tập cơ bản để nâng cao điểm trung bình nhé!"
                   : "Bạn đang học rất tốt! Hãy thử thách bản thân với các bài tập nâng cao."}
-              </p>
-              <p className="text-xs text-white/70 leading-relaxed mb-4">
+              </P>
+              <P className="text-xs text-white/70 leading-relaxed mb-4">
                 {stats && stats.pendingAssignments > 0
                   ? `Còn ${stats.pendingAssignments} bài tập chưa hoàn thành. Hãy ưu tiên bài sắp hết hạn!`
                   : "Tuyệt vời! Bạn đã hoàn thành tất cả bài tập. Hãy ôn lại kiến thức cũ."}
-              </p>
+              </P>
               <Link
                 href="/student/chat"
                 className="block w-full py-2.5 bg-white rounded-xl text-sm font-bold text-blue-600 text-center hover:opacity-90 transition-opacity"
@@ -268,7 +270,7 @@ export default function StudentDashboard() {
 
             {/* Recent activity */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
-              <p className="text-base font-bold text-gray-900 mb-4">Hoạt động gần đây</p>
+              <P className="text-base font-bold text-gray-900 mb-4">Hoạt động gần đây</P>
               <div className="space-y-3.5">
                 {activities.map((a, i) => (
                   <div key={i} className="flex items-start gap-2.5">
@@ -277,8 +279,8 @@ export default function StudentDashboard() {
                       style={{ background: a.dot }}
                     />
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">{a.text}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{a.meta}</p>
+                      <P className="text-sm font-semibold text-gray-800">{a.text}</P>
+                      <P className="text-xs text-gray-400 mt-0.5">{a.meta}</P>
                     </div>
                   </div>
                 ))}
@@ -287,7 +289,7 @@ export default function StudentDashboard() {
 
             {/* Online friends */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
-              <p className="text-base font-bold text-gray-900 mb-3.5">Bạn bè trực tuyến</p>
+              <P className="text-base font-bold text-gray-900 mb-3.5">Bạn bè trực tuyến</P>
               <div className="flex items-center mb-2.5">
                 {avatarColors.map((c, i) => (
                   <div
@@ -319,9 +321,9 @@ export default function StudentDashboard() {
                   +12
                 </div>
               </div>
-              <p className="text-xs text-gray-400">
+              <P className="text-xs text-gray-400">
                 Nhóm 12A1 hiện có 5 bạn đang cùng học môn Toán.
-              </p>
+              </P>
             </div>
 
           </div>

@@ -11,6 +11,7 @@ import { lifecycle } from './execution/lifecycle/lifecycle';
 import { logger } from './lib/logger';
 import { jwtRouter } from './translation/routes/jwtRoute';
 import { startAutoAssignScheduler } from './execution/scheduler/autoAssignJob';
+import { startNotificationScheduler } from './execution/scheduler/notificationJobs';
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -56,7 +57,8 @@ export const initialiseServer = async () => {
 
     // Start cron jobs
     startAutoAssignScheduler();
-    logger.info('Auto-assign scheduler started (daily at 6:00 AM)');
+    startNotificationScheduler();
+    logger.info('Schedulers started (auto-assign 6AM, notifications 7/8/9AM)');
   });
 
   lifecycle.on('closing', () => {

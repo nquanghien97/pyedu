@@ -7,6 +7,8 @@ import {
 } from 'recharts';
 import { Info, Loader2, TrendingUp, BookOpen, Target, Award } from 'lucide-react';
 import { getMyProgress } from '@/services/progress';
+import { Button } from "@/components/ui/button";
+import { H1, H2, H3, P } from "@/components/ui/typography";
 import {
   StudentProgressResponse,
   MASTERY_LABELS,
@@ -19,8 +21,8 @@ const CustomLineTooltip = ({ active, payload, label }: { active?: boolean; paylo
   if (active && payload?.length) {
     return (
       <div style={{ background: '#1E40AF', borderRadius: 8, padding: '6px 12px' }}>
-        <p style={{ color: '#fff', fontSize: 12, fontWeight: 700, margin: 0 }}>{label}</p>
-        <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, margin: '2px 0 0' }}>Điểm: {payload[0].value}%</p>
+        <P style={{ color: '#fff', fontSize: 12, fontWeight: 700, margin: 0 }}>{label}</P>
+        <P style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, margin: '2px 0 0' }}>Điểm: {payload[0].value}%</P>
       </div>
     );
   }
@@ -51,7 +53,7 @@ export default function ReportsPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={32} className="text-blue-500 animate-spin" />
-          <p className="text-sm text-gray-500">Đang tải báo cáo...</p>
+          <P className="text-sm text-gray-500">Đang tải báo cáo...</P>
         </div>
       </div>
     );
@@ -92,8 +94,8 @@ export default function ReportsPage() {
       <div className="max-w-7xl mx-auto flex flex-col gap-5">
         {/* Header */}
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900">Báo cáo tiến bộ</h1>
-          <p className="text-sm text-gray-400 mt-1">Theo dõi quá trình học tập và mức độ thành thạo</p>
+          <H1>Báo cáo tiến bộ</H1>
+          <P className="text-sm text-gray-400 mt-1">Theo dõi quá trình học tập và mức độ thành thạo</P>
         </div>
 
         {/* Stat Cards */}
@@ -104,8 +106,8 @@ export default function ReportsPage() {
                 <BookOpen size={20} className="text-blue-500" />
               </div>
             </div>
-            <p className="text-xs text-gray-400 mb-1">Bài tập đã làm</p>
-            <p className="text-2xl font-extrabold text-gray-900">{overview.totalExercises}</p>
+            <P className="text-xs text-gray-400 mb-1">Bài tập đã làm</P>
+            <P className="text-2xl font-extrabold text-gray-900">{overview.totalExercises}</P>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
@@ -114,11 +116,11 @@ export default function ReportsPage() {
                 <Target size={20} className="text-green-500" />
               </div>
             </div>
-            <p className="text-xs text-gray-400 mb-1">Điểm trung bình</p>
-            <p className="text-2xl font-extrabold text-gray-900">
+            <P className="text-xs text-gray-400 mb-1">Điểm trung bình</P>
+            <P className="text-2xl font-extrabold text-gray-900">
               {overview.averageScore.toFixed(1)}
               <span className="text-sm font-normal text-gray-400">%</span>
-            </p>
+            </P>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
@@ -127,10 +129,10 @@ export default function ReportsPage() {
                 <Award size={20} className="text-purple-500" />
               </div>
             </div>
-            <p className="text-xs text-gray-400 mb-1">Xếp loại</p>
-            <p className="text-2xl font-extrabold text-gray-900">
+            <P className="text-xs text-gray-400 mb-1">Xếp loại</P>
+            <P className="text-2xl font-extrabold text-gray-900">
               {masteryIcon} {masteryLabel}
-            </p>
+            </P>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
@@ -139,15 +141,15 @@ export default function ReportsPage() {
                 <TrendingUp size={20} className="text-orange-500" />
               </div>
             </div>
-            <p className="text-xs text-gray-400 mb-1">Số môn học</p>
-            <p className="text-2xl font-extrabold text-gray-900">{bySubject.length}</p>
+            <P className="text-xs text-gray-400 mb-1">Số môn học</P>
+            <P className="text-2xl font-extrabold text-gray-900">{bySubject.length}</P>
           </div>
         </div>
 
         {/* Subject Progress Cards */}
         {bySubject.length > 0 && (
           <div>
-            <h2 className="text-sm font-bold text-gray-700 mb-3">Tiến bộ theo môn học</h2>
+            <H2 className="text-sm mb-3">Tiến bộ theo môn học</H2>
             <div className="grid grid-cols-3 gap-4">
               {bySubject.map((subject) => {
                 const level = subject.masteryLevel as MasteryLevel;
@@ -157,7 +159,7 @@ export default function ReportsPage() {
                     className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-gray-900">{subject.subjectName}</h3>
+                      <H3 className="text-sm">{subject.subjectName}</H3>
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${MASTERY_COLORS[level]}`}>
                         {MASTERY_ICONS[level]} {MASTERY_LABELS[level]}
                       </span>
@@ -214,9 +216,9 @@ export default function ReportsPage() {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm font-bold text-gray-900">Phân tích học lực</span>
-                <button className="bg-transparent border-none cursor-pointer text-gray-400">
+                <Button variant="ghost" className="text-gray-400">
                   <Info size={15} />
-                </button>
+                </Button>
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart cx="50%" cy="50%" outerRadius="72%" data={radarData}>
@@ -271,10 +273,10 @@ export default function ReportsPage() {
               <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
                 <TrendingUp size={28} className="text-gray-400" />
               </div>
-              <p className="text-sm font-semibold text-gray-500 mb-1">Chưa có dữ liệu</p>
-              <p className="text-xs text-gray-400">
+              <P className="text-sm font-semibold text-gray-500 mb-1">Chưa có dữ liệu</P>
+              <P className="text-xs text-gray-400">
                 Hãy hoàn thành một vài bài tập để xem báo cáo tiến bộ của bạn.
-              </p>
+              </P>
             </div>
           )}
         </div>
@@ -290,7 +292,7 @@ export default function ReportsPage() {
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-100">
                   {['BÀI TẬP', 'MÔN HỌC', 'NGÀY NỘP', 'ĐIỂM SỐ'].map((h) => (
-                    <th key={h} className="text-[11px] font-bold text-gray-400 tracking-wider text-left px-6 py-3">
+                    <th key={h} className="text-xs font-bold text-gray-400 tracking-wider text-left px-6 py-3">
                       {h}
                     </th>
                   ))}

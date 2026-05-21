@@ -8,7 +8,7 @@ export default function HowItWorksSection({ bgColor }: { bgColor?: string }) {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Bắt đầu chỉ với{" "}
-            <span className="text-[#3b82f6]">3 bước đơn giản</span>
+            <span className="text-primary">3 bước đơn giản</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto">
             Từ đăng ký đến học tập hiệu quả — mọi thứ được thiết kế để đơn

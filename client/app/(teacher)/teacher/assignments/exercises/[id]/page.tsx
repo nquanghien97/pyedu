@@ -31,6 +31,7 @@ import {
   XIcon,
 } from 'lucide-react';
 import { notification } from '@/components/notification';
+import { H1, H2, P } from "@/components/ui/typography";
 
 // Danh sách khối lớp cố định
 export const GRADES = Array.from({ length: 12 }, (_, i) => ({
@@ -163,7 +164,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
   if (!exercise) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Không tìm thấy bài tập.</p>
+        <P className="text-gray-500">Không tìm thấy bài tập.</P>
         <Button variant="outline" onClick={() => router.push('/teacher/exercises')} className="mt-4">
           Quay lại
         </Button>
@@ -176,13 +177,13 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="max-w-4xl mx-auto">
-      <button
+      <Button
         onClick={() => router.back()}
         className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
       >
         <ArrowLeftIcon className="w-4 h-4" />
         Quay lại
-      </button>
+      </Button>
 
       {/* Header Card */}
       <div className="bg-white rounded-lg border shadow-sm p-6 mb-4">
@@ -197,18 +198,13 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
                 className="text-lg font-bold"
               />
             ) : (
-              <h1 className="text-2xl font-bold text-gray-900">{exercise.title || 'Không có tiêu đề'}</h1>
+              <H1>{exercise.title || 'Không có tiêu đề'}</H1>
             )}
           </div>
           <div className="flex items-center gap-2 ml-4 shrink-0">
             {isEditing ? (
               <>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="gap-1 bg-[#3b82f6] hover:bg-blue-600"
-                >
+                <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1">
                   <SaveIcon className="w-4 h-4" />
                   {saving ? 'Đang lưu...' : 'Lưu'}
                 </Button>
@@ -222,7 +218,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
                   variant="outline"
                   size="sm"
                   onClick={startEditing}
-                  className="gap-1 text-[#3b82f6] border-[#3b82f6] hover:bg-blue-50"
+                  className="gap-1 text-primary border-primary hover:bg-blue-50"
                 >
                   <PencilIcon className="w-4 h-4" />
                   Chỉnh sửa
@@ -378,7 +374,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
               size="sm"
               variant={exercise.status === status ? 'default' : 'outline'}
               onClick={() => handleStatusChange(status)}
-              className={`text-xs ${exercise.status === status ? 'bg-[#3b82f6] hover:bg-blue-600' : ''}`}
+              className={`text-xs ${exercise.status === status ? 'bg-primary hover:bg-blue-600' : ''}`}
             >
               {STATUS_LABELS[status]}
             </Button>
@@ -388,7 +384,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
 
       {/* Questions */}
       <div className="bg-white rounded-lg border shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4">Danh sách câu hỏi</h2>
+        <H2 className="mb-4">Danh sách câu hỏi</H2>
 
         {exercise.questions && exercise.questions.length > 0 ? (
           <div className="space-y-4">
@@ -429,7 +425,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-400 py-8">Chưa có câu hỏi nào.</p>
+          <P className="text-center text-gray-400 py-8">Chưa có câu hỏi nào.</P>
         )}
       </div>
     </div>

@@ -9,6 +9,9 @@ import { classService, ClassEntity } from "@/services/class";
 import { getSubjects } from "@/services/subject";
 import { SubjectEntity } from "@/entity/subject";
 import { notification } from "@/components/notification";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, H2, H3, P } from "@/components/ui/typography";
 
 export default function AutoAssignPage() {
   const [configs, setConfigs] = useState<AutoAssignConfig[]>([]);
@@ -83,8 +86,13 @@ export default function AutoAssignPage() {
       setShowForm(false);
       resetForm();
       loadData();
-    } catch (err: any) {
-      notification.error("Lỗi: " + (err.response?.data?.error || err.message));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error
+        ? err.message
+        : typeof err === "object" && err !== null
+          ? ((err as { response?: { data?: { error?: string } } }).response?.data?.error || "Đã xảy ra lỗi")
+          : String(err);
+      notification.error("Lỗi: " + errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -135,37 +143,33 @@ export default function AutoAssignPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
+            <H1 className="flex items-center gap-2">
               <Calendar className="text-blue-600" />
               Giao bài tự động (Auto-Assign)
-            </h1>
-            <p className="text-sm text-gray-500 mt-2">
+            </H1>
+            <P className="text-sm text-gray-500 mt-2">
               Thiết lập hệ thống tự động chọn và giao bài tập hàng ngày cho các lớp.
-            </p>
+            </P>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleTriggerNow}
-              disabled={submitting}
-              className="px-4 py-2 bg-indigo-100 text-indigo-700 font-bold rounded-xl flex items-center gap-2 hover:bg-indigo-200 transition-colors"
-            >
+            <Button onClick={handleTriggerNow} disabled={submitting} variant='outline'>
               <Play size={16} /> Chạy quét ngay
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setShowForm(!showForm)}
-              className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl flex items-center gap-2 hover:bg-blue-700 transition-colors"
+              
             >
               {showForm ? 'Đóng form' : <><Plus size={16} /> Tạo cấu hình mới</>}
-            </button>
+            </Button>
           </div>
         </div>
 
         {showForm && (
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8 animate-in slide-in-from-top-4 duration-300">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <H2 className="mb-6 flex items-center gap-2">
               <Settings size={18} className="text-blue-500" />
               Thêm cấu hình mới
-            </h2>
+            </H2>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="text-xs font-bold text-gray-700 block mb-2 uppercase tracking-wider">Chọn Lớp học</label>
@@ -204,7 +208,7 @@ export default function AutoAssignPage() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 block mb-2 uppercase tracking-wider">Số bài mỗi ngày</label>
-                <input
+                <Input
                   type="number"
                   min="1" max="10"
                   value={exercisesPerDay}
@@ -218,7 +222,7 @@ export default function AutoAssignPage() {
                   {WEEKDAYS.map(day => {
                     const isSelected = daysOfWeek.includes(day.value);
                     return (
-                      <button
+                      <Button
                         key={day.value}
                         onClick={() => handleToggleDay(day.value)}
                         className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${isSelected
@@ -227,25 +231,22 @@ export default function AutoAssignPage() {
                           }`}
                       >
                         {day.label}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <Button
                 onClick={() => setShowForm(false)}
                 className="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200"
               >
                 Hủy
-              </button>
-              <button
-                onClick={handleCreate} disabled={submitting}
-                className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 flex items-center gap-2"
-              >
+              </Button>
+              <Button onClick={handleCreate} disabled={submitting} className="py-2.5 font-bold rounded-xl flex items-center gap-2">
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : 'Lưu cấu hình'}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -255,8 +256,8 @@ export default function AutoAssignPage() {
         ) : configs.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
             <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
-            <h3 className="text-lg font-bold text-gray-800">Chưa có cấu hình</h3>
-            <p className="text-gray-500 mt-2">Bạn chưa thiết lập giao bài tự động cho lớp nào.</p>
+            <H3>Chưa có cấu hình</H3>
+            <P className="text-gray-500 mt-2">Bạn chưa thiết lập giao bài tự động cho lớp nào.</P>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -264,16 +265,16 @@ export default function AutoAssignPage() {
               <div key={config.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                 <div className="p-5 border-b border-gray-50 flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                    <H3 className="flex items-center gap-2">
                       <Users size={18} className="text-indigo-500" />
                       {config.class?.name || 'Lớp ẩn'}
-                    </h3>
-                    <p className="text-xs font-semibold text-blue-600 mt-1 flex items-center gap-1.5">
+                    </H3>
+                    <P className="text-xs font-semibold text-blue-600 mt-1 flex items-center gap-1.5">
                       <BookOpen size={14} /> {config.subject?.name || 'Môn ẩn'}
-                    </p>
+                    </P>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input
+                    <Input
                       type="checkbox"
                       className="sr-only peer"
                       checked={config.isActive}
@@ -286,24 +287,24 @@ export default function AutoAssignPage() {
                 <div className="p-5 flex-1 bg-slate-50/50">
                   <div className="grid grid-cols-2 gap-y-4 text-sm">
                     <div>
-                      <p className="text-gray-400 text-xs font-bold uppercase mb-1">Mức độ ưu tiên</p>
-                      <p className="font-semibold text-gray-800">
+                      <P className="text-gray-400 text-xs font-bold uppercase mb-1">Mức độ ưu tiên</P>
+                      <P className="font-semibold text-gray-800">
                         {config.difficultyLevel === 'easy' ? 'Dễ' :
                           config.difficultyLevel === 'medium' ? 'Trung bình' :
                             config.difficultyLevel === 'hard' ? 'Khó' : 'Ngẫu nhiên'}
-                      </p>
+                      </P>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-xs font-bold uppercase mb-1">Số lượng/ngày</p>
-                      <p className="font-semibold text-gray-800">{config.exercisesPerDay} bài</p>
+                      <P className="text-gray-400 text-xs font-bold uppercase mb-1">Số lượng/ngày</P>
+                      <P className="font-semibold text-gray-800">{config.exercisesPerDay} bài</P>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-gray-400 text-xs font-bold uppercase mb-1">Lịch giao bài (6:00 AM)</p>
+                      <P className="text-gray-400 text-xs font-bold uppercase mb-1">Lịch giao bài (6:00 AM)</P>
                       <div className="flex gap-1.5 mt-2">
                         {WEEKDAYS.map(day => (
                           <div
                             key={day.value}
-                            className={`w-7 h-7 rounded flex items-center justify-center text-[10px] font-bold ${(config.daysOfWeek || []).includes(day.value)
+                            className={`w-7 h-7 rounded flex items-center justify-center text-xs font-bold ${(config.daysOfWeek || []).includes(day.value)
                               ? 'bg-indigo-100 text-indigo-700'
                               : 'bg-gray-100 text-gray-300'
                               }`}
@@ -317,12 +318,12 @@ export default function AutoAssignPage() {
                 </div>
 
                 <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2 text-sm font-semibold">
-                  <button
+                  <Button
                     onClick={() => handleDelete(config.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    variant='destructive'
                   >
                     <Trash2 size={14} /> Xóa
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

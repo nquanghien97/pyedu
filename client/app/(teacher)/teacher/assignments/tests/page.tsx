@@ -6,6 +6,8 @@ import {
   Download, MoreHorizontal, Calendar, Clock, Sparkles, Plus
 } from "lucide-react";
 import StatCard from "./StatCard";
+import { Button } from "@/components/ui/button";
+import { H1, P } from "@/components/ui/typography";
 
 const exams = [
   {
@@ -101,26 +103,20 @@ export default function ExamManagement() {
         </div>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
+        <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111827", margin: 0 }}>Quản lý Bài kiểm tra</h1>
-            <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 6, marginBottom: 0 }}>
+            <H1>Quản lý Bài kiểm tra</H1>
+            <P style={{ fontSize: 13, color: "#9CA3AF", marginTop: 6, marginBottom: 0 }}>
               Theo dõi, tạo và phân tích kết quả các bài đánh giá định kỳ.
-            </p>
+            </P>
           </div>
-          <button style={{
-            display: "flex", alignItems: "center", gap: 8,
-            background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-            border: "none", borderRadius: 12, padding: "11px 22px",
-            fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer",
-            boxShadow: "0 4px 14px rgba(59,130,246,0.35)", transition: "opacity 0.2s",
-          }}
+          <Button
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.9")}
             onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
           >
             <Plus size={16} /> Tạo bài mới
             <Sparkles size={14} style={{ marginLeft: 2 }} />
-          </button>
+          </Button>
         </div>
 
         {/* Stat cards */}
@@ -149,7 +145,7 @@ export default function ExamManagement() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #F3F4F6" }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>Danh sách bài kiểm tra</span>
             <div style={{ display: "flex", gap: 10 }}>
-              <button style={{
+              <Button style={{
                 display: "flex", alignItems: "center", gap: 6,
                 background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 9,
                 padding: "7px 14px", fontSize: 13, fontWeight: 500, color: "#374151", cursor: "pointer",
@@ -159,8 +155,8 @@ export default function ExamManagement() {
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
               >
                 <SlidersHorizontal size={14} /> Bộ lọc
-              </button>
-              <button style={{
+              </Button>
+              <Button style={{
                 display: "flex", alignItems: "center", gap: 6,
                 background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 9,
                 padding: "7px 14px", fontSize: 13, fontWeight: 500, color: "#374151", cursor: "pointer",
@@ -170,7 +166,7 @@ export default function ExamManagement() {
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
               >
                 <Download size={14} /> Xuất dữ liệu
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -205,10 +201,10 @@ export default function ExamManagement() {
             >
               {/* Name */}
               <div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>{exam.name}</p>
-                <p style={{ fontSize: 11, color: "#9CA3AF", margin: "3px 0 0", display: "flex", alignItems: "center", gap: 4 }}>
+                <P style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>{exam.name}</P>
+                <P style={{ fontSize: 11, color: "#9CA3AF", margin: "3px 0 0", display: "flex", alignItems: "center", gap: 4 }}>
                   <Clock size={10} /> {exam.updated}
-                </p>
+                </P>
               </div>
               {/* Chapter */}
               <span style={{ fontSize: 13, color: "#6B7280" }}>{exam.chapter}</span>
@@ -223,12 +219,12 @@ export default function ExamManagement() {
               {/* Status */}
               <StatusBadge status={exam.status} type={exam.statusType} />
               {/* Actions */}
-              <button style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 4, display: "flex", alignItems: "center" }}
+              <Button style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 4, display: "flex", alignItems: "center" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "#374151")}
                 onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}
               >
                 <MoreHorizontal size={18} />
-              </button>
+              </Button>
             </div>
           ))}
 
@@ -241,12 +237,12 @@ export default function ExamManagement() {
               Hiển thị <b style={{ color: "#111827" }}>1-4</b> trên <b style={{ color: "#111827" }}>24</b> bài kiểm tra
             </span>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <button
+              <Button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #E5E7EB", background: "#fff", fontSize: 13, color: "#374151", fontWeight: 500, cursor: "pointer" }}
-              >Trước</button>
+              >Trước</Button>
               {[1, 2].map(n => (
-                <button key={n} onClick={() => setPage(n)} style={{
+                <Button key={n} onClick={() => setPage(n)} style={{
                   width: 34, height: 34, borderRadius: 8,
                   border: page === n ? "none" : "1px solid #E5E7EB",
                   background: page === n ? "#3B82F6" : "#fff",
@@ -255,19 +251,19 @@ export default function ExamManagement() {
                   fontSize: 13, cursor: "pointer",
                   boxShadow: page === n ? "0 2px 6px rgba(59,130,246,0.3)" : "none",
                   transition: "all 0.15s",
-                }}>{n}</button>
+                }}>{n}</Button>
               ))}
-              <button
+              <Button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #E5E7EB", background: "#fff", fontSize: 13, color: "#374151", fontWeight: 500, cursor: "pointer" }}
-              >Sau</button>
+              >Sau</Button>
             </div>
           </div>
         </div>
       </div>
 
       {/* FAB */}
-      <button style={{
+      <Button style={{
         position: "fixed", bottom: 28, right: 28,
         width: 52, height: 52, borderRadius: "50%",
         background: "linear-gradient(135deg, #3B82F6, #2563EB)",
@@ -281,7 +277,7 @@ export default function ExamManagement() {
         onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(59,130,246,0.45)"; }}
       >
         <Sparkles size={22} color="#fff" />
-      </button>
+      </Button>
     </div>
   );
 }

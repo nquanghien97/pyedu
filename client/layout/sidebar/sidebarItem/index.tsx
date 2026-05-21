@@ -42,11 +42,11 @@ function SidebarItem(props: SidebarItemProps) {
   return (
     <>
       <Link href={menu.url} className="w-full">
-        <div className={`flex flex-col items-start p-2 rounded-xl hover:bg-[#ebf2fe] ${activeClass && 'bg-[#ebf2fe]'}`}>
+        <div className={`flex flex-col items-start p-2 rounded-xl hover:bg-primary/10 ${activeClass && 'bg-primary/10'}`}>
           {menu.items ? (
             <div className="flex items-center w-full gap-2 cursor-pointer" onClick={handleClick}>
               <div
-                className={`flex items-center w-full gap-2 ${activeClass ? "text-[#1a73e8]!" : "text-black"}`}
+                className={`flex items-center w-full gap-2 ${activeClass ? "text-primary!" : "text-black"}`}
               >
                 {menu.icon}
                 {!open && <span className={`${activeClass} whitespace-nowrap`}>{menu.title}</span>}
@@ -63,7 +63,7 @@ function SidebarItem(props: SidebarItemProps) {
           ) : (
             <div>
               <div className="flex items-center w-full gap-2 text-black">
-                <div className={`flex items-center w-full ${menu.icon ? 'gap-2' : 'gap-0'} ${activeClass ? "text-[#1a73e8]!" : "text-black"}`}>
+                <div className={`flex items-center w-full ${menu.icon ? 'gap-2' : 'gap-0'} ${activeClass ? "text-primary!" : "text-black"}`}>
                   {menu.icon || <DotIcon width={24} height={24} />}
                   {!open && <span className={`${activeClass} whitespace-nowrap`}>{menu.title}</span>}
                 </div>

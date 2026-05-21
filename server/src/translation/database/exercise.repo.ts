@@ -181,4 +181,52 @@ export const exerciseRepository = {
   async deleteQuestion(questionId: string) {
     return prisma.exerciseQuestion.delete({ where: { id: questionId } });
   },
+
+  async createAiExercise(
+    data: CreateExerciseInput,
+    createdBy: number,
+    aiConfig: Record<string, unknown>
+  ) {
+    const exerciseId = nanoid(36);
+
+    return prisma.exercise.create({
+      data: {
+        id: exerciseId,
+        title: data.title,
+        grade: data.grade ?? null,
+        subjectId: data.subjectId ?? null,
+        topicId: data.topicId ?? null,
+        exerciseType: data.exerciseType ?? null,
+        difficultyLevel: data.difficultyLevel ?? null,
+        totalPoints: data.totalPoints ?? null,
+        timeLimitMinutes: data.timeLimitMinutes ?? null,
+        status: 'draft',
+        isAiGenerated: true,
+        aiGenerationConfig: (aiConfig as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+        createdBy,
+        questions: data.questions
+          ? {
+            create: data.questions.map((q, index) => ({
+              id: nanoid(36),
+              questionText: q.questionText,
+              questionType: q.questionType,
+              orderIndex: q.orderIndex ?? index + 1,
+              points: q.points ?? null,
+              content: (q.content ?? Prisma.JsonNull),
+              explanation: q.explanation ?? null,
+              hints: (q.hints ?? Prisma.JsonNull),
+              autoGrade: q.autoGrade ?? (q.questionType !== 'essay'),
+              aiGradingEnabled: q.aiGradingEnabled ?? false,
+            })),
+          }
+          : undefined,
+      },
+      include: {
+        subject: { select: { id: true, name: true } },
+        topic: { select: { id: true, name: true } },
+        creator: { select: { id: true, name: true } },
+        questions: { orderBy: { orderIndex: 'asc' } },
+      },
+    });
+  },
 };

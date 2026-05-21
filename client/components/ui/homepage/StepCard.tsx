@@ -40,10 +40,10 @@ export default function StepCard({
       }}
     >
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] flex items-center justify-center shadow-lg shadow-[#3b82f6]/30">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] flex items-center justify-center shadow-lg shadow-primary/30">
           <div className="text-white">{icon}</div>
         </div>
-        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-[#3b82f6] border-2 border-[#3b82f6]">
+        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-primary border-2 border-primary">
           {step}
         </div>
       </div>

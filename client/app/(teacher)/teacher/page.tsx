@@ -29,6 +29,9 @@ import StatCard from "./StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getTeacherDashboardStats } from "@/services/dashboard";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { H1, H2, P } from "@/components/ui/typography";
+import { useRouter } from "next/navigation";
 
 const weeklyData = [
   { day: "Thứ 2", value: 30 },
@@ -64,8 +67,8 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   if (active && payload && payload.length) {
     return (
       <div className="bg-white border border-gray-100 shadow-lg rounded-xl px-3 py-2 text-sm">
-        <p className="font-semibold text-gray-700">{label}</p>
-        <p className="text-blue-500">{payload[0].value} học sinh</p>
+        <P className="font-semibold text-gray-700">{label}</P>
+        <P className="text-blue-500">{payload[0].value} học sinh</P>
       </div>
     );
   }
@@ -98,6 +101,7 @@ interface DashboardStats {
 }
 
 export default function TeacherPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState("Tháng này");
   const [openPopover, setOpenPopover] = useState(false);
@@ -129,20 +133,20 @@ export default function TeacherPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">
+          <H1>
             {greeting}, {user?.name || 'Thầy cô'}! 👋
-          </h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          </H1>
+          <P className="text-sm text-gray-400 mt-0.5">
             Dưới đây là tiến độ học tập trong tuần này của học sinh.
-          </p>
+          </P>
         </div>
-        <Link
-          href="/teacher/assignments/assign"
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md active:scale-95"
+        <Button
+          onClick={() => { router.push('/teacher/assignments/assign') }}
+          className=""
         >
           <Plus size={16} />
           Giao bài tập mới
-        </Link>
+        </Button>
       </div>
 
       {/* Stats Row */}
@@ -198,9 +202,9 @@ export default function TeacherPage() {
         {/* Chart */}
         <div className="md:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold text-gray-800">
+            <H2>
               Tiến độ học tập hàng tuần
-            </h2>
+            </H2>
             <Popover open={openPopover} onOpenChange={setOpenPopover}>
               <PopoverTrigger>
                 <div className="cursor-pointer text-sm text-gray-500 flex items-center gap-1 hover:text-gray-700 transition-colors">
@@ -259,10 +263,10 @@ export default function TeacherPage() {
         {/* Top Students */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-800">Học sinh tiêu biểu</h2>
-            <button className="text-xs text-blue-500 font-medium hover:text-blue-600 transition-colors">
+            <H2>Học sinh tiêu biểu</H2>
+            <Button className="text-xs text-blue-500 font-medium hover:text-blue-600">
               Xem tất cả
-            </button>
+            </Button>
           </div>
           <div className="space-y-3">
             {students.map((s, i) => (
@@ -273,10 +277,10 @@ export default function TeacherPage() {
                   {s.name.split(" ").pop()?.[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{s.name}</p>
-                  <p className="text-xs text-gray-400">
+                  <P className="text-sm font-medium text-gray-800 truncate">{s.name}</P>
+                  <P className="text-xs text-gray-400">
                     {s.class} • {s.score} điểm
-                  </p>
+                  </P>
                 </div>
                 <div>
                   {s.trend === "up" ? (
@@ -298,7 +302,7 @@ export default function TeacherPage() {
       {/* Assignments Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-          <h2 className="font-semibold text-gray-800">Bài tập mới nhất</h2>
+          <H2>Bài tập mới nhất</H2>
           <div className="flex items-center gap-2">
             <Link
               href="/teacher/assignments/assign"
@@ -362,9 +366,9 @@ export default function TeacherPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <button className="text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
+                      <Button className="text-sm font-medium text-blue-500 hover:text-blue-700">
                         Chi tiết
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

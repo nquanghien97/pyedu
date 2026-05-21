@@ -1,5 +1,5 @@
 import { USER_ROLE } from "@/entity/user";
-import { AtomIcon, BookOpenIcon, FileChartColumn, LayoutDashboard, NotepadText, Shield, User, Users, } from "lucide-react";
+import { AtomIcon, BellIcon, BookOpenIcon, FileChartColumn, LayoutDashboard, NotepadText, Shield, User, Users, } from "lucide-react";
 
 
 export interface DataSidebarType {
@@ -69,6 +69,12 @@ export const menuSidebarTeacher = [
     icon: <FileChartColumn width={16} height={16} />,
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],
   },
+  {
+    title: 'Thông báo',
+    url: '/teacher/notifications',
+    icon: <BellIcon width={16} height={16} />,
+    allowRole: [USER_ROLE.ADMIN, USER_ROLE.TEACHER],
+  },
 ]
 
 export const menuSidebarStudent: DataSidebarType[] = [
@@ -100,6 +106,12 @@ export const menuSidebarStudent: DataSidebarType[] = [
     title: 'Báo cáo',
     url: '/student/reports',
     icon: <FileChartColumn width={16} height={16} />,
+    allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
+  },
+  {
+    title: 'Thông báo',
+    url: '/student/notifications',
+    icon: <BellIcon width={16} height={16} />,
     allowRole: [USER_ROLE.ADMIN, USER_ROLE.STUDENT],
   },
 ]

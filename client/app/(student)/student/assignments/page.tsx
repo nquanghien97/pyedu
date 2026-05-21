@@ -37,6 +37,9 @@ import {
 } from '@/services/assignment';
 import { SubjectEntity } from '@/entity/subject';
 import { getSubjects } from '@/services/subject';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, P } from "@/components/ui/typography";
 
 type TabKey = 'all' | 'easy' | 'medium' | 'hard' | 'expert';
 
@@ -86,20 +89,20 @@ function StatCard({
         </div>
         {badge && (
           <span
-            className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+            className="text-xs font-bold px-2.5 py-0.5 rounded-full"
             style={{ background: badgeBg, color: badgeColor }}
           >
             {badge}
           </span>
         )}
       </div>
-      <p className="text-xs text-gray-400 mb-1">{label}</p>
-      <p className="text-2xl font-extrabold text-gray-900">
+      <P className="text-xs text-gray-400 mb-1">{label}</P>
+      <P className="text-2xl font-extrabold text-gray-900">
         {value}{' '}
         {suffix && (
           <span className="text-sm font-normal text-gray-400">{suffix}</span>
         )}
-      </p>
+      </P>
     </div>
   );
 }
@@ -261,12 +264,12 @@ export default function AssignmentPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900">
+            <H1>
               Bài tập của tôi
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
+            </H1>
+            <P className="text-sm text-gray-400 mt-1">
               Danh sách bài tập được giao và ngân hàng bài tập sẵn có
-            </p>
+            </P>
           </div>
         </div>
 
@@ -316,7 +319,7 @@ export default function AssignmentPage() {
         <div className="flex items-center gap-3 mb-5">
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm flex-1 max-w-md focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <Search size={16} className="text-gray-400 flex-shrink-0" />
-            <input
+            <Input
               type="text"
               placeholder="Tìm kiếm bài tập..."
               value={searchQuery}
@@ -327,7 +330,7 @@ export default function AssignmentPage() {
 
           {/* Subject Filter */}
           <div className="relative">
-            <button
+            <Button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
               className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm text-sm text-gray-600 hover:border-blue-300 transition-colors cursor-pointer"
             >
@@ -337,42 +340,25 @@ export default function AssignmentPage() {
                 'Môn học'
                 : 'Tất cả môn học'}
               <ChevronDown size={14} className="text-gray-400" />
-            </button>
+            </Button>
 
             {showFilterDropdown && (
               <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-[200px] py-1 overflow-hidden">
-                <button
-                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-blue-50 transition-colors cursor-pointer"
-                  style={{
-                    color: !selectedSubjectId ? '#3B82F6' : '#374151',
-                    fontWeight: !selectedSubjectId ? 600 : 400,
-                  }}
-                  onClick={() => {
+                <Button className="w-full py-2.5 text-left text-sm hover:bg-blue-50" style={{ color: !selectedSubjectId ? '#3B82F6' : '#374151', fontWeight: !selectedSubjectId ? 600 : 400, }} onClick={() => {
                     setSelectedSubjectId('');
                     setShowFilterDropdown(false);
                   }}
                 >
                   Tất cả môn học
-                </button>
+                </Button>
                 {allSubjects.map((subject) => (
-                  <button
-                    key={subject.id}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-blue-50 transition-colors cursor-pointer"
-                    style={{
-                      color:
-                        selectedSubjectId === subject.id
-                          ? '#3B82F6'
-                          : '#374151',
-                      fontWeight:
-                        selectedSubjectId === subject.id ? 600 : 400,
-                    }}
-                    onClick={() => {
+                  <Button key={subject.id} className="w-full py-2.5 text-left text-sm hover:bg-blue-50" style={{ color: selectedSubjectId === subject.id ? '#3B82F6' : '#374151', fontWeight: selectedSubjectId === subject.id ? 600 : 400, }} onClick={() => {
                       setSelectedSubjectId(subject.id);
                       setShowFilterDropdown(false);
                     }}
                   >
                     {subject.name}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -382,7 +368,7 @@ export default function AssignmentPage() {
         {/* Tabs */}
         <div className="flex gap-0 border-b border-gray-200 mb-6">
           {tabs.map((t) => (
-            <button
+            <Button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               className="px-5 py-2.5 text-sm transition-all whitespace-nowrap cursor-pointer border-none bg-transparent"
@@ -397,7 +383,7 @@ export default function AssignmentPage() {
               }}
             >
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -419,7 +405,7 @@ export default function AssignmentPage() {
                   (h) => (
                     <th
                       key={h}
-                      className="text-[11px] font-bold text-gray-400 tracking-wider text-left px-6 py-3"
+                      className="text-xs font-bold text-gray-400 tracking-wider text-left px-6 py-3"
                     >
                       {h}
                     </th>
@@ -434,7 +420,7 @@ export default function AssignmentPage() {
                   <td colSpan={6}>
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
                       <Loader2 size={28} className="text-blue-500 animate-spin" />
-                      <p className="text-sm text-gray-400">Đang tải bài tập...</p>
+                      <P className="text-sm text-gray-400">Đang tải bài tập...</P>
                     </div>
                   </td>
                 </tr>
@@ -448,12 +434,12 @@ export default function AssignmentPage() {
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <FileQuestion size={24} className="text-gray-400" />
                       </div>
-                      <p className="text-sm font-semibold text-gray-500">
+                      <P className="text-sm font-semibold text-gray-500">
                         Không tìm thấy bài tập nào
-                      </p>
-                      <p className="text-xs text-gray-400">
+                      </P>
+                      <P className="text-xs text-gray-400">
                         Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                      </p>
+                      </P>
                     </div>
                   </td>
                 </tr>
@@ -501,20 +487,20 @@ export default function AssignmentPage() {
                       {/* Title */}
                       <td className="px-6 py-4 align-middle">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
+                          <P className="text-sm font-semibold text-gray-900 truncate">
                             {exercise.title || 'Chưa đặt tên'}
-                          </p>
+                          </P>
                           {exercise.isAiGenerated && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 flex-shrink-0">
+                            <span className="flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 flex-shrink-0">
                               <Sparkles size={10} />
                               AI
                             </span>
                           )}
                         </div>
                         {assignment.assigner && (
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <P className="text-xs text-gray-400 mt-0.5">
                             Giao bởi: {assignment.assigner.name}
-                          </p>
+                          </P>
                         )}
                       </td>
 
@@ -571,19 +557,19 @@ export default function AssignmentPage() {
                       {/* Action */}
                       <td className="px-6 py-4 align-middle">
                         {isCompleted ? (
-                          <button
+                          <Button
                             onClick={() => router.push(`/student/assignments/${assignment.id}`)}
                             className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg hover:border-blue-300 transition-all cursor-pointer"
                           >
                             Xem lại
-                          </button>
+                          </Button>
                         ) : (
-                          <button
+                          <Button
                             onClick={() => router.push(`/student/assignments/${assignment.id}`)}
                             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none"
                           >
                             Làm bài
-                          </button>
+                          </Button>
                         )}
                       </td>
                     </tr>
@@ -596,7 +582,7 @@ export default function AssignmentPage() {
         {/* Pagination */}
         {!loading && pagination.totalPages > 1 && (
           <div className="flex items-center justify-between bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-3.5">
-            <p className="text-xs text-gray-400">
+            <P className="text-xs text-gray-400">
               Hiển thị{' '}
               <span className="font-semibold text-gray-600">
                 {(pagination.page - 1) * pagination.limit + 1}–
@@ -610,9 +596,9 @@ export default function AssignmentPage() {
                 {pagination.total}
               </span>{' '}
               bài tập
-            </p>
+            </P>
             <div className="flex items-center gap-1.5">
-              <button
+              <Button
                 onClick={() =>
                   setPagination((prev) => ({
                     ...prev,
@@ -623,7 +609,7 @@ export default function AssignmentPage() {
                 className="w-8 h-8 rounded-lg flex items-center justify-center border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
               >
                 <ChevronLeft size={14} className="text-gray-500" />
-              </button>
+              </Button>
 
               {Array.from(
                 { length: Math.min(pagination.totalPages, 5) },
@@ -642,7 +628,7 @@ export default function AssignmentPage() {
                     pageNum = pagination.page - 2 + idx;
                   }
                   return (
-                    <button
+                    <Button
                       key={pageNum}
                       onClick={() =>
                         setPagination((prev) => ({ ...prev, page: pageNum }))
@@ -660,12 +646,12 @@ export default function AssignmentPage() {
                       }}
                     >
                       {pageNum}
-                    </button>
+                    </Button>
                   );
                 }
               )}
 
-              <button
+              <Button
                 onClick={() =>
                   setPagination((prev) => ({
                     ...prev,
@@ -676,7 +662,7 @@ export default function AssignmentPage() {
                 className="w-8 h-8 rounded-lg flex items-center justify-center border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
               >
                 <ChevronRight size={14} className="text-gray-500" />
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -714,17 +700,17 @@ export default function AssignmentPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-                  <p className="text-xs text-white/70 mb-1">
+                  <P className="text-xs text-white/70 mb-1">
                     Tổng bài tập sẵn có
-                  </p>
-                  <p className="text-2xl font-extrabold text-white">
+                  </P>
+                  <P className="text-2xl font-extrabold text-white">
                     {stats.total}
-                  </p>
+                  </P>
                 </div>
                 <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-                  <p className="text-xs text-white/70 mb-1">
+                  <P className="text-xs text-white/70 mb-1">
                     Phân bố độ khó
-                  </p>
+                  </P>
                   <div className="flex items-end gap-1.5 mt-1">
                     {(['easy', 'medium', 'hard', 'expert'] as const).map(
                       (level) => {
@@ -747,7 +733,7 @@ export default function AssignmentPage() {
                                 )}px`,
                               }}
                             />
-                            <span className="text-[9px] text-white/60">
+                            <span className="text-xs text-white/60">
                               {count}
                             </span>
                           </div>
@@ -757,14 +743,14 @@ export default function AssignmentPage() {
                   </div>
                 </div>
                 <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-                  <p className="text-xs text-white/70 mb-1">
+                  <P className="text-xs text-white/70 mb-1">
                     Lời khuyên
-                  </p>
-                  <p className="text-xs text-white/90 leading-relaxed">
+                  </P>
+                  <P className="text-xs text-white/90 leading-relaxed">
                     {chartData.easy > chartData.hard
                       ? 'Hãy thử thách bản thân với những bài tập khó hơn!'
                       : 'Tuyệt vời! Bạn đang làm rất tốt các bài tập hóc búa.'}
-                  </p>
+                  </P>
                 </div>
               </div>
             </div>

@@ -13,6 +13,9 @@ import { getTeacherAssignments, createTeacherAssignment } from "@/services/assig
 import { ExerciseEntity } from "@/entity/exercise";
 import { AssignmentEntity } from "@/entity/assignment";
 import { notification } from "@/components/notification";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, H3, P } from "@/components/ui/typography";
 
 type AssignTarget = "class" | "student";
 type Tab = "new" | "history";
@@ -98,28 +101,28 @@ export default function AssignPage() {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-extrabold text-gray-900">Quản lý Giao bài tập</h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <H1>Quản lý Giao bài tập</H1>
+          <P className="text-sm text-gray-400 mt-1">
             Giao bài tập cho lớp hoặc cá nhân học sinh và theo dõi tiến độ.
-          </p>
+          </P>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-4 border-b border-gray-200 mb-6">
-          <button
+          <Button
             onClick={() => setActiveTab("new")}
-            className={`px-5 py-2.5 text-sm font-semibold transition-all border-b-2 ${activeTab === "new" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            className={`${activeTab === "new" ? "" : "bg-transparent hover:bg-gray-100 text-black"
               }`}
           >
             Giao bài mới
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setActiveTab("history")}
-            className={`px-5 py-2.5 text-sm font-semibold transition-all border-b-2 ${activeTab === "history" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            className={`${activeTab === "history" ? "" : "bg-transparent hover:bg-gray-100 text-black"
               }`}
           >
             Lịch sử đã giao
-          </button>
+          </Button>
         </div>
 
         {loading ? (
@@ -154,8 +157,8 @@ export default function AssignPage() {
                             <Users size={18} />
                           </div>
                           <div>
-                            <p className={`font-bold text-sm ${assignTarget === "class" ? "text-blue-900" : "text-gray-700"}`}>Cả lớp học</p>
-                            <p className="text-xs text-gray-500 mt-0.5">Giao cho tất cả học sinh trong lớp</p>
+                            <P className={`font-bold text-sm ${assignTarget === "class" ? "text-blue-900" : "text-gray-700"}`}>Cả lớp học</P>
+                            <P className="text-xs text-gray-500 mt-0.5">Giao cho tất cả học sinh trong lớp</P>
                           </div>
                         </div>
 
@@ -168,8 +171,8 @@ export default function AssignPage() {
                             <UserIcon size={18} />
                           </div>
                           <div>
-                            <p className={`font-bold text-sm ${assignTarget === "student" ? "text-blue-900" : "text-gray-700"}`}>Cá nhân</p>
-                            <p className="text-xs text-gray-500 mt-0.5">Giao cho một học sinh cụ thể</p>
+                            <P className={`font-bold text-sm ${assignTarget === "student" ? "text-blue-900" : "text-gray-700"}`}>Cá nhân</P>
+                            <P className="text-xs text-gray-500 mt-0.5">Giao cho một học sinh cụ thể</P>
                           </div>
                         </div>
                       </div>
@@ -213,7 +216,7 @@ export default function AssignPage() {
 
                       <div>
                         <label className="text-xs font-bold text-gray-700 block mb-2">Thời hạn nộp bài</label>
-                        <input
+                        <Input
                           type="datetime-local"
                           value={dueDate}
                           onChange={e => setDueDate(e.target.value)}
@@ -243,10 +246,10 @@ export default function AssignPage() {
                               <BookOpen size={18} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-gray-900 truncate">{ex.title}</p>
-                              <p className="text-[11px] text-gray-500 mt-1 truncate">
+                              <P className="text-sm font-bold text-gray-900 truncate">{ex.title}</P>
+                              <P className="text-xs text-gray-500 mt-1 truncate">
                                 {ex.subject?.name} • {ex._count?.questions || 0} câu hỏi • {ex.timeLimitMinutes || '--'} phút
-                              </p>
+                              </P>
                             </div>
                             {selectedExerciseId === ex.id && (
                               <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -260,35 +263,31 @@ export default function AssignPage() {
 
                     {/* Actions */}
                     <div className="flex gap-3 pt-2">
-                      <button
-                        onClick={handleCreateAssignment}
-                        disabled={submitting}
-                        className="flex-1 py-3.5 rounded-xl border-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-shadow disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer flex justify-center items-center gap-2"
-                      >
+                      <Button onClick={handleCreateAssignment} disabled={submitting} className="w-full">
                         {submitting && <Loader2 size={16} className="animate-spin" />}
                         {submitting ? 'Đang xử lý...' : 'Hoàn tất giao bài'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Column: Tips */}
-                <div className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 rounded-2xl p-6 h-fit">
-                  <h3 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <div className="bg-linear-to-b from-blue-50 to-white border border-blue-100 rounded-2xl p-6 h-fit">
+                  <H3 className="text-blue-900 mb-4 flex items-center gap-2">
                     <span className="bg-blue-200 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center text-sm">💡</span>
                     Mẹo giao bài
-                  </h3>
+                  </H3>
                   <ul className="text-sm text-gray-600 space-y-4">
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                       Học sinh sẽ nhận được thông báo ngay khi bạn giao bài thành công.
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                       Ngày hết hạn có thể thay đổi sau khi giao.
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                       Hỗ trợ giao cùng một bài tập cho nhiều đối tượng khác nhau ở các thời điểm khác nhau.
                     </li>
                   </ul>
@@ -303,7 +302,7 @@ export default function AssignPage() {
                   <thead>
                     <tr className="bg-gray-50/80 border-b border-gray-100">
                       {['BÀI TẬP', 'ĐỐI TƯỢNG', 'LOẠI', 'HẠN NỘP', 'TIẾN ĐỘ'].map((h) => (
-                        <th key={h} className="text-[11px] font-bold text-gray-400 uppercase tracking-wider text-left px-6 py-4">
+                        <th key={h} className="text-xs font-bold text-gray-400 uppercase tracking-wider text-left px-6 py-4">
                           {h}
                         </th>
                       ))}
@@ -323,20 +322,20 @@ export default function AssignPage() {
                           : students.find(s => s.id === a.assignedToId)?.name || 'Học sinh ẩn';
 
                         return (
-                          <tr 
-                            key={a.id} 
+                          <tr
+                            key={a.id}
                             onClick={() => router.push(`/teacher/assignments/${a.id}`)}
                             className="border-b border-gray-50 hover:bg-slate-50 transition-colors cursor-pointer"
                           >
                             <td className="px-6 py-4">
-                              <p className="font-bold text-sm text-gray-900">{a.exercise?.title}</p>
-                              <p className="text-[11px] text-gray-400 mt-0.5">{a.exercise?.subject?.name}</p>
+                              <P className="font-bold text-sm text-gray-900">{a.exercise?.title}</P>
+                              <P className="text-xs text-gray-400 mt-0.5">{a.exercise?.subject?.name}</P>
                             </td>
                             <td className="px-6 py-4 text-sm font-semibold text-gray-700">
                               {targetName}
                             </td>
                             <td className="px-6 py-4">
-                              <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${a.assignedToType === 'class' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
+                              <span className={`text-xs font-bold px-2 py-1 rounded-md ${a.assignedToType === 'class' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
                                 {a.assignedToType === 'class' ? 'LỚP HỌC' : 'CÁ NHÂN'}
                               </span>
                             </td>

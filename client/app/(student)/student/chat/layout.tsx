@@ -52,12 +52,12 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                 <MessageCircle className="w-4 h-4 text-gray-500 shrink-0" />
                 <span className="truncate text-sm font-medium text-gray-700 block">{s.title || "Cuộc trò chuyện mới"}</span>
               </div>
-              <button
+              <Button
                 onClick={(e) => handleDelete(e, s.id)}
                 className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 p-1 shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
+              </Button>
             </Link>
           ))}
           {sessions.length === 0 && (

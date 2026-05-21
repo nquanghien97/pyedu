@@ -315,9 +315,14 @@ model Notification {
   title            String?  @db.VarChar(255)
   message          String?
   notificationType String?  @db.VarChar(50)
-  isRead           Boolean?
+  isRead           Boolean  @default(false)
+  metadata         Json?
   userId           Int
+  createdAt        DateTime @default(now())
   user             User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }
 
 model Conversation {

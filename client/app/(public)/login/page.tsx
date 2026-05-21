@@ -17,6 +17,7 @@ import { USER_ROLE } from "@/entity/user";
 import { withGuest } from "@/hoc/withGuest";
 import LoadingIcon from "@/assets/loadingIcon";
 import { notification } from "@/components/notification";
+import { H1, P } from "@/components/ui/typography";
 
 const schema = z.object({
   email: z.string().min(1, "email is required"),
@@ -49,7 +50,8 @@ function LoginPage() {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
     try {
-      const res: any = await login(data)
+      // login may return a generic/unknown payload; narrow the type here
+      const res = (await login(data)) as { data: { user: UserEntity | null; accessToken: string | null } };
       notification.success("Đăng nhập thành công!");
       
       const userData = res.data.user as UserEntity | null;
@@ -89,7 +91,7 @@ function LoginPage() {
               <Image src="/logo.png" alt="Logo" width={100} height={100} />
             </Link>
           </div>
-          <h1 className="mb-4 text-3xl font-semibold text-center">Đăng nhập tài khoản</h1>
+          <H1>Đăng nhập tài khoản</H1>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="email"
@@ -102,17 +104,17 @@ function LoginPage() {
               render={({ field }) => <Input {...field} placeholder="Password" type="password" className="mb-4" />}
             />
             <div className="flex justify-center mb-2">
-              <Button disabled={isLoading} variant="outline" className="bg-[#3b82f6] px-8 cursor-pointer text-white hover:text-white hover:bg-[#2563eb]">
+              <Button disabled={isLoading} variant="outline" className="px-8 hover:text-white">
                 Đăng nhập
                 {isLoading && <LoadingIcon />}
               </Button>
             </div>
-            <p className="text-center text-sm text-muted-foreground">
+            <P className="text-center text-sm text-muted-foreground">
               Bạn chưa có tài khoản?{' '}
               <Link href="/register" className="text-primary hover:underline">
                 Đăng ký
               </Link>
-            </p>
+            </P>
           </form>
         </div>
       </div>

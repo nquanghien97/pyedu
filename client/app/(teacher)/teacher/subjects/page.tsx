@@ -10,6 +10,7 @@ import { getSubjects, createSubject, updateSubject, deleteSubject, createTopic, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusIcon, PencilIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, BookOpenIcon, FolderIcon, XIcon, CheckIcon, LayersIcon, GraduationCap } from 'lucide-react';
+import { H1, H2, H3, P } from "@/components/ui/typography";
 
 // ---------- Zod Schemas ----------
 const nameSchema = z.object({
@@ -67,7 +68,7 @@ function InlineNameForm({
           autoFocus
         />
         {errors.name && (
-          <p className="text-xs text-red-500 mt-0.5">{errors.name.message}</p>
+          <P className="text-xs text-red-500 mt-0.5">{errors.name.message}</P>
         )}
       </div>
       <Button type="submit" size="sm" disabled={isSubmitting}>
@@ -180,21 +181,21 @@ export default function SubjectsPage() {
       <div className="max-w-[1000px] mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Cấu trúc Chương trình Đào tạo</h1>
-            <p className="text-sm text-gray-500">Quản lý môn học và chủ đề theo các khối lớp đang hoạt động.</p>
+            <H1 className="mb-1">Cấu trúc Chương trình Đào tạo</H1>
+            <P className="text-sm text-gray-500">Quản lý môn học và chủ đề theo các khối lớp đang hoạt động.</P>
           </div>
         </div>
 
         {/* Subjects List */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all p-4">
-            <h2 className="font-extrabold text-gray-900 mb-4 text-xl flex items-center border-b pb-3">
+            <H3 className="mb-4 flex items-center pb-3">
               <BookOpenIcon className="w-6 h-6 text-indigo-600 mr-2" />
               Chương trình cốt lõi
-            </h2>
+            </H3>
             
             {subjects.length === 0 && !editing && (
-              <p className="text-sm text-gray-400 font-medium py-4 text-center">Đang tải dữ liệu môn học...</p>
+              <P className="text-sm text-gray-400 font-medium py-4 text-center">Đang tải dữ liệu môn học...</P>
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -202,27 +203,24 @@ export default function SubjectsPage() {
                 <div key={subject.id} className="bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm transition-shadow hover:shadow-md">
                   {/* Subject Header */}
                   <div className="flex items-center gap-2 p-3 hover:bg-gray-100 group border-b border-gray-100 rounded-t-xl transition-colors">
-                    <button onClick={() => toggleSubjectExpand(subject.id)} className="w-8 h-8 flex justify-center items-center hover:bg-gray-200 rounded-lg text-gray-500">
+                    <Button onClick={() => toggleSubjectExpand(subject.id)} className="w-8 h-8 flex justify-center items-center hover:bg-gray-200 hover:text-black rounded-lg text-white">
                       {expandedSubjects.has(subject.id) ? <ChevronDownIcon size={18} /> : <ChevronRightIcon size={18} />}
-                    </button>
+                    </Button>
 
                     <BookOpenIcon className="w-5 h-5 text-blue-500" />
                     <span className="font-bold text-gray-800 flex-1 truncate">{subject.name}</span>
-                    <span className="text-[10px] font-bold text-gray-400 bg-white border px-2 py-1 rounded-md">
+                    <span className="text-xs font-bold text-gray-400 bg-white border px-2 py-1 rounded-md">
                       {subject.topics?.length || 0} chủ đề
                     </span>
                     
                     <div className="hidden group-hover:flex items-center gap-1 mx-1">
-                      <button
-                        className="w-8 h-8 flex justify-center items-center bg-white hover:bg-green-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors shadow-sm"
-                        title="Thêm chủ đề"
-                        onClick={() => {
+                      <Button className="w-8 h-8 flex justify-center items-center bg-white hover:bg-green-100 text-gray-400 hover:text-green-600" title="Thêm chủ đề" onClick={() => {
                           setEditing({ type: 'topic', mode: 'create', parentId: subject.id });
                           setExpandedSubjects(prev => new Set(prev).add(subject.id));
                         }}
                       >
                         <PlusIcon size={18} />
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -262,7 +260,7 @@ export default function SubjectsPage() {
                         !editing && (
                           <div className="flex flex-col items-center justify-center p-4 text-center">
                             <LayersIcon className="w-8 h-8 text-gray-300 mb-1" />
-                            <p className="text-xs font-medium text-gray-400">Chưa có chủ đề nào.</p>
+                            <P className="text-xs font-medium text-gray-400">Chưa có chủ đề nào.</P>
                           </div>
                         )
                       )}
@@ -310,20 +308,12 @@ function TopicItem({
           <FolderIcon className="w-4 h-4 text-green-500" />
           <span className="text-sm font-semibold text-gray-700 flex-1">{topic.name}</span>
           <div className="hidden group-hover:flex items-center gap-1">
-            <button
-              className="w-7 h-7 flex justify-center items-center hover:bg-orange-50 rounded-md text-gray-400 hover:text-orange-600 transition-colors"
-              onClick={onStartEdit}
-              title="Sửa chủ đề"
-            >
+            <Button className="w-7 h-7 flex justify-center items-center hover:bg-orange-50 text-gray-400 hover:text-orange-600" onClick={onStartEdit} title="Sửa chủ đề">
               <PencilIcon size={14} />
-            </button>
-            <button
-              className="w-7 h-7 flex justify-center items-center hover:bg-red-50 rounded-md text-gray-400 hover:text-red-500 transition-colors"
-              onClick={onDelete}
-              title="Xóa chủ đề"
-            >
+            </Button>
+            <Button className="w-7 h-7 flex justify-center items-center hover:bg-red-50 text-gray-400 hover:text-red-500" onClick={onDelete} title="Xóa chủ đề">
               <TrashIcon size={14} />
-            </button>
+            </Button>
           </div>
         </>
       )}

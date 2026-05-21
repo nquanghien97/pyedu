@@ -7,16 +7,16 @@ export default function ForWhoSection({ bgColor }: { bgColor?: string }) {
         <div className="text-center mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Được thiết kế cho{" "}
-            <span className="text-[#3b82f6]">mọi người</span>
+            <span className="text-primary">mọi người</span>
           </h2>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Teacher Card */}
           <div className="group relative bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-[#3b82f6]/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700" />
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] flex items-center justify-center mb-6 shadow-lg shadow-[#3b82f6]/20">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
                 <Users className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -31,9 +31,9 @@ export default function ForWhoSection({ bgColor }: { bgColor?: string }) {
                   "Xem báo cáo thống kê trực quan",
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center mt-0.5 shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 shrink-0">
                       <svg
-                        className="w-3 h-3 text-[#3b82f6]"
+                        className="w-3 h-3 text-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"

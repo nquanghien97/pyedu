@@ -8,7 +8,7 @@ import { getSubjects, getSubjectById, createSubject, updateSubject, deleteSubjec
 import { getTopicsBySubject, getTopicById, createTopic, updateTopic, deleteTopic } from './topicHandler';
 import { getExercises, getExerciseById, createExercise, updateExercise, updateExerciseStatus, deleteExercise, addQuestion, updateQuestion, deleteQuestion } from './exerciseHandler';
 import { upload, uploadAttachment, deleteAttachment } from './uploadHandler';
-import { generateExerciseByAI, generateExerciseFromFile } from './aiGenerateHandler';
+import { generateExerciseByAI, generateExerciseFromFile, getAiExerciseHistory } from './aiGenerateHandler';
 import { getSessions, createSession, deleteSession, getSessionMessages } from './chatSessionHandler';
 import { sendMessage } from './chatMessageHandler';
 import { getStudentAssignments } from './studentAssignmentHandler';
@@ -20,6 +20,8 @@ import { getAutoAssignConfigs, createAutoAssignConfig, updateAutoAssignConfig, d
 import { getMe } from './userHandler';
 import { requireAdmin, getDashboardStats, getAllUsers, createUser, updateUser, deleteUser } from './adminHandler';
 import { getTeacherDashboardStats, getStudentDashboardStats } from './dashboardHandler';
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from './notificationHandler';
+import { sseStreamHandler } from './sseHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -86,6 +88,7 @@ protectedRouter.delete('/uploads/:id', deleteAttachment);
 // AI Generator
 protectedRouter.post('/ai/generate-exercise', generateExerciseByAI);
 protectedRouter.post('/ai/generate-exercise-by-file', upload.single('file'), generateExerciseFromFile);
+protectedRouter.get('/teacher/ai-exercises/history', getAiExerciseHistory);
 
 // Teacher Meta Data (for Assign Dropdowns)
 protectedRouter.get('/teacher/classes', getTeacherClasses);
@@ -120,6 +123,14 @@ protectedRouter.post('/auto-assign', createAutoAssignConfig);
 protectedRouter.put('/auto-assign/:id', updateAutoAssignConfig);
 protectedRouter.delete('/auto-assign/:id', deleteAutoAssignConfig);
 protectedRouter.post('/auto-assign/run', triggerAutoAssign);
+
+// Notifications
+protectedRouter.get('/notifications', getNotifications);
+protectedRouter.get('/notifications/unread-count', getUnreadCount);
+protectedRouter.get('/notifications/stream', sseStreamHandler);
+protectedRouter.patch('/notifications/read-all', markAllAsRead);
+protectedRouter.patch('/notifications/:id/read', markAsRead);
+protectedRouter.delete('/notifications/:id', deleteNotification);
 
 // Admin routes
 protectedRouter.get('/admin/stats', requireAdmin, getDashboardStats);

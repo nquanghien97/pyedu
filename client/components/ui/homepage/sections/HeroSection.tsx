@@ -7,7 +7,7 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
     <section className={`relative pt-24 pb-8 lg:pt-24 overflow-hidden ${bgColor}`}>
       {/* Background decorations */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#3b82f6]/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute top-40 right-0 w-[400px] h-[400px] bg-blue-100/40 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-100/30 rounded-full blur-3xl" />
         {/* Grid pattern */}
@@ -23,7 +23,7 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-[#3b82f6]/10 text-[#3b82f6] px-4 py-2 rounded-full text-sm font-medium mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-8 animate-fade-in">
             <Sparkles className="w-4 h-4" />
             Nền tảng học tập thông minh tích hợp AI
           </div>
@@ -65,7 +65,7 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
             <Link href="/login">
               <Button
                 size="lg"
-                className="bg-[#3b82f6] hover:bg-[#2563eb] text-white px-8 py-3 h-12 text-base font-semibold rounded-xl shadow-lg shadow-[#3b82f6]/25 hover:shadow-xl hover:shadow-[#3b82f6]/30 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                className="bg-primary hover:bg-blue-600 text-white px-8 py-3 h-12 text-base font-semibold rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
                 Bắt đầu ngay
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -77,7 +77,7 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
               <Button
                 size="lg"
                 variant="outline"
-                className="px-8 py-3 h-12 text-base font-semibold rounded-xl border-gray-200 text-gray-700 hover:border-[#3b82f6]/30 hover:text-[#3b82f6] hover:bg-[#3b82f6]/5 transition-all duration-300 cursor-pointer"
+                className="px-8 py-3 h-12 text-base font-semibold rounded-xl border-gray-200 text-gray-700 hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-all duration-300 cursor-pointer"
               >
                 Tìm hiểu thêm
                 <ChevronDown className="w-5 h-5 ml-1" />
@@ -88,8 +88,8 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
           {/* Hero Illustration */}
           <div className="relative max-w-3xl mx-auto">
             <div className="absolute inset-0 z-10 pointer-events-none" />
-            <div className="bg-gradient-to-br from-[#3b82f6]/5 to-[#1d4ed8]/5 rounded-2xl border border-[#3b82f6]/10 p-8 shadow-2xl shadow-[#3b82f6]/5">
-              <div className="bg-white rounded-xl shadow-sm border border-[#ccc] p-6">
+            <div className="bg-gradient-to-br from-[#3b82f6]/5 to-[#1d4ed8]/5 rounded-2xl border border-primary/10 p-8 shadow-2xl shadow-primary/5">
+              <div className="bg-white rounded-xl shadow-sm border border-border p-6">
                 {/* Mock Dashboard */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="flex gap-1.5">
@@ -131,11 +131,11 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
                   ))}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-24 bg-[#f1f1f1] rounded-xl flex items-center justify-center">
-                    <BarChart3 className="w-10 h-10 text-[#3b82f6]/30" />
+                  <div className="h-24 bg-muted rounded-xl flex items-center justify-center">
+                    <BarChart3 className="w-10 h-10 text-primary/30" />
                   </div>
-                  <div className="h-24 bg-[#f1f1f1] rounded-xl flex items-center justify-center">
-                    <BotMessageSquare className="w-10 h-10 text-[#3b82f6]/30" />
+                  <div className="h-24 bg-muted rounded-xl flex items-center justify-center">
+                    <BotMessageSquare className="w-10 h-10 text-primary/30" />
                   </div>
                 </div>
               </div>

@@ -28,7 +28,7 @@ export default function CtaSection({ bgColor }: { bgColor?: string }) {
           <Link href="/login">
             <Button
               size="lg"
-              className="bg-white text-[#3b82f6] hover:bg-gray-50 px-10 py-3 h-13 text-base font-semibold rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+              className="bg-white text-primary hover:bg-gray-50 px-10 py-3 h-13 text-base font-semibold rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
             >
               Bắt đầu miễn phí
               <ArrowRight className="w-5 h-5 ml-2" />

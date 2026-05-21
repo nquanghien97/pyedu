@@ -2,7 +2,7 @@ import Image from "next/image"
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0f172a] text-gray-400 pt-16 pb-8">
+    <footer className="bg-slate-900 text-gray-400 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Logo & Description */}
@@ -15,7 +15,7 @@ export default function Footer() {
                 height={36}
               />
               <span className="text-lg font-bold text-white">
-                Py<span className="text-[#3b82f6]">Edu</span>
+                Py<span className="text-primary">Edu</span>
               </span>
             </div>
             <p className="text-sm leading-relaxed">
@@ -37,7 +37,7 @@ export default function Footer() {
                 <li key={item}>
                   <a
                     href="/#features"
-                    className="text-sm hover:text-[#3b82f6] transition-colors cursor-pointer"
+                    className="text-sm hover:text-primary transition-colors cursor-pointer"
                   >
                     {item}
                   </a>
@@ -57,7 +57,7 @@ export default function Footer() {
                 "Góp ý",
               ].map((item) => (
                 <li key={item}>
-                  <span className="text-sm hover:text-[#3b82f6] transition-colors cursor-pointer">
+                  <span className="text-sm hover:text-primary transition-colors cursor-pointer">
                     {item}
                   </span>
                 </li>
@@ -75,7 +75,7 @@ export default function Footer() {
                 "Quyền riêng tư",
               ].map((item) => (
                 <li key={item}>
-                  <span className="text-sm hover:text-[#3b82f6] transition-colors cursor-pointer">
+                  <span className="text-sm hover:text-primary transition-colors cursor-pointer">
                     {item}
                   </span>
                 </li>

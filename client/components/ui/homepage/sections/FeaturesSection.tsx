@@ -10,7 +10,7 @@ export default function FeaturesSection({ bgColor }: { bgColor?: string }) {
         <div className="text-center mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Mọi thứ bạn cần cho{" "}
-            <span className="text-[#3b82f6]">việc học</span>
+            <span className="text-primary">việc học</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto">
             PyEdu cung cấp bộ công cụ toàn diện giúp giáo viên và học sinh

@@ -10,7 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { PlusIcon, SearchIcon, TrashIcon, EyeIcon, FilterIcon, SparklesIcon, BookOpen, CheckCircle, FileText } from 'lucide-react';
+import AIBadge from '@/components/shared/AIBadge';
 import StatCard from './StatCard';
+import { H1, P } from "@/components/ui/typography";
 
 // Danh sách khối lớp cố định
 const GRADES = Array.from({ length: 12 }, (_, i) => ({
@@ -73,21 +75,21 @@ export default function ExercisesPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Bài tập</h1>
-          <p className="text-sm text-gray-500 mt-1">Tạo và quản lý bài tập, câu hỏi cho học sinh</p>
+          <H1>Quản lý Bài tập</H1>
+          <P className="text-sm text-gray-500 mt-1">Tạo và quản lý bài tập, câu hỏi cho học sinh</P>
         </div>
         <div className="flex gap-3">
           <Link href="/teacher/assignments/exercises/ai-generate">
-            <Button className="gap-2 bg-gradient-to-r from-purple-500 to-[#3b82f6] hover:opacity-90 border-0 text-white shadow-md shadow-[#3b82f6]/20 transition-all">
+            <Button className="gap-2">
               <SparklesIcon className="w-4 h-4" />
               AI Tạo đề
             </Button>
           </Link>
           <Link href="/teacher/assignments/exercises/create">
-            <Button className="gap-2 shadow-sm bg-[#3b82f6] hover:bg-blue-600">
+            <Button className="gap-2">
               <PlusIcon className="w-4 h-4" />
               Thủ công
             </Button>
@@ -173,7 +175,7 @@ export default function ExercisesPage() {
           </div>
         ) : exercises.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
-            <p>Chưa có bài tập nào.</p>
+            <P>Chưa có bài tập nào.</P>
           </div>
         ) : (
           <table className="w-full">
@@ -191,9 +193,12 @@ export default function ExercisesPage() {
               {exercises.map(exercise => (
                 <tr key={exercise.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <Link href={`/teacher/assignments/exercises/${exercise.id}`} className="text-sm font-medium text-gray-900 hover:text-[#3b82f6]">
-                      {exercise.title || 'Không có tiêu đề'}
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      <Link href={`/teacher/assignments/exercises/${exercise.id}`} className="text-sm font-medium text-gray-900 hover:text-primary">
+                        {exercise.title || 'Không có tiêu đề'}
+                      </Link>
+                      {exercise.isAiGenerated && <AIBadge />}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{exercise.subject?.name || '—'}</td>
                   <td className="px-4 py-3">
@@ -230,9 +235,9 @@ export default function ExercisesPage() {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
-            <p className="text-sm text-gray-500">
+            <P className="text-sm text-gray-500">
               Trang {pagination.page} / {pagination.totalPages} ({pagination.total} bài tập)
-            </p>
+            </P>
             <div className="flex items-center gap-2">
               <Button
                 size="sm"

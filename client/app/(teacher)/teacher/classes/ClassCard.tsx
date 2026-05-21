@@ -1,4 +1,6 @@
 import { CheckSquare, MoreHorizontal, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { P } from "@/components/ui/typography";
 
 interface ClassProps {
   cls: {
@@ -84,26 +86,26 @@ export default function ClassCard({ cls } : ClassProps) {
         {/* Title row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
           <span style={{ fontWeight: 700, fontSize: 16, color: "#111827" }}>{cls.name}</span>
-          <button style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 2 }}>
+          <Button style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 2 }}>
             <MoreHorizontal size={18} />
-          </button>
+          </Button>
         </div>
-        <p style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 14 }}>Mã lớp: {cls.code}</p>
+        <P style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 14 }}>Mã lớp: {cls.code}</P>
 
         {/* Stats */}
         <div style={{ display: "flex", gap: 20, marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Users size={16} color="#3B82F6" />
             <div>
-              <p style={{ fontSize: 11, color: "#9CA3AF", lineHeight: 1.2 }}>Sĩ số</p>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cls.students} Học sinh</p>
+              <P style={{ fontSize: 11, color: "#9CA3AF", lineHeight: 1.2 }}>Sĩ số</P>
+              <P style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cls.students} Học sinh</P>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <CheckSquare size={16} color="#22C55E" />
             <div>
-              <p style={{ fontSize: 11, color: "#9CA3AF", lineHeight: 1.2 }}>Hoàn thành</p>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cls.completion}%</p>
+              <P style={{ fontSize: 11, color: "#9CA3AF", lineHeight: 1.2 }}>Hoàn thành</P>
+              <P style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cls.completion}%</P>
             </div>
           </div>
         </div>
@@ -127,12 +129,12 @@ export default function ClassCard({ cls } : ClassProps) {
 
         {/* Link */}
         <div style={{ borderTop: "1px solid #F1F5F9", paddingTop: 14, textAlign: "right" }}>
-          <button style={{
+          <Button style={{
             background: "none", border: "none", cursor: "pointer",
             color: "#3B82F6", fontSize: 13, fontWeight: 600,
           }}>
             Chi tiết lớp học
-          </button>
+          </Button>
         </div>
       </div>
     </div>

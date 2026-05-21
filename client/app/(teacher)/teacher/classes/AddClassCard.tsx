@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import { P } from "@/components/ui/typography";
 
 export default function AddClassCard() {
     return (
@@ -32,10 +33,10 @@ export default function AddClassCard() {
           <Plus size={22} color="#9CA3AF" />
         </div>
         <div style={{ textAlign: "center" }}>
-          <p style={{ fontWeight: 700, fontSize: 15, color: "#374151", marginBottom: 6 }}>Thêm lớp học mới</p>
-          <p style={{ fontSize: 12, color: "#9CA3AF", lineHeight: 1.6 }}>
+          <P style={{ fontWeight: 700, fontSize: 15, color: "#374151", marginBottom: 6 }}>Thêm lớp học mới</P>
+          <P style={{ fontSize: 12, color: "#9CA3AF", lineHeight: 1.6 }}>
             Bắt đầu quản lý một lớp<br />học hoặc môn học mới
-          </p>
+          </P>
         </div>
       </div>
     );

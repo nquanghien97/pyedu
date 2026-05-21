@@ -1,5 +1,6 @@
 import React from "react";
 import { TrendingUp, TrendingDown, Plus } from "lucide-react";
+import { P } from "@/components/ui/typography";
 
 interface StatCardProps {
   icon: React.ComponentType<{ size?: number }>; // the SVG/component you render
@@ -43,8 +44,8 @@ const StatCard: React.FC<StatCardProps> = ({
         </span>
       </div>
       <div>
-        <p className="text-xs text-gray-400 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <P className="text-xs text-gray-400 mb-1">{label}</P>
+        <P className="text-2xl font-bold text-gray-800">{value}</P>
       </div>
     </div>
   );

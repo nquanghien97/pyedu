@@ -1,4 +1,5 @@
 import { AlertTriangle, Info, Star, TrendingDown, TrendingUp } from "lucide-react";
+import { P } from "@/components/ui/typography";
 
 export function AlertCard({ type, title, tag, tagColor, desc } : { type: "warning" | "success" | "info", title: string, tag: string, tagColor: "red" | "green" | "blue", desc: string }) {
   const styles = {
@@ -21,10 +22,10 @@ export function AlertCard({ type, title, tag, tagColor, desc } : { type: "warnin
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#111827", margin: 0 }}>{title}</p>
+          <P style={{ fontSize: 13, fontWeight: 700, color: "#111827", margin: 0 }}>{title}</P>
           <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", padding: "2px 8px", borderRadius: 999, background: ts.bg, color: ts.color, whiteSpace: "nowrap", marginLeft: 8 }}>{tag}</span>
         </div>
-        <p style={{ fontSize: 12, color: "#6B7280", margin: 0, lineHeight: 1.5 }}>{desc}</p>
+        <P style={{ fontSize: 12, color: "#6B7280", margin: 0, lineHeight: 1.5 }}>{desc}</P>
       </div>
     </div>
   );
@@ -33,11 +34,11 @@ export function AlertCard({ type, title, tag, tagColor, desc } : { type: "warnin
 // ── Stat Card ────────────────────────────────────────────────────
 export function StatCard({ label, value, delta, up } : { label: string, value: string, delta: string, up: boolean }) {
   return (
-    <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "20px 22px", flex: 1 }}>
-      <p style={{ fontSize: 12, color: "#9CA3AF", margin: "0 0 8px" }}>{label}</p>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontSize: 26, fontWeight: 800, color: "#111827" }}>{value}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 3, color: up ? "#16A34A" : "#DC2626" }}>
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5" style={{ flex: 1 }}>
+      <P className="text-sm text-muted-foreground mb-2">{label}</P>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-bold">{value}</span>
+        <span className={`flex items-center gap-1 ${up ? 'text-green-500' : 'text-red-500'}`}>
           {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
           {delta}
         </span>

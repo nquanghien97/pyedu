@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { getSubmissionById, updateSubmissionGrade } from '@/services/submission';
 import { notification } from '@/components/notification';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, H3, P } from "@/components/ui/typography";
 
 function normalizeOptions(
   rawOptions: unknown[]
@@ -175,33 +178,33 @@ export default function TeacherSubmissionDetailPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <button
+            <Button
               onClick={() => router.back()}
               className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-slate-50"
             >
               <ArrowLeft size={18} className="text-gray-600" />
-            </button>
+            </Button>
             <div>
-              <h1 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+              <H1 className="flex items-center gap-2">
                 Bài làm: {student?.user?.name}
-              </h1>
-              <p className="text-sm font-medium text-gray-500 mt-1">
+              </H1>
+              <P className="text-sm font-medium text-gray-500 mt-1">
                 {assignment?.exercise?.title}
-              </p>
+              </P>
             </div>
           </div>
           <div className="flex items-center gap-5 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
             <div className="text-center px-4 border-r border-gray-100">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Điểm số</p>
-              <p className={`text-2xl font-extrabold ${scoreColor}`}>
+              <P className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Điểm số</P>
+              <P className={`text-2xl font-extrabold ${scoreColor}`}>
                 {data.totalScore} <span className="text-sm text-gray-400">/ {assignment?.exercise?.totalPoints}</span>
-              </p>
+              </P>
             </div>
             <div className="text-center">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phần trăm</p>
-              <p className={`text-2xl font-extrabold ${scoreColor}`}>
+              <P className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phần trăm</P>
+              <P className={`text-2xl font-extrabold ${scoreColor}`}>
                 {data.percentage}%
-              </p>
+              </P>
             </div>
           </div>
         </div>
@@ -215,7 +218,7 @@ export default function TeacherSubmissionDetailPage() {
             return (
               <div key={ans.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="bg-slate-50 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-                  <h3 className="font-bold text-gray-800">Câu {index + 1}</h3>
+                  <H3>Câu {index + 1}</H3>
                   <span className="text-xs font-bold bg-white px-2 py-1 rounded text-gray-500 border border-gray-200">
                     {ans.question.questionType === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}
                   </span>
@@ -223,16 +226,16 @@ export default function TeacherSubmissionDetailPage() {
 
                 <div className="p-6">
                   <div className="mb-4">
-                    <p className="text-sm text-gray-800 font-medium" dangerouslySetInnerHTML={{ __html: ans.question.questionText || '' }} />
+                    <P className="text-sm text-gray-800 font-medium" dangerouslySetInnerHTML={{ __html: ans.question.questionText || '' }} />
                   </div>
 
                   {/* Answer display based on type */}
                   <div className="bg-blue-50/50 rounded-xl p-4 mb-6 border border-blue-100">
-                    <p className="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wide">Học sinh trả lời:</p>
+                    <P className="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wide">Học sinh trả lời:</P>
                     {ans.question.questionType === 'essay' ? (
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{ans.answerData?.text || '—'}</p>
+                      <P className="text-sm text-gray-700 whitespace-pre-wrap">{ans.answerData?.text || '—'}</P>
                     ) : (
-                      <p className="text-sm text-gray-700 font-semibold whitespace-pre-wrap">{renderStudentAnswer(ans)}</p>
+                      <P className="text-sm text-gray-700 font-semibold whitespace-pre-wrap">{renderStudentAnswer(ans)}</P>
                     )}
                   </div>
 
@@ -242,13 +245,7 @@ export default function TeacherSubmissionDetailPage() {
                       {/* Points */}
                       <div className="w-1/4">
                         <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block mb-2">Điểm (Max: {pointsPossible})</label>
-                        <input
-                          type="number"
-                          min="0" max={pointsPossible} step="0.5"
-                          value={edit.pointsEarned ?? ''}
-                          className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-blue-500 transition-colors font-bold text-gray-800"
-                          disabled={!isManualGrade}
-                          onChange={e => handleEditChange(ans.id, 'pointsEarned', parseFloat(e.target.value) || 0)}
+                        <Input type="number" min="0" max={pointsPossible} step="0.5" value={edit.pointsEarned ?? ''} className="w-full border-2 border-gray-200 focus:border-blue-500 transition-colors font-bold text-gray-800" disabled={!isManualGrade} onChange={e => handleEditChange(ans.id, 'pointsEarned', parseFloat(e.target.value) || 0)}
                         />
                       </div>
 
@@ -273,14 +270,10 @@ export default function TeacherSubmissionDetailPage() {
 
         {/* Save button sticky bottom */}
         <div className="mt-8 flex justify-end sticky bottom-6 z-10 transition-transform">
-          <button
-            onClick={handleSaveGrades}
-            disabled={saving}
-            className="bg-blue-600 shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all text-white font-extrabold px-8 py-3 rounded-2xl flex items-center gap-3 disabled:opacity-50"
-          >
+          <Button onClick={handleSaveGrades} disabled={saving} className="shadow-lg shadow-blue-200 hover:scale-105 font-extrabold px-8 py-3 rounded-2xl flex items-center gap-3 disabled:opacity-50">
             {saving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
             Lưu Điểm & Nhận Xét
-          </button>
+          </Button>
         </div>
       </div>
     </div>

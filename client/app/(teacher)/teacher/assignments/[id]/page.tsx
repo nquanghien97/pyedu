@@ -15,6 +15,8 @@ import {
   Award,
 } from 'lucide-react';
 import { getAssignmentSubmissions, AssignmentSubmissionsResponse } from '@/services/submission';
+import { Button } from "@/components/ui/button";
+import { H1, H2, P } from "@/components/ui/typography";
 
 export default function AssignmentDetailPage() {
   const params = useParams();
@@ -93,7 +95,7 @@ export default function AssignmentDetailPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={32} className="text-blue-500 animate-spin" />
-          <p className="text-sm text-gray-500">Đang tải dữ liệu...</p>
+          <P className="text-sm text-gray-500">Đang tải dữ liệu...</P>
         </div>
       </div>
     );
@@ -101,19 +103,19 @@ export default function AssignmentDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-7">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button
+          <Button
             onClick={() => router.back()}
             className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
           >
             <ArrowLeft size={16} className="text-gray-600" />
-          </button>
+          </Button>
           <div>
-            <h1 className="text-lg font-extrabold text-gray-900">
+            <H1 className="text-lg">
               {assignment?.exercise?.title ?? 'Chi tiết Assignment'}
-            </h1>
+            </H1>
             <div className="flex items-center gap-3 mt-1">
               {assignment?.exercise?.subject && (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
@@ -140,40 +142,40 @@ export default function AssignmentDetailPage() {
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
               <Users size={20} className="text-blue-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Tổng bài nộp</p>
-            <p className="text-2xl font-extrabold text-gray-900">{pagination.total}</p>
+            <P className="text-xs text-gray-400 mb-1">Tổng bài nộp</P>
+            <P className="text-2xl font-extrabold text-gray-900">{pagination.total}</P>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
               <BarChart3 size={20} className="text-green-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Điểm trung bình</p>
-            <p className="text-2xl font-extrabold text-gray-900">
+            <P className="text-xs text-gray-400 mb-1">Điểm trung bình</P>
+            <P className="text-2xl font-extrabold text-gray-900">
               {avgScore}<span className="text-sm font-normal text-gray-400">%</span>
-            </p>
+            </P>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
               <Award size={20} className="text-purple-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Điểm cao (≥80%)</p>
-            <p className="text-2xl font-extrabold text-gray-900">{highScoreCount}</p>
+            <P className="text-xs text-gray-400 mb-1">Điểm cao (≥80%)</P>
+            <P className="text-2xl font-extrabold text-gray-900">{highScoreCount}</P>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
               <AlertTriangle size={20} className="text-orange-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Nộp trễ</p>
-            <p className="text-2xl font-extrabold text-gray-900">{lateCount}</p>
+            <P className="text-xs text-gray-400 mb-1">Nộp trễ</P>
+            <P className="text-2xl font-extrabold text-gray-900">{lateCount}</P>
           </div>
         </div>
 
         {/* Submissions Table */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-bold text-gray-900">
+            <H2 className="text-sm">
               Danh sách bài nộp
-            </h2>
+            </H2>
           </div>
 
           <table className="w-full border-collapse">
@@ -183,7 +185,7 @@ export default function AssignmentDetailPage() {
                   (h) => (
                     <th
                       key={h}
-                      className="text-[11px] font-bold text-gray-400 tracking-wider text-left px-6 py-3"
+                      className="text-xs font-bold text-gray-400 tracking-wider text-left px-6 py-3"
                     >
                       {h}
                     </th>
@@ -199,9 +201,9 @@ export default function AssignmentDetailPage() {
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <FileText size={24} className="text-gray-400" />
                       </div>
-                      <p className="text-sm font-semibold text-gray-500">
+                      <P className="text-sm font-semibold text-gray-500">
                         Chưa có bài nộp nào
-                      </p>
+                      </P>
                     </div>
                   </td>
                 </tr>
@@ -228,12 +230,12 @@ export default function AssignmentDetailPage() {
                   >
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <P className="text-sm font-semibold text-gray-900">
                           {sub.student.user.name}
-                        </p>
-                        <p className="text-xs text-gray-400">
+                        </P>
+                        <P className="text-xs text-gray-400">
                           {sub.student.user.email}
-                        </p>
+                        </P>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -290,13 +292,13 @@ export default function AssignmentDetailPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <button
+                      <Button
                         onClick={() => router.push(`/teacher/submissions/${sub.id}`)}
                         className="text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer bg-transparent border-none flex items-center gap-1"
                       >
                         <Eye size={13} />
                         Xem
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

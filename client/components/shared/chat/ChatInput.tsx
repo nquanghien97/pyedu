@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { ImageIcon, SendIcon, X, Loader2 } from 'lucide-react';
 import { notification } from '@/components/notification';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ChatInputProps {
   onSendMessage: (content: string, file?: File) => void;
@@ -60,31 +62,28 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
         {previewUrl && (
           <div className="mb-2 inline-block relative border border-gray-200 rounded-lg p-1 bg-gray-50">
             <img src={previewUrl} alt="Preview" className="h-20 w-auto rounded object-contain" />
-            <button
-              onClick={removeFile}
-              className="absolute -top-2 -right-2 bg-gray-600 text-white rounded-full p-0.5 hover:bg-gray-800"
-            >
+            <Button onClick={removeFile} className="absolute -top-2 -right-2 bg-gray-600 rounded-full p-0.5 hover:bg-gray-800">
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         )}
 
         <div className="flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-2xl px-3 py-2 shadow-sm focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-          <input
+          <Input
             type="file"
             accept="image/*"
             className="hidden"
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-          <button
+          <Button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="text-gray-400 hover:text-blue-600 transition-colors shrink-0 p-2 rounded-full hover:bg-blue-50"
             disabled={isLoading}
           >
             <ImageIcon className="w-5 h-5" />
-          </button>
+          </Button>
 
           <textarea
             value={content}
@@ -95,13 +94,9 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
             disabled={isLoading}
           />
 
-          <button
-            onClick={submit}
-            disabled={(!content.trim() && !file) || isLoading}
-            className="w-10 h-10 mb-0.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-xl flex items-center justify-center text-white transition-colors shadow-sm shrink-0"
-          >
+          <Button onClick={submit} disabled={(!content.trim() && !file) || isLoading} className="w-10 h-10 mb-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-xl flex items-center justify-center shrink-0">
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendIcon className="w-5 h-5 -ml-0.5" />}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

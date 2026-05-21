@@ -23,6 +23,9 @@ import { AnswerData, SubmitAnswerInput, SubmissionEntity } from '@/entity/submis
 import { api } from '@/lib/api';
 import { submitExercise, getMySubmissions } from '@/services/submission';
 import { notification } from '@/components/notification';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, H3, P } from "@/components/ui/typography";
 
 interface AssignmentDetail {
   id: string;
@@ -191,7 +194,7 @@ export default function DoExercisePage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={32} className="text-blue-500 animate-spin" />
-          <p className="text-sm text-gray-500">Đang tải bài tập...</p>
+          <P className="text-sm text-gray-500">Đang tải bài tập...</P>
         </div>
       </div>
     );
@@ -216,39 +219,39 @@ export default function DoExercisePage() {
               >
                 <Trophy size={36} className="text-white" />
               </div>
-              <h1 className="text-2xl font-extrabold text-gray-900 mb-1">
+              <H1>
                 Kết quả bài làm
-              </h1>
-              <p className="text-sm text-gray-500">
+              </H1>
+              <P className="text-sm text-gray-500">
                 {assignment.exercise.title}
-              </p>
+              </P>
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-blue-50 rounded-xl p-4 text-center">
-                <p className="text-xs text-blue-600 font-medium mb-1">Điểm số</p>
-                <p className="text-3xl font-extrabold text-blue-700">
+                <P className="text-xs text-blue-600 font-medium mb-1">Điểm số</P>
+                <P className="text-3xl font-extrabold text-blue-700">
                   {submissionResult.totalScore ?? 0}
-                </p>
-                <p className="text-xs text-blue-500">
+                </P>
+                <P className="text-xs text-blue-500">
                   / {assignment.exercise.totalPoints ?? 0}
-                </p>
+                </P>
               </div>
               <div className="bg-green-50 rounded-xl p-4 text-center">
-                <p className="text-xs text-green-600 font-medium mb-1">Phần trăm</p>
-                <p className="text-3xl font-extrabold text-green-700">
+                <P className="text-xs text-green-600 font-medium mb-1">Phần trăm</P>
+                <P className="text-3xl font-extrabold text-green-700">
                   {submissionResult.percentage ?? 0}%
-                </p>
+                </P>
               </div>
               <div className="bg-purple-50 rounded-xl p-4 text-center">
-                <p className="text-xs text-purple-600 font-medium mb-1">Lần nộp</p>
-                <p className="text-3xl font-extrabold text-purple-700">
+                <P className="text-xs text-purple-600 font-medium mb-1">Lần nộp</P>
+                <P className="text-3xl font-extrabold text-purple-700">
                   {submissionResult.attemptNumber ?? 1}
-                </p>
+                </P>
                 {assignment.maxAttempts && (
-                  <p className="text-xs text-purple-500">
+                  <P className="text-xs text-purple-500">
                     / {assignment.maxAttempts}
-                  </p>
+                  </P>
                 )}
               </div>
             </div>
@@ -311,27 +314,27 @@ export default function DoExercisePage() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-800 font-medium mb-3">
+                  <P className="text-sm text-gray-800 font-medium mb-3">
                     {question?.questionText}
-                  </p>
+                  </P>
 
                   {answer.feedback && (
                     <div className="bg-slate-50 rounded-xl p-3 mt-3">
-                      <p className="text-xs text-gray-500 font-medium mb-1">
+                      <P className="text-xs text-gray-500 font-medium mb-1">
                         Nhận xét:
-                      </p>
-                      <p className="text-sm text-gray-700">{answer.feedback}</p>
+                      </P>
+                      <P className="text-sm text-gray-700">{answer.feedback}</P>
                     </div>
                   )}
 
                   {question?.explanation && (
                     <div className="bg-blue-50 rounded-xl p-3 mt-3">
-                      <p className="text-xs text-blue-600 font-medium mb-1">
+                      <P className="text-xs text-blue-600 font-medium mb-1">
                         Giải thích:
-                      </p>
-                      <p className="text-sm text-blue-800">
+                      </P>
+                      <P className="text-sm text-blue-800">
                         {question.explanation}
-                      </p>
+                      </P>
                     </div>
                   )}
                 </div>
@@ -340,12 +343,12 @@ export default function DoExercisePage() {
           </div>
 
           <div className="flex justify-center gap-3">
-            <button
+            <Button
               onClick={() => router.push('/student/assignments')}
               className="bg-white border border-gray-200 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 transition-all cursor-pointer"
             >
               ← Quay lại danh sách
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -357,18 +360,18 @@ export default function DoExercisePage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Bar */}
       <div className="bg-white border-b border-slate-100 shadow-sm px-6 py-3 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
+            <Button
               onClick={() => router.push('/student/assignments')}
               className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer border-none"
             >
               <ArrowLeft size={16} className="text-gray-600" />
-            </button>
+            </Button>
             <div>
-              <h1 className="text-sm font-bold text-gray-900">
+              <H1>
                 {assignment.exercise.title}
-              </h1>
+              </H1>
               <div className="flex items-center gap-3 mt-0.5">
                 {assignment.exercise.subject && (
                   <span className="text-xs text-gray-500">
@@ -413,18 +416,14 @@ export default function DoExercisePage() {
             </div>
 
             {/* Submit */}
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || answeredCount === 0}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button onClick={handleSubmit} disabled={submitting || answeredCount === 0} className="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
                 <Send size={14} />
               )}
               Nộp bài
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -433,16 +432,16 @@ export default function DoExercisePage() {
         {/* Question Navigator */}
         <div className="w-64 flex-shrink-0">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sticky top-20">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
+            <H3 className="text-xs uppercase tracking-wider mb-4">
               Câu hỏi ({totalQuestions})
-            </h3>
+            </H3>
             <div className="grid grid-cols-5 gap-2">
               {questions.map((q, idx) => {
                 const isAnswered = !!answers[q.id];
                 const isCurrent = idx === currentQuestionIndex;
 
                 return (
-                  <button
+                  <Button
                     key={q.id}
                     onClick={() => setCurrentQuestionIndex(idx)}
                     className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold transition-all cursor-pointer border-none"
@@ -460,7 +459,7 @@ export default function DoExercisePage() {
                     }}
                   >
                     {idx + 1}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -510,9 +509,9 @@ export default function DoExercisePage() {
                 </span>
               </div>
 
-              <p className="text-base text-gray-800 font-medium leading-relaxed mb-8">
+              <P className="text-base text-gray-800 font-medium leading-relaxed mb-8">
                 {currentQuestion.questionText}
-              </p>
+              </P>
 
               {/* Render answer input based on type */}
               <QuestionAnswerInput
@@ -523,7 +522,7 @@ export default function DoExercisePage() {
 
               {/* Navigation */}
               <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
-                <button
+                <Button
                   onClick={() =>
                     setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
                   }
@@ -532,11 +531,11 @@ export default function DoExercisePage() {
                 >
                   <ChevronLeft size={16} />
                   Câu trước
-                </button>
+                </Button>
                 <span className="text-xs text-gray-400">
                   {currentQuestionIndex + 1} / {totalQuestions}
                 </span>
-                <button
+                <Button
                   onClick={() =>
                     setCurrentQuestionIndex((prev) =>
                       Math.min(totalQuestions - 1, prev + 1)
@@ -547,7 +546,7 @@ export default function DoExercisePage() {
                 >
                   Câu tiếp
                   <ChevronRight size={16} />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -691,7 +690,7 @@ function MultipleChoiceInput({
   return (
     <div className="space-y-3">
       {options.map((opt, idx) => (
-        <button
+        <Button
           key={`${opt.id}-${idx}`}
           onClick={() => onSelect(opt.id)}
           className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer text-left bg-white"
@@ -715,7 +714,7 @@ function MultipleChoiceInput({
           >
             {opt.text}
           </span>
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -742,13 +741,13 @@ function MultipleSelectInput({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-gray-400 font-medium mb-2">
+      <P className="text-xs text-gray-400 font-medium mb-2">
         (Chọn nhiều đáp án)
-      </p>
+      </P>
       {options.map((opt, idx) => {
         const isSelected = selected.includes(opt.id);
         return (
-          <button
+          <Button
             key={`${opt.id}-${idx}`}
             onClick={() => toggle(opt.id)}
             className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer text-left bg-white"
@@ -772,7 +771,7 @@ function MultipleSelectInput({
             >
               {opt.text}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -792,7 +791,7 @@ function TrueFalseInput({
         { value: true, label: 'Đúng', emoji: '✓' },
         { value: false, label: 'Sai', emoji: '✗' },
       ].map((opt) => (
-        <button
+        <Button
           key={String(opt.value)}
           onClick={() => onSelect(opt.value)}
           className="flex-1 flex items-center justify-center gap-3 p-5 rounded-xl border-2 transition-all cursor-pointer bg-white"
@@ -808,7 +807,7 @@ function TrueFalseInput({
           >
             {opt.label}
           </span>
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -844,7 +843,7 @@ function FillBlankInput({
             <span className="text-sm font-bold text-gray-500 w-16 text-right">
               Ô {blank.id}:
             </span>
-            <input
+            <Input
               type="text"
               value={currentValue}
               onChange={(e) => updateBlank(blank.id, e.target.value)}

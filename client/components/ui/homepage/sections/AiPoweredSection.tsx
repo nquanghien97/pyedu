@@ -17,13 +17,13 @@ export default function AiPoweredSection({ bgColor }: { bgColor?: string }) {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Content */}
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#3b82f6]/20 text-[#60a5fa] px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-primary/20 text-blue-400 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
               <BrainCircuit className="w-4 h-4" />
               Tích hợp AI
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
               Sức mạnh trí tuệ nhân tạo{" "}
-              <span className="text-[#60a5fa]">trong giáo dục</span>
+              <span className="text-blue-400">trong giáo dục</span>
             </h2>
             <p className="text-gray-400 text-lg mb-10 leading-relaxed">
               PyEdu tích hợp công nghệ AI tiên tiến (Gemini) giúp tự động hóa
@@ -53,7 +53,7 @@ export default function AiPoweredSection({ bgColor }: { bgColor?: string }) {
                 },
               ].map((feature, index) => (
                 <div key={index} className="flex gap-4 group">
-                  <div className="w-11 h-11 rounded-xl bg-[#3b82f6]/20 flex items-center justify-center text-[#60a5fa] shrink-0 group-hover:bg-[#3b82f6] group-hover:text-white transition-all duration-300">
+                  <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center text-blue-400 shrink-0 group-hover:bg-primary group-hover:text-white transition-all duration-300">
                     {feature.icon}
                   </div>
                   <div>
@@ -71,8 +71,8 @@ export default function AiPoweredSection({ bgColor }: { bgColor?: string }) {
 
           {/* AI Chat Mock UI */}
           <div className="relative">
-            <div className="absolute inset-0 bg-[#3b82f6]/10 rounded-3xl blur-3xl" />
-            <div className="relative bg-[#1e293b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-3xl" />
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
               {/* Chat Header */}
               <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center">
@@ -95,7 +95,7 @@ export default function AiPoweredSection({ bgColor }: { bgColor?: string }) {
               <div className="p-6 space-y-4">
                 {/* User message */}
                 <div className="flex justify-end">
-                  <div className="bg-[#3b82f6] text-white text-sm px-4 py-2.5 rounded-2xl rounded-br-md max-w-[80%]">
+                  <div className="bg-primary text-white text-sm px-4 py-2.5 rounded-2xl rounded-br-md max-w-[80%]">
                     Giải giúp em phương trình bậc 2: x² - 5x + 6 = 0
                   </div>
                 </div>
@@ -104,12 +104,12 @@ export default function AiPoweredSection({ bgColor }: { bgColor?: string }) {
                   <div className="bg-white/5 border border-white/10 text-gray-300 text-sm px-4 py-3 rounded-2xl rounded-bl-md max-w-[85%] space-y-2">
                     <p>
                       Để giải phương trình{" "}
-                      <code className="bg-white/10 px-1.5 py-0.5 rounded text-[#60a5fa]">
+                      <code className="bg-white/10 px-1.5 py-0.5 rounded text-blue-400">
                         x² - 5x + 6 = 0
                       </code>
                       , ta dùng công thức delta:
                     </p>
-                    <p className="text-[#60a5fa] font-mono text-xs bg-white/5 px-3 py-2 rounded-lg">
+                    <p className="text-blue-400 font-mono text-xs bg-white/5 px-3 py-2 rounded-lg">
                       Δ = b² - 4ac = 25 - 24 = 1 &gt; 0
                     </p>
                     <p>

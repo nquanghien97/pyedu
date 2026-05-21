@@ -5,6 +5,7 @@ import { submissionRepository } from '../../database/submission.repo';
 import { submitExerciseSchema } from '../../../entities/submission';
 import { gradeSubmission } from '../../../execution/grading/grading.service';
 import { updateStudentProgress } from '../../../execution/progress/progress.service';
+import { notificationService } from '../../../execution/notification/notification.service';
 
 /**
  * POST /api/v1/student/assignments/:id/submit
@@ -107,6 +108,27 @@ export const submitAssignment: RequestHandler = withAsyncErrorHandling(
     ).catch(() => {
       // Silently handle progress update failures
     });
+
+    // Trigger notification: bài đã được chấm
+    try {
+      const totalScore = submission.totalScore ? Number(submission.totalScore) : 0;
+      const maxScore = assignment.exercise.totalPoints ? Number(assignment.exercise.totalPoints) : 0;
+      await notificationService.create({
+        userId,
+        title: '✅ Bài đã được chấm!',
+        message: `Bài "${assignment.exercise.title}" được ${totalScore}/${maxScore} điểm`,
+        notificationType: 'submission_graded',
+        metadata: {
+          submissionId: submission.id,
+          assignmentId,
+          score: totalScore,
+          maxScore,
+          link: `/student/assignments/${assignmentId}`,
+        },
+      });
+    } catch {
+      // Non-blocking
+    }
 
     res.status(201).json({ success: true, data: submission });
   }

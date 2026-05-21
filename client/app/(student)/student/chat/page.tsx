@@ -1,4 +1,5 @@
 import { Bot } from "lucide-react";
+import { H2, P } from "@/components/ui/typography";
 
 export default function ChatWelcomePage() {
   return (
@@ -6,10 +7,10 @@ export default function ChatWelcomePage() {
       <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
         <Bot className="w-10 h-10" />
       </div>
-      <h2 className="text-2xl font-semibold text-gray-700 mb-2">PyEdu Bot sẵn sàng hỗ trợ</h2>
-      <p className="max-w-md mx-auto text-gray-500">
+      <H2 className="mb-2">PyEdu Bot sẵn sàng hỗ trợ</H2>
+      <P className="max-w-md mx-auto text-gray-500">
         Hãy bắt đầu một cuộc trò chuyện mới ở thanh bên trái để hỏi bài tập hoặc yêu cầu gợi ý giải.
-      </p>
+      </P>
     </div>
   );
 }

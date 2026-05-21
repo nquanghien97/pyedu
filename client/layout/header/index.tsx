@@ -9,9 +9,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
-import { BellIcon, LockIcon, MenuIcon, UserIcon } from 'lucide-react';
+import { LockIcon, MenuIcon, UserIcon } from 'lucide-react';
 import { logout } from '@/services/auth';
-import { Badge } from '@/components/ui/badge';
+import NotificationBell from '@/components/shared/NotificationBell';
 
 interface HeaderProps {
   open: boolean;
@@ -64,16 +64,13 @@ function Header(props: HeaderProps) {
             </div>
           </div>        </div>
         <div className={styles.right_header}>
-          <div className="relative">
-            <Badge className="absolute -top-3 -right-3 min-w-5 h-5 rounded-full flex items-center justify-center px-1" variant="destructive">12</Badge>
-            <BellIcon width={24} height={24} />
-          </div>
+          <NotificationBell />
           <div className={styles.user_wrapper}>
             <div
               className={`${styles.user} gap-2`}
               onClick={() => setOpenUserOptions(true)}
             >
-              <div className="flex items-center justify-center rounded-full bg-[#f1f1f1] w-10 h-10 p-2">
+              <div className="flex items-center justify-center rounded-full bg-muted w-10 h-10 p-2">
                 <UserIcon width={24} height={24} />
               </div>
               <span>{user?.name}</span>

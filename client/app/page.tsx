@@ -33,19 +33,19 @@ export default function Home() {
       <HeroSection />
 
       {/* ─── FEATURES SECTION ─── */}
-      <FeaturesSection bgColor="bg-[#f1f1f1]" />
+      <FeaturesSection bgColor="bg-muted" />
 
       {/* ─── HOW IT WORKS SECTION ─── */}
       <HowItWorksSection />
 
       {/* ─── FOR WHO SECTION ─── */}
-      <ForWhoSection bgColor="bg-[#f1f1f1]" />
+      <ForWhoSection bgColor="bg-muted" />
 
       {/* ─── AI-POWERED SECTION ─── */}
       <AiPoweredSection />
 
       {/* ─── STATISTICS SECTION ─── */}
-      <StatisticsSection bgColor="bg-[#f1f1f1]" />
+      <StatisticsSection bgColor="bg-muted" />
 
       {/* ─── CTA SECTION ─── */}
       <CtaSection />

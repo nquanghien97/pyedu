@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { CheckCircle2, Clock, Star, SlidersHorizontal, ChevronLeft, ChevronRight, Info, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { P } from "@/components/ui/typography";
 
 type Tab = "chapter" | "schedule" | "results";
 
@@ -88,7 +90,7 @@ function ActionButton({ type }: { type: string }) {
   const a = actionConfig[type];
   if (a.variant === "button") {
     return (
-      <button style={{
+      <Button style={{
         background: "linear-gradient(135deg, #3B82F6, #2563EB)",
         border: "none", borderRadius: 9, padding: "7px 20px",
         fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer",
@@ -96,18 +98,18 @@ function ActionButton({ type }: { type: string }) {
       }}
         onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
         onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-      >{a.label}</button>
+      >{a.label}</Button>
     );
   }
   return (
-    <button style={{
+    <Button style={{
       background: "none", border: "none", fontSize: 13,
       fontWeight: 600, color: "#3B82F6", cursor: "pointer", padding: 0,
       transition: "color 0.15s",
     }}
       onMouseEnter={e => (e.currentTarget.style.color = "#1D4ED8")}
       onMouseLeave={e => (e.currentTarget.style.color = "#3B82F6")}
-    >{a.label}</button>
+    >{a.label}</Button>
   );
 }
 
@@ -117,13 +119,13 @@ export default function TestsPage() {
   const totalPages = 3;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans p-6">
+    <div className="min-h-screen bg-slate-50 font-sans p-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Tabs */}
         <div className="flex gap-0 border-b border-[#E5E7EB] mb-6">
           {tabs.map(t => (
-            <button
+            <Button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               style={{
@@ -138,7 +140,7 @@ export default function TestsPage() {
             >
               <span style={{ fontSize: 14 }}>{t.icon}</span>
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -152,8 +154,8 @@ export default function TestsPage() {
                 <CheckCircle2 size={17} color="#22C55E" />
               </div>
             </div>
-            <p style={{ fontSize: 32, fontWeight: 800, color: "#111827", margin: "0 0 6px" }}>24</p>
-            <p style={{ fontSize: 12, color: "#16A34A", margin: 0, fontWeight: 500 }}>↑ Tăng 15% so với tháng trước</p>
+            <P style={{ fontSize: 32, fontWeight: 800, color: "#111827", margin: "0 0 6px" }}>24</P>
+            <P style={{ fontSize: 12, color: "#16A34A", margin: 0, fontWeight: 500 }}>↑ Tăng 15% so với tháng trước</P>
           </div>
 
           {/* Đang đợi */}
@@ -164,8 +166,8 @@ export default function TestsPage() {
                 <Clock size={17} color="#F59E0B" />
               </div>
             </div>
-            <p style={{ fontSize: 32, fontWeight: 800, color: "#111827", margin: "0 0 6px" }}>03</p>
-            <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>Gần nhất: Toán học (Mai)</p>
+            <P style={{ fontSize: 32, fontWeight: 800, color: "#111827", margin: "0 0 6px" }}>03</P>
+            <P style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>Gần nhất: Toán học (Mai)</P>
           </div>
 
           {/* Điểm TB */}
@@ -176,8 +178,8 @@ export default function TestsPage() {
                 <Star size={17} color="#6366F1" />
               </div>
             </div>
-            <p style={{ fontSize: 32, fontWeight: 800, color: "#111827", margin: "0 0 6px" }}>8.5</p>
-            <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>Xếp loại: <span style={{ color: "#16A34A", fontWeight: 600 }}>Giỏi</span></p>
+            <P style={{ fontSize: 32, fontWeight: 800, color: "#111827", margin: "0 0 6px" }}>8.5</P>
+            <P style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>Xếp loại: <span style={{ color: "#16A34A", fontWeight: 600 }}>Giỏi</span></P>
           </div>
         </div>
 
@@ -187,10 +189,10 @@ export default function TestsPage() {
           {/* Table toolbar */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "18px 24px", borderBottom: "1px solid #F3F4F6" }}>
             <div>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>Danh sách bài kiểm tra theo chương</p>
-              <p style={{ fontSize: 12, color: "#9CA3AF", margin: "4px 0 0" }}>Hiển thị các bài kiểm tra được chỉ định trong học kỳ hiện tại</p>
+              <P style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>Danh sách bài kiểm tra theo chương</P>
+              <P style={{ fontSize: 12, color: "#9CA3AF", margin: "4px 0 0" }}>Hiển thị các bài kiểm tra được chỉ định trong học kỳ hiện tại</P>
             </div>
-            <button style={{
+            <Button style={{
               display: "flex", alignItems: "center", gap: 6,
               background: "#fff", border: "1.5px solid #E5E7EB",
               borderRadius: 9, padding: "7px 14px",
@@ -201,7 +203,7 @@ export default function TestsPage() {
               onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
             >
               <SlidersHorizontal size={14} /> Lọc theo môn
-            </button>
+            </Button>
           </div>
 
           {/* Column headers */}
@@ -268,14 +270,14 @@ export default function TestsPage() {
               Hiển thị <b style={{ color: "#111827" }}>4</b> trong tổng số <b style={{ color: "#111827" }}>12</b> bài kiểm tra
             </span>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <button
+              <Button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #E5E7EB", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <ChevronLeft size={14} color="#6B7280" />
-              </button>
+              </Button>
               {[1, 2, 3].map(n => (
-                <button key={n} onClick={() => setPage(n)} style={{
+                <Button key={n} onClick={() => setPage(n)} style={{
                   width: 32, height: 32, borderRadius: 8,
                   background: page === n ? "#3B82F6" : "#fff",
                   color: page === n ? "#fff" : "#374151",
@@ -284,14 +286,14 @@ export default function TestsPage() {
                   border: page === n ? "none" : "1px solid #E5E7EB",
                   boxShadow: page === n ? "0 2px 6px rgba(59,130,246,0.3)" : "none",
                   transition: "all 0.15s",
-                }}>{n}</button>
+                }}>{n}</Button>
               ))}
-              <button
+              <Button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #E5E7EB", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <ChevronRight size={14} color="#6B7280" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -330,11 +332,11 @@ export default function TestsPage() {
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <p style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>Cần hỗ trợ?</p>
-                <p style={{ fontSize: 13, color: "#9CA3AF", margin: "6px 0 18px", lineHeight: 1.5 }}>
+                <P style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>Cần hỗ trợ?</P>
+                <P style={{ fontSize: 13, color: "#9CA3AF", margin: "6px 0 18px", lineHeight: 1.5 }}>
                   Gặp sự cố khi làm bài kiểm tra trực tuyến?
-                </p>
-                <button style={{
+                </P>
+                <Button style={{
                   background: "#111827", border: "none", borderRadius: 10,
                   padding: "9px 20px", fontSize: 13, fontWeight: 700,
                   color: "#fff", cursor: "pointer", transition: "opacity 0.2s",
@@ -343,7 +345,7 @@ export default function TestsPage() {
                   onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
                 >
                   Liên hệ hỗ trợ
-                </button>
+                </Button>
               </div>
               <div style={{
                 width: 44, height: 44, borderRadius: 12,

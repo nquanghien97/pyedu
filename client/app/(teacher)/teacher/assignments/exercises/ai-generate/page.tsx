@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeftIcon, SparklesIcon, FileTextIcon, UploadCloudIcon, Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { notification } from '@/components/notification';
+import { H1, H2, P } from "@/components/ui/typography";
 
 // ---------- Schemas ----------
 const topicSchema = z.object({
@@ -84,6 +85,7 @@ export default function AIGeneratePage() {
       const res = await aiGenerateService.generateByTopic({
         gradeName: gName,
         subjectName: sName,
+        subjectId: data.subjectId,
         topicName: data.topicName,
         difficultyLevel: data.difficultyLevel as DifficultyLevel,
         numberOfQuestions: data.numberOfQuestions,
@@ -92,11 +94,13 @@ export default function AIGeneratePage() {
       });
 
       if (res.success && res.data) {
+        const aiData = res.data.rawAiData || res.data;
         setAiDraft({
-          ...res.data,
+          ...aiData,
           grade: data.grade,
           subjectId: data.subjectId,
         });
+        notification.success('AI đã tạo bài tập thành công! Bạn có thể chỉnh sửa trước khi duyệt.');
         router.push('/teacher/assignments/exercises/create');
       }
     } catch (error: any) {
@@ -119,15 +123,18 @@ export default function AIGeneratePage() {
         file: selectedFile,
         gradeName: gName,
         subjectName: sName,
+        subjectId: fileSubjectId,
         additionalInstructions: fileInstructions,
       });
 
       if (res.success && res.data) {
+        const aiData = res.data.rawAiData || res.data;
         setAiDraft({
-          ...res.data,
+          ...aiData,
           grade: fileGrade,
           subjectId: fileSubjectId,
         });
+        notification.success('AI đã tạo bài tập thành công! Bạn có thể chỉnh sửa trước khi duyệt.');
         router.push('/teacher/assignments/exercises/create');
       }
     } catch (error: any) {
@@ -140,13 +147,13 @@ export default function AIGeneratePage() {
   if (isGenerating) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <Loader2Icon className="w-16 h-16 animate-spin text-[#3b82f6] mx-auto mb-6" />
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-[#3b82f6] to-purple-500 bg-clip-text text-transparent">
+        <Loader2Icon className="w-16 h-16 animate-spin text-primary mx-auto mb-6" />
+        <H2 className="bg-gradient-to-r from-[#3b82f6] to-purple-500 bg-clip-text text-transparent">
           AI đang phân tích và khởi tạo...
-        </h2>
-        <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
+        </H2>
+        <P className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
           Quá trình này có thể mất từ 10 - 60 giây tùy thuộc vào độ phức tạp và kích thước dữ liệu tải lên. Vui lòng không đóng trang web.
-        </p>
+        </P>
       </div>
     );
   }
@@ -163,30 +170,36 @@ export default function AIGeneratePage() {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#3b82f6] to-purple-500 flex items-center justify-center shadow-md">
             <SparklesIcon className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">AI Tạo Bài Tập</h1>
+          <H1>AI Tạo Bài Tập</H1>
         </div>
-        <p className="text-gray-500 text-sm">Bộ công cụ sinh đề tự động bằng trí tuệ nhân tạo Gemini</p>
+        <div className="flex items-center justify-between">
+          <P className="text-gray-500 text-sm">Bộ công cụ sinh đề tự động bằng trí tuệ nhân tạo Gemini</P>
+          <Link href="/teacher/assignments/exercises/ai-generate/history" className="text-sm font-semibold text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-1">
+            <FileTextIcon className="w-4 h-4" />
+            Lịch sử tạo đề
+          </Link>
+        </div>
       </div>
 
       {/* Tabs */}
       <div className="flex p-1 bg-gray-100 rounded-xl mb-6 shadow-inner w-full sm:w-fit">
-        <button
+        <Button
           onClick={() => setActiveTab('topic')}
-          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'topic' ? 'bg-white text-[#3b82f6] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'topic' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
         >
           <FileTextIcon className="w-4 h-4" />
           Sáng tạo Chủ Đề
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setActiveTab('file')}
           className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'file' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
         >
           <UploadCloudIcon className="w-4 h-4" />
           Nhân bản Đề Mẫu
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden shadow-[#3b82f6]/5">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden shadow-primary/5">
 
         {/* TOPIC TAB */}
         {activeTab === 'topic' && (
@@ -199,7 +212,7 @@ export default function AIGeneratePage() {
                   placeholder="Vd: Ôn tập phương trình lượng giác..."
                   className="bg-gray-50/50 border-gray-200 focus-visible:ring-[#3b82f6]"
                 />
-                {topicErrors.topicName && <p className="text-xs text-red-500 mt-1">{topicErrors.topicName.message}</p>}
+                {topicErrors.topicName && <P className="text-xs text-red-500 mt-1">{topicErrors.topicName.message}</P>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -236,7 +249,7 @@ export default function AIGeneratePage() {
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Số lượng (1-50) <span className="text-red-500">*</span></label>
                   <Input type="number" {...registerTopic('numberOfQuestions')} className="bg-gray-50/50" />
-                  {topicErrors.numberOfQuestions && <p className="text-xs text-red-500 mt-1">{topicErrors.numberOfQuestions.message}</p>}
+                  {topicErrors.numberOfQuestions && <P className="text-xs text-red-500 mt-1">{topicErrors.numberOfQuestions.message}</P>}
                 </div>
               </div>
 
@@ -251,7 +264,7 @@ export default function AIGeneratePage() {
             </div>
 
             <div className="pt-4 border-t border-gray-100 flex justify-end">
-              <Button type="submit" className="bg-gradient-to-r from-[#3b82f6] to-blue-600 hover:from-blue-600 hover:to-[#3b82f6] shadow-md shadow-blue-500/20 px-8 py-2 h-11 text-base">
+              <Button type="submit" className="hover:from-blue-600 hover:to-[#3b82f6] shadow-blue-500/20 px-8 h-11 text-base">
                 <SparklesIcon className="w-4 h-4 mr-2" />
                 Dựng Đề Ngay
               </Button>
@@ -263,14 +276,14 @@ export default function AIGeneratePage() {
         {activeTab === 'file' && (
           <form onSubmit={handleFileSubmit} className="p-6 sm:p-8 space-y-6">
             <div className="bg-purple-50 rounded-xl p-4 border border-purple-100 mb-6">
-              <p className="text-sm text-purple-800 flex gap-2"><SparklesIcon className="w-4 h-4" /> AI sẽ "đọc" format thiết kế, logic, độ khó và phong cách của đề thi bạn đính kèm để sinh ra 1 bộ đề hoàn toàn mới tương đương.</p>
+              <P className="text-sm text-purple-800 flex gap-2"><SparklesIcon className="w-4 h-4" /> AI sẽ "đọc" format thiết kế, logic, độ khó và phong cách của đề thi bạn đính kèm để sinh ra 1 bộ đề hoàn toàn mới tương đương.</P>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-semibold text-gray-700 block mb-1.5">File tài liệu đính kèm (PDF, DOCX, Ảnh) <span className="text-red-500">*</span></label>
                 <div className="flex border-2 border-dashed border-gray-300 rounded-xl px-6 py-10 items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative">
-                  <input
+                  <Input
                     type="file"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     accept="image/*,application/pdf"
@@ -279,11 +292,11 @@ export default function AIGeneratePage() {
                   <div className="text-center">
                     <UploadCloudIcon className="w-10 h-10 text-purple-400 mx-auto mb-2" />
                     {selectedFile ? (
-                      <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+                      <P className="text-sm font-medium text-gray-900">{selectedFile.name}</P>
                     ) : (
                       <>
-                        <p className="text-sm font-medium text-gray-900">Kéo thả hoặc nhấp để tải file</p>
-                        <p className="text-xs text-gray-500 mt-1">Hỗ trợ PDF, Ảnh. Tối đa 10MB</p>
+                        <P className="text-sm font-medium text-gray-900">Kéo thả hoặc nhấp để tải file</P>
+                        <P className="text-xs text-gray-500 mt-1">Hỗ trợ PDF, Ảnh. Tối đa 10MB</P>
                       </>
                     )}
                   </div>
@@ -319,7 +332,7 @@ export default function AIGeneratePage() {
             </div>
 
             <div className="pt-4 border-t border-gray-100 flex justify-end">
-              <Button type="submit" disabled={!selectedFile} className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-indigo-600 hover:to-purple-500 shadow-md shadow-purple-500/20 px-8 py-2 h-11 text-base disabled:opacity-50 disabled:cursor-not-allowed">
+              <Button type="submit" disabled={!selectedFile} className="hover:from-indigo-600 hover:to-purple-500 shadow-purple-500/20 px-8 h-11 text-base disabled:opacity-50 disabled:cursor-not-allowed">
                 <SparklesIcon className="w-4 h-4 mr-2" />
                 Nhân Bản Ngay
               </Button>

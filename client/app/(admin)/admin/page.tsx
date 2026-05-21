@@ -21,6 +21,7 @@ import {
 import { getDashboardStats, getUsers } from "@/services/admin";
 import { useAuthStore } from "@/stores/auth.store";
 import Link from "next/link";
+import { H1, H2, P } from "@/components/ui/typography";
 
 interface DashboardStats {
   total: number;
@@ -72,9 +73,9 @@ function StatCard({ icon: Icon, iconBg, label, value, description }: StatCardPro
         </div>
       </div>
       <div>
-        <p className="text-xs text-gray-400 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
-        <p className="text-xs text-gray-400 mt-1">{description}</p>
+        <P className="text-xs text-gray-400 mb-1">{label}</P>
+        <P className="text-2xl font-bold text-gray-800">{value}</P>
+        <P className="text-xs text-gray-400 mt-1">{description}</P>
       </div>
     </div>
   );
@@ -93,8 +94,8 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
   if (active && payload && payload.length) {
     return (
       <div className="bg-white border border-gray-100 shadow-lg rounded-xl px-3 py-2 text-sm">
-        <p className="font-semibold text-gray-700">{payload[0].name}</p>
-        <p style={{ color: payload[0].payload.fill }}>{payload[0].value} người dùng</p>
+        <P className="font-semibold text-gray-700">{payload[0].name}</P>
+        <P style={{ color: payload[0].payload.fill }}>{payload[0].value} người dùng</P>
       </div>
     );
   }
@@ -148,12 +149,12 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">
+          <H1>
             Xin chào, {user?.name || "Admin"}! 👋
-          </h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          </H1>
+          <P className="text-sm text-gray-400 mt-0.5">
             Tổng quan hệ thống quản trị PyEdu.
-          </p>
+          </P>
         </div>
         <Link
           href="/admin/users"
@@ -200,7 +201,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Pie Chart */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-semibold text-gray-800 mb-4">Phân bổ vai trò</h2>
+          <H2 className="mb-4">Phân bổ vai trò</H2>
           {stats.total > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -238,7 +239,7 @@ export default function AdminDashboard() {
         {/* Recent Users */}
         <div className="md:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-800">Người dùng mới nhất</h2>
+            <H2>Người dùng mới nhất</H2>
             <Link
               href="/admin/users"
               className="text-xs text-blue-500 font-medium hover:text-blue-600 transition-colors"
@@ -259,8 +260,8 @@ export default function AdminDashboard() {
                   {u.name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{u.name}</p>
-                  <p className="text-xs text-gray-400">{u.email}</p>
+                  <P className="text-sm font-medium text-gray-800 truncate">{u.name}</P>
+                  <P className="text-xs text-gray-400">{u.email}</P>
                 </div>
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_BADGE_STYLES[u.role] || "bg-gray-100 text-gray-500"}`}>
                   {ROLE_LABELS[u.role] || u.role}
@@ -272,7 +273,7 @@ export default function AdminDashboard() {
               </div>
             ))}
             {recentUsers.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">Chưa có người dùng nào</p>
+              <P className="text-sm text-gray-400 text-center py-4">Chưa có người dùng nào</P>
             )}
           </div>
         </div>
@@ -280,7 +281,7 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h2 className="font-semibold text-gray-800 mb-4">Thao tác nhanh</h2>
+        <H2 className="mb-4">Thao tác nhanh</H2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Link
             href="/admin/users"
@@ -290,8 +291,8 @@ export default function AdminDashboard() {
               <Users size={18} className="text-blue-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-800">Quản lý người dùng</p>
-              <p className="text-xs text-gray-400">Xem, tạo, sửa, xoá tài khoản</p>
+              <P className="text-sm font-medium text-gray-800">Quản lý người dùng</P>
+              <P className="text-xs text-gray-400">Xem, tạo, sửa, xoá tài khoản</P>
             </div>
           </Link>
           <Link
@@ -302,8 +303,8 @@ export default function AdminDashboard() {
               <UserPlus size={18} className="text-green-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-800">Tạo tài khoản mới</p>
-              <p className="text-xs text-gray-400">Thêm giáo viên, học sinh</p>
+              <P className="text-sm font-medium text-gray-800">Tạo tài khoản mới</P>
+              <P className="text-xs text-gray-400">Thêm giáo viên, học sinh</P>
             </div>
           </Link>
           <Link
@@ -314,8 +315,8 @@ export default function AdminDashboard() {
               <TrendingUp size={18} className="text-purple-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-800">Thống kê hệ thống</p>
-              <p className="text-xs text-gray-400">Xem báo cáo tổng quan</p>
+              <P className="text-sm font-medium text-gray-800">Thống kê hệ thống</P>
+              <P className="text-xs text-gray-400">Xem báo cáo tổng quan</P>
             </div>
           </Link>
         </div>

@@ -25,6 +25,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { H1, P } from "@/components/ui/typography";
 
 interface UserItem {
   id: number;
@@ -159,18 +161,18 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Quản lý người dùng</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <H1>Quản lý người dùng</H1>
+          <P className="text-sm text-gray-400 mt-0.5">
             Tạo, chỉnh sửa và quản lý tài khoản người dùng trên hệ thống.
-          </p>
+          </P>
         </div>
-        <button
+        <Button
           onClick={() => setShowCreateDialog(true)}
           className="cursor-pointer flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md active:scale-95"
         >
           <Plus size={16} />
           Tạo tài khoản mới
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
@@ -179,7 +181,7 @@ export default function AdminUsersPage() {
           {/* Search */}
           <div className="flex-1 relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
+            <Input
               type="text"
               placeholder="Tìm kiếm theo tên hoặc email..."
               value={searchInput}
@@ -188,7 +190,7 @@ export default function AdminUsersPage() {
               className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
             />
             {searchInput && (
-              <button
+              <Button
                 onClick={() => {
                   setSearchInput("");
                   setSearch("");
@@ -197,7 +199,7 @@ export default function AdminUsersPage() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X size={14} />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -205,7 +207,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center gap-2">
             <Filter size={14} className="text-gray-400" />
             {["", "ADMIN", "TEACHER", "STUDENT"].map((role) => (
-              <button
+              <Button
                 key={role}
                 onClick={() => handleRoleFilter(role)}
                 className={`cursor-pointer px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${roleFilter === role
@@ -214,7 +216,7 @@ export default function AdminUsersPage() {
                   }`}
               >
                 {role === "" ? "Tất cả" : ROLE_LABELS[role]}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -229,8 +231,8 @@ export default function AdminUsersPage() {
         ) : users.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-400">
             <Users size={48} className="mb-3 text-gray-300" />
-            <p className="text-sm font-medium">Không tìm thấy người dùng nào</p>
-            <p className="text-xs mt-1">Thử thay đổi bộ lọc hoặc tạo tài khoản mới</p>
+            <P className="text-sm font-medium">Không tìm thấy người dùng nào</P>
+            <P className="text-xs mt-1">Thử thay đổi bộ lọc hoặc tạo tài khoản mới</P>
           </div>
         ) : (
           <>
@@ -276,14 +278,14 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4 text-sm text-gray-500">{formatDate(u.createdAt)}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
-                        <button
+                        <Button
                           onClick={() => setEditingUser(u)}
                           className="cursor-pointer w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-200 transition-all duration-200"
                           title="Chỉnh sửa"
                         >
                           <Pencil size={14} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => setUserToDelete(u)}
                           disabled={deletingId === u.id}
                           className="cursor-pointer w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-200 disabled:opacity-50"
@@ -294,7 +296,7 @@ export default function AdminUsersPage() {
                           ) : (
                             <Trash2 size={14} />
                           )}
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -304,18 +306,18 @@ export default function AdminUsersPage() {
 
             {/* Pagination */}
             <div className="flex items-center justify-between px-5 py-3 border-t border-gray-50">
-              <p className="text-xs text-gray-400">
+              <P className="text-xs text-gray-400">
                 Hiển thị {(pagination.page - 1) * pagination.limit + 1} -{" "}
                 {Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total} người dùng
-              </p>
+              </P>
               <div className="flex items-center gap-1">
-                <button
+                <Button
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page <= 1}
                   className="cursor-pointer w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft size={14} />
-                </button>
+                </Button>
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
                   .filter((p) => {
                     return p === 1 || p === pagination.totalPages || Math.abs(p - pagination.page) <= 1;
@@ -325,7 +327,7 @@ export default function AdminUsersPage() {
                       {idx > 0 && arr[idx - 1] !== p - 1 && (
                         <span className="w-8 text-center text-xs text-gray-400">…</span>
                       )}
-                      <button
+                      <Button
                         onClick={() => handlePageChange(p)}
                         className={`cursor-pointer w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${p === pagination.page
                           ? "bg-blue-500 text-white"
@@ -333,16 +335,16 @@ export default function AdminUsersPage() {
                           }`}
                       >
                         {p}
-                      </button>
+                      </Button>
                     </span>
                   ))}
-                <button
+                <Button
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page >= pagination.totalPages}
                   className="cursor-pointer w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronRight size={14} />
-                </button>
+                </Button>
               </div>
             </div>
           </>
@@ -384,7 +386,7 @@ export default function AdminUsersPage() {
               <Button variant="outline" onClick={() => setUserToDelete(null)} disabled={deletingId !== null}>
                 Huỷ
               </Button>
-              <Button onClick={confirmDelete} disabled={deletingId !== null} className="bg-red-500 hover:bg-red-600 text-white border-transparent">
+              <Button onClick={confirmDelete} disabled={deletingId !== null} className="bg-red-500 hover:bg-red-600 border-transparent">
                 {deletingId !== null ? "Đang xoá..." : "Xoá"}
               </Button>
             </DialogFooter>

@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { Loader2, Users, TrendingUp, Award, Search } from 'lucide-react';
 import { getStudentsProgress } from '@/services/progress';
 import { TeacherStudentProgress, MASTERY_LABELS, MASTERY_COLORS, MASTERY_ICONS, MasteryLevel } from '@/entity/progress';
+import { Input } from "@/components/ui/input";
+import { H1, P } from "@/components/ui/typography";
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 
 function classifyOverallMastery(score: number): MasteryLevel {
   if (score >= 80) return 'mastered';
@@ -46,10 +49,10 @@ export default function StudentsPage() {
   const avgScore =
     totalStudents > 0
       ? Math.round(
-          (students.reduce((sum, s) => sum + s.overallAverageScore, 0) /
-            totalStudents) *
-            10
-        ) / 10
+        (students.reduce((sum, s) => sum + s.overallAverageScore, 0) /
+          totalStudents) *
+        10
+      ) / 10
       : 0;
   const excellentCount = students.filter(
     (s) => s.overallAverageScore >= 80
@@ -60,7 +63,7 @@ export default function StudentsPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={32} className="text-blue-500 animate-spin" />
-          <p className="text-sm text-gray-500">Đang tải dữ liệu...</p>
+          <P className="text-sm text-gray-500">Đang tải dữ liệu...</P>
         </div>
       </div>
     );
@@ -71,12 +74,12 @@ export default function StudentsPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-extrabold text-gray-900">
+          <H1>
             Danh sách học sinh
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          </H1>
+          <P className="text-sm text-gray-400 mt-1">
             Quản lý và theo dõi tiến bộ học tập của các học sinh
-          </p>
+          </P>
         </div>
 
         {/* Stats */}
@@ -85,39 +88,40 @@ export default function StudentsPage() {
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
               <Users size={20} className="text-blue-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Tổng học sinh</p>
-            <p className="text-2xl font-extrabold text-gray-900">{totalStudents}</p>
+            <P className="text-xs text-gray-400 mb-1">Tổng học sinh</P>
+            <P className="text-2xl font-bold">{totalStudents}</P>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
               <TrendingUp size={20} className="text-green-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Điểm TB chung</p>
-            <p className="text-2xl font-extrabold text-gray-900">
+            <P className="text-xs text-gray-400 mb-1">Điểm TB chung</P>
+            <P className="text-2xl font-bold">
               {avgScore}<span className="text-sm font-normal text-gray-400">%</span>
-            </p>
+            </P>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
               <Award size={20} className="text-purple-500" />
             </div>
-            <p className="text-xs text-gray-400 mb-1">Xuất sắc (≥80%)</p>
-            <p className="text-2xl font-extrabold text-gray-900">{excellentCount}</p>
+            <P className="text-xs text-gray-400 mb-1">Xuất sắc (≥80%)</P>
+            <P className="text-2xl font-bold">{excellentCount}</P>
           </div>
         </div>
 
         {/* Search */}
         <div className="mb-5">
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm max-w-md focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-            <Search size={16} className="text-gray-400 flex-shrink-0" />
-            <input
+          <InputGroup className="max-w-xs">
+            <InputGroupInput
               type="text"
               placeholder="Tìm kiếm học sinh..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-none outline-none text-sm text-gray-700 bg-transparent w-full placeholder:text-gray-400"
             />
-          </div>
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
         </div>
 
         {/* Table */}
@@ -129,7 +133,7 @@ export default function StudentsPage() {
                   (h) => (
                     <th
                       key={h}
-                      className="text-[11px] font-bold text-gray-400 tracking-wider text-left px-6 py-3"
+                      className="text-xs font-bold text-gray-400 tracking-wider text-left px-6 py-3"
                     >
                       {h}
                     </th>
@@ -143,9 +147,9 @@ export default function StudentsPage() {
                   <td colSpan={5}>
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
                       <Users size={28} className="text-gray-400" />
-                      <p className="text-sm font-semibold text-gray-500">
+                      <P className="text-sm font-semibold text-gray-500">
                         {searchQuery ? 'Không tìm thấy học sinh phù hợp' : 'Chưa có học sinh nào'}
-                      </p>
+                      </P>
                     </div>
                   </td>
                 </tr>
@@ -192,12 +196,12 @@ export default function StudentsPage() {
                           {initials}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">
+                          <P className="text-sm font-semibold text-gray-900">
                             {student.studentName}
-                          </p>
-                          <p className="text-xs text-gray-400">
+                          </P>
+                          <P className="text-xs text-gray-400">
                             {student.studentEmail}
-                          </p>
+                          </P>
                         </div>
                       </div>
                     </td>
@@ -226,13 +230,13 @@ export default function StudentsPage() {
                         {student.bySubject.slice(0, 3).map((subj) => (
                           <span
                             key={subj.subjectId}
-                            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+                            className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
                           >
                             {subj.subjectName}: {subj.averageScore.toFixed(0)}%
                           </span>
                         ))}
                         {student.bySubject.length > 3 && (
-                          <span className="text-[10px] text-gray-400">
+                          <span className="text-xs text-gray-400">
                             +{student.bySubject.length - 3}
                           </span>
                         )}

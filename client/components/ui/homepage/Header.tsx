@@ -47,7 +47,7 @@ export default function Header() {
               <a
                 key={item.id}
                 href={`/#${item.id}`}
-                className="text-sm font-medium text-gray-600 hover:text-[#3b82f6] transition-colors duration-200 cursor-pointer"
+                className="text-sm font-medium text-gray-600 hover:text-primary transition-colors duration-200 cursor-pointer"
               >
                 {item.label}
               </a>
@@ -57,7 +57,7 @@ export default function Header() {
           {/* Login Button */}
           <div className="hidden lg:flex items-center gap-3">
             <Link href="/login">
-              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white px-6 cursor-pointer rounded-lg shadow-md shadow-[#3b82f6]/25 hover:shadow-lg hover:shadow-[#3b82f6]/30 transition-all duration-300">
+              <Button className="bg-primary hover:bg-blue-600 text-white px-6 cursor-pointer rounded-lg shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300">
                 Đăng nhập
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
@@ -66,7 +66,7 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 text-gray-600 hover:text-[#3b82f6] transition-colors cursor-pointer"
+            className="lg:hidden p-2 text-gray-600 hover:text-primary transition-colors cursor-pointer"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -91,13 +91,13 @@ export default function Header() {
               <a
                 key={item.id}
                 href={`/#${item.id}`}
-                className="block w-full text-left px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#3b82f6] hover:bg-[#3b82f6]/5 rounded-lg transition-colors cursor-pointer"
+                className="block w-full text-left px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors cursor-pointer"
               >
                 {item.label}
               </a>
             ))}
             <Link href="/login" className="block">
-              <Button className="w-full bg-[#3b82f6] hover:bg-[#2563eb] text-white cursor-pointer">
+              <Button className="w-full bg-primary hover:bg-blue-600 text-white cursor-pointer">
                 Đăng nhập
               </Button>
             </Link>
