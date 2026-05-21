@@ -98,7 +98,7 @@
 
 .right_header {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   align-items: center;
   margin-right: 1rem;
 }

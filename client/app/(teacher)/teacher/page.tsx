@@ -30,7 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { getTeacherDashboardStats } from "@/services/dashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { H1, H2, P } from "@/components/ui/typography";
+import { H1, H2, H3, P } from "@/components/ui/typography";
 import { useRouter } from "next/navigation";
 
 const weeklyData = [
@@ -263,8 +263,8 @@ export default function TeacherPage() {
         {/* Top Students */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <H2>Học sinh tiêu biểu</H2>
-            <Button className="text-xs text-blue-500 font-medium hover:text-blue-600">
+            <H3>Học sinh tiêu biểu</H3>
+            <Button>
               Xem tất cả
             </Button>
           </div>
@@ -366,7 +366,7 @@ export default function TeacherPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <Button className="text-sm font-medium text-blue-500 hover:text-blue-700">
+                      <Button>
                         Chi tiết
                       </Button>
                     </td>

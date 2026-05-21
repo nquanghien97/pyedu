@@ -184,7 +184,7 @@ export default function ClassesPage() {
                   <div className="mt-5 pt-4 border-t border-gray-50 flex gap-2">
                     <Button
                       onClick={() => openManageClass(cls)}
-                      className="flex-1 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-bold rounded-xl transition-colors flex justify-center items-center gap-2"
+                      className="w-full"
                     >
                       <UserPlus size={16} /> Quản lý học sinh
                     </Button>

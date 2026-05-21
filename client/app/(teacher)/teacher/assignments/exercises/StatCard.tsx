@@ -20,12 +20,12 @@ export default function StatCard({ icon: Icon, iconBg, iconColor, value, label }
       gap: 16,
       flex: 1,
     }}>
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="w-12 h-12 rounded-xl bg-blue-200 flex justify-center items-center">
         <Icon size={22} color={iconColor} />
       </div>
       <div>
-        <P style={{ fontSize: 26, fontWeight: 800, color: "#111827", margin: 0, lineHeight: 1.1 }}>{value}</P>
-        <P style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", margin: 0, letterSpacing: "0.06em", marginTop: 2 }}>{label}</P>
+        <P className="text-2xl font-bold">{value}</P>
+        <P className="text-xs font-bold text-gray-500 mt-1">{label}</P>
       </div>
     </div>
   );
