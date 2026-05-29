@@ -12,6 +12,7 @@ export async function logout() {
     console.error('Logout failed:', error);
   } finally {
     useAuthStore.setState({ user: null, me: null, accessToken: null });
+    Cookies.remove('role');
   }
 }
 

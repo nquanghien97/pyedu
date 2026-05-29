@@ -58,10 +58,10 @@ function LoginPage() {
       const accessToken = res.data.accessToken as string | null;
 
       if (userData && accessToken) {
-        // Lưu data user và token vào store (memory)
         setUser(userData);
         useAuthStore.setState({ me: userData });
         useAuthStore.getState().setAccessToken(accessToken);
+        Cookies.set('role', userData.role, { expires: 7 });
 
         // Redirect theo role
         if (userData.role === USER_ROLE.TEACHER) {

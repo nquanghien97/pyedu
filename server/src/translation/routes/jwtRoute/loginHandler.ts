@@ -26,14 +26,17 @@ export const loginHandler: RequestHandler = withAsyncErrorHandling(
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isSecure,
-      sameSite: "strict",
+      sameSite: isSecure ? "none" : "lax",
       path: "/",
-      domain: isSecure ? ".nongsanviet.site" : undefined,
+      // domain: isSecure ? ".nongsanviet.site" : undefined, // Removed hardcoded domain to support vercel.app frontend
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Clear legacy role cookie if it exists
-    res.clearCookie("role");
+    // Clear legacy role cookie if it exists (must match the old domain and path)
+    res.clearCookie("role", {
+      path: "/",
+      domain: isSecure ? ".nongsanviet.site" : undefined,
+    });
 
     res.status(200).json({
       success: true,

@@ -3,21 +3,7 @@ import type { NextRequest } from "next/server";
 import { USER_ROLE } from "./entity/user";
 
 export default function middleware(req: NextRequest) {
-  const refreshToken = req.cookies.get("refreshToken")?.value;
-  let role = null;
-
-  if (refreshToken) {
-    try {
-      // Decode JWT payload (part 2) - handle base64url
-      const base64Url = refreshToken.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = atob(base64);
-      const payload = JSON.parse(jsonPayload);
-      role = payload.role;
-    } catch (e) {
-      console.error("Middleware token decode error:", e);
-    }
-  }
+  let role = req.cookies.get("role")?.value;
 
   const { pathname } = req.nextUrl;
 

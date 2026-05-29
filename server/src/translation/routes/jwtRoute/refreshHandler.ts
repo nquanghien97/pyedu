@@ -19,7 +19,7 @@ export const refreshHandler: RequestHandler = withAsyncErrorHandling(
       res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: req.secure || req.headers["x-forwarded-proto"] === "https",
-        sameSite: "strict",
+        sameSite: (req.secure || req.headers["x-forwarded-proto"] === "https") ? "none" : "lax",
         path: "/",
       });
       res.status(401).json({ message: 'Invalid or expired refresh token' });
@@ -32,7 +32,7 @@ export const refreshHandler: RequestHandler = withAsyncErrorHandling(
       res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: req.secure || req.headers["x-forwarded-proto"] === "https",
-        sameSite: "strict",
+        sameSite: (req.secure || req.headers["x-forwarded-proto"] === "https") ? "none" : "lax",
         path: "/",
       });
       res.status(401).json({ message: 'User not found' });
@@ -55,9 +55,9 @@ export const refreshHandler: RequestHandler = withAsyncErrorHandling(
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: isSecure,
-      sameSite: "strict",
+      sameSite: isSecure ? "none" : "lax",
       path: "/",
-      domain: isSecure ? ".nongsanviet.site" : undefined,
+      // domain: isSecure ? ".nongsanviet.site" : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

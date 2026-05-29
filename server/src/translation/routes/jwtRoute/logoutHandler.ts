@@ -14,8 +14,8 @@ export const logoutHandler: RequestHandler = withAsyncErrorHandling(
     // Clear cookies
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: req.secure || req.headers["x-forwarded-proto"] === "https",
+      sameSite: (req.secure || req.headers["x-forwarded-proto"] === "https") ? "none" : "lax",
       path: "/",
     });
     

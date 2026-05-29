@@ -33,6 +33,9 @@ export async function refreshAccessToken(): Promise<string | null> {
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      }
     });
 
     if (!response.ok) {
@@ -68,6 +71,7 @@ export async function api<T = unknown, M = object>({
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
       ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
       ...(options.headers || {}),
     },
@@ -97,7 +101,13 @@ export async function api<T = unknown, M = object>({
         
         // Gọi logout API để server xóa cookie
         try {
-          await fetch(`${API_BASE_URL}/api/v1/logout`, { method: 'POST', credentials: 'include' });
+          await fetch(`${API_BASE_URL}/api/v1/logout`, { 
+            method: 'POST', 
+            credentials: 'include',
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            }
+          });
         } catch (e) {}
 
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
@@ -146,6 +156,7 @@ export async function apiFormData<T = unknown>({
     credentials: 'include',
     ...options,
     headers: {
+        'ngrok-skip-browser-warning': 'true',
         ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
         ...(options.headers || {}),
     }
