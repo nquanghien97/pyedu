@@ -19,9 +19,11 @@ const TODAY_INDEX = 3;
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
   if (active && payload?.length) {
     return (
-      <div style={{ background: "#1E40AF", borderRadius: 8, padding: "6px 12px" }}>
-        <P style={{ color: "#fff", fontSize: 12, fontWeight: 700, margin: 0 }}>{label}</P>
-        <P style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, margin: "2px 0 0" }}>{payload[0].value}% mục tiêu</P>
+      <div className="bg-[#1E40AF] rounded-xl px-3 py-2">
+        <P className="text-white text-xs font-bold m-0">{label}</P>
+        <P className="text-white opacity-85 text-xs my-1 mx-0">
+          {payload[0].value}% mục tiêu
+        </P>
       </div>
     );
   }

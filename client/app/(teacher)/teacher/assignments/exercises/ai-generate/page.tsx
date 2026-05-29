@@ -29,7 +29,7 @@ const topicSchema = z.object({
   subjectId: z.string().optional(),
   topicName: z.string().min(1, 'Chủ đề không được để trống'),
   difficultyLevel: z.string().min(1, 'Chọn mức độ khó'),
-  numberOfQuestions: z.coerce.number().min(1, 'Tối thiểu 1 câu').max(50, 'Tối đa 50 câu'),
+  numberOfQuestions: z.number().min(1, 'Tối thiểu 1 câu').max(50, 'Tối đa 50 câu'),
   questionType: z.string().min(1, 'Chọn loại câu hỏi'),
   additionalInstructions: z.string().optional(),
 });
@@ -56,8 +56,7 @@ export default function AIGeneratePage() {
     watch: watchTopic,
     formState: { errors: topicErrors },
   } = useForm<TopicFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(topicSchema) as any,
+    resolver: zodResolver(topicSchema),
     defaultValues: {
       grade: '',
       subjectId: '',
@@ -103,8 +102,9 @@ export default function AIGeneratePage() {
         notification.success('AI đã tạo bài tập thành công! Bạn có thể chỉnh sửa trước khi duyệt.');
         router.push('/teacher/assignments/exercises/create');
       }
-    } catch (error: any) {
-      notification.error(error.message || 'Lỗi khi gọi AI');
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Lỗi khi gọi AI';
+      notification.error(msg);
     } finally {
       setIsGenerating(false);
     }
@@ -137,8 +137,9 @@ export default function AIGeneratePage() {
         notification.success('AI đã tạo bài tập thành công! Bạn có thể chỉnh sửa trước khi duyệt.');
         router.push('/teacher/assignments/exercises/create');
       }
-    } catch (error: any) {
-      notification.error(error.message || 'Lỗi khi gọi AI phân tích file');
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Lỗi khi gọi AI phân tích file';
+      notification.error(msg);
     } finally {
       setIsGenerating(false);
     }
@@ -148,7 +149,7 @@ export default function AIGeneratePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <Loader2Icon className="w-16 h-16 animate-spin text-primary mx-auto mb-6" />
-        <H2 className="bg-gradient-to-r from-[#3b82f6] to-purple-500 bg-clip-text text-transparent">
+        <H2 className="bg-linear-to-r from-[#3b82f6] to-purple-500 bg-clip-text text-transparent">
           AI đang phân tích và khởi tạo...
         </H2>
         <P className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">
@@ -160,14 +161,14 @@ export default function AIGeneratePage() {
 
   return (
     <div className="max-w-3xl mx-auto pb-12">
-      <Link href="/teacher/exercises" className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 w-fit mb-6">
+      <Link href="/teacher/exercises" className="">
         <ArrowLeftIcon className="w-4 h-4" />
         Quay lại
       </Link>
 
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#3b82f6] to-purple-500 flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#3b82f6] to-purple-500 flex items-center justify-center shadow-md">
             <SparklesIcon className="w-5 h-5 text-white" />
           </div>
           <H1>AI Tạo Bài Tập</H1>
@@ -182,17 +183,17 @@ export default function AIGeneratePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex p-1 bg-gray-100 rounded-xl mb-6 shadow-inner w-full sm:w-fit">
+      <div className="flex p-1 gap-1 bg-gray-100 rounded-xl mb-6 shadow-inner w-full sm:w-fit">
         <Button
           onClick={() => setActiveTab('topic')}
-          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'topic' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          variant={activeTab === 'topic' ? 'default' : 'outline'}
         >
           <FileTextIcon className="w-4 h-4" />
           Sáng tạo Chủ Đề
         </Button>
         <Button
           onClick={() => setActiveTab('file')}
-          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'file' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          variant={activeTab === 'file' ? 'default' : 'outline'}
         >
           <UploadCloudIcon className="w-4 h-4" />
           Nhân bản Đề Mẫu
@@ -248,7 +249,7 @@ export default function AIGeneratePage() {
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Số lượng (1-50) <span className="text-red-500">*</span></label>
-                  <Input type="number" {...registerTopic('numberOfQuestions')} className="bg-gray-50/50" />
+                  <Input type="number" {...registerTopic('numberOfQuestions', { valueAsNumber: true })} className="bg-gray-50/50" />
                   {topicErrors.numberOfQuestions && <P className="text-xs text-red-500 mt-1">{topicErrors.numberOfQuestions.message}</P>}
                 </div>
               </div>

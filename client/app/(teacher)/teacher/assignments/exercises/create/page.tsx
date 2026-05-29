@@ -114,8 +114,8 @@ export default function CreateExercisePage() {
     // Check Zustand Store for AI draft
     if (aiDraft) {
       try {
-        if (aiDraft.title) setValue('title', aiDraft.title);
-        if (aiDraft.difficultyLevel) setValue('difficultyLevel', aiDraft.difficultyLevel);
+        if (typeof aiDraft.title === 'string') setValue('title', aiDraft.title);
+        if (typeof aiDraft.difficultyLevel === 'string') setValue('difficultyLevel', aiDraft.difficultyLevel);
         if (aiDraft.questions && Array.isArray(aiDraft.questions)) {
           // Normalize AI generated content to strict frontend expectations
           const sanitizedQuestions = aiDraft.questions.map((q: any) => {
@@ -214,8 +214,8 @@ export default function CreateExercisePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <Button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+    <div className="max-w-6xl p-6 mx-auto">
+      <Button onClick={() => router.back()}>
         <ArrowLeftIcon className="w-4 h-4" />
         Quay lại
       </Button>

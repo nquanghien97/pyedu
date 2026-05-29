@@ -5,7 +5,6 @@ import {
   Search,
   BookOpen,
   CheckCircle2,
-  Clock,
   AlertTriangle,
   TrendingUp,
   Filter,
@@ -20,16 +19,8 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
-  ExerciseEntity,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_COLORS,
-  DifficultyLevel,
-} from '@/entity/exercise';
-import {
   AssignmentEntity,
   AssignmentStats,
-  ASSIGNMENT_STATUS_LABELS,
-  ASSIGNMENT_STATUS_COLORS,
 } from '@/entity/assignment';
 import {
   getStudentAssignments,
@@ -38,8 +29,8 @@ import {
 import { SubjectEntity } from '@/entity/subject';
 import { getSubjects } from '@/services/subject';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { H1, P } from "@/components/ui/typography";
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 
 type TabKey = 'all' | 'easy' | 'medium' | 'hard' | 'expert';
 
@@ -60,7 +51,6 @@ const tabs: TabItem[] = [
 function StatCard({
   icon,
   iconBg,
-  iconColor,
   label,
   value,
   suffix,
@@ -124,17 +114,17 @@ function SubjectTag({
   );
 }
 
-function DifficultyBadge({ level }: { level: DifficultyLevel }) {
-  const label = DIFFICULTY_LABELS[level] || level;
-  const colorClass = DIFFICULTY_COLORS[level] || 'bg-gray-100 text-gray-700';
-  return (
-    <span
-      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colorClass}`}
-    >
-      {label}
-    </span>
-  );
-}
+// function DifficultyBadge({ level }: { level: DifficultyLevel }) {
+//   const label = DIFFICULTY_LABELS[level] || level;
+//   const colorClass = DIFFICULTY_COLORS[level] || 'bg-gray-100 text-gray-700';
+//   return (
+//     <span
+//       className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colorClass}`}
+//     >
+//       {label}
+//     </span>
+//   );
+// }
 
 const subjectColorMap: Record<
   string,
@@ -317,16 +307,17 @@ export default function AssignmentPage() {
 
         {/* Search & Filter Bar */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm flex-1 max-w-md focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-            <Search size={16} className="text-gray-400 flex-shrink-0" />
-            <Input
+          <InputGroup className="max-w-xs">
+            <InputGroupInput
               type="text"
               placeholder="Tìm kiếm bài tập..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-none outline-none text-sm text-gray-700 bg-transparent w-full placeholder:text-gray-400"
             />
-          </div>
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
 
           {/* Subject Filter */}
           <div className="relative">
@@ -343,19 +334,19 @@ export default function AssignmentPage() {
             </Button>
 
             {showFilterDropdown && (
-              <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-[200px] py-1 overflow-hidden">
+              <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-50 py-1 overflow-hidden">
                 <Button className="w-full py-2.5 text-left text-sm hover:bg-blue-50" style={{ color: !selectedSubjectId ? '#3B82F6' : '#374151', fontWeight: !selectedSubjectId ? 600 : 400, }} onClick={() => {
-                    setSelectedSubjectId('');
-                    setShowFilterDropdown(false);
-                  }}
+                  setSelectedSubjectId('');
+                  setShowFilterDropdown(false);
+                }}
                 >
                   Tất cả môn học
                 </Button>
                 {allSubjects.map((subject) => (
                   <Button key={subject.id} className="w-full py-2.5 text-left text-sm hover:bg-blue-50" style={{ color: selectedSubjectId === subject.id ? '#3B82F6' : '#374151', fontWeight: selectedSubjectId === subject.id ? 600 : 400, }} onClick={() => {
-                      setSelectedSubjectId(subject.id);
-                      setShowFilterDropdown(false);
-                    }}
+                    setSelectedSubjectId(subject.id);
+                    setShowFilterDropdown(false);
+                  }}
                   >
                     {subject.name}
                   </Button>
@@ -491,7 +482,7 @@ export default function AssignmentPage() {
                             {exercise.title || 'Chưa đặt tên'}
                           </P>
                           {exercise.isAiGenerated && (
-                            <span className="flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 flex-shrink-0">
+                            <span className="flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 shrink-0">
                               <Sparkles size={10} />
                               AI
                             </span>
@@ -566,7 +557,7 @@ export default function AssignmentPage() {
                         ) : (
                           <Button
                             onClick={() => router.push(`/student/assignments/${assignment.id}`)}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none"
+                            className="bg-linear-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 transition-all cursor-pointer border-none"
                           >
                             Làm bài
                           </Button>
@@ -669,7 +660,7 @@ export default function AssignmentPage() {
 
         {/* Overview Section */}
         {!loading && assignments.length > 0 && (
-          <div className="mt-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg shadow-blue-500/20 relative overflow-hidden">
+          <div className="mt-6 bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg shadow-blue-500/20 relative overflow-hidden">
             {/* Decorative circles */}
             <svg
               className="absolute top-0 right-0 opacity-10"

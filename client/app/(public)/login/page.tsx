@@ -91,7 +91,7 @@ function LoginPage() {
               <Image src="/logo.png" alt="Logo" width={100} height={100} />
             </Link>
           </div>
-          <H1>Đăng nhập tài khoản</H1>
+          <H1 className="text-center mb-8">Đăng nhập tài khoản</H1>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="email"
@@ -104,7 +104,7 @@ function LoginPage() {
               render={({ field }) => <Input {...field} placeholder="Password" type="password" className="mb-4" />}
             />
             <div className="flex justify-center mb-2">
-              <Button disabled={isLoading} variant="outline" className="px-8 hover:text-white">
+              <Button disabled={isLoading} className="px-8 hover:text-white">
                 Đăng nhập
                 {isLoading && <LoadingIcon />}
               </Button>

@@ -1,64 +1,18 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ClipboardList, CheckCircle2, Star, SlidersHorizontal,
-  Download, MoreHorizontal, Calendar, Clock, Sparkles, Plus
+  Download, MoreHorizontal, Calendar, Clock, Sparkles, Plus, Trash
 } from "lucide-react";
 import StatCard from "./StatCard";
 import { Button } from "@/components/ui/button";
 import { H1, P } from "@/components/ui/typography";
-
-const exams = [
-  {
-    id: 1,
-    name: "Kiểm tra Giữa kỳ I",
-    updated: "Cập nhật: 2 giờ trước",
-    chapter: "Chương 1: Động lực học",
-    subject: "VẬT LÝ",
-    subjectColor: "#6366F1",
-    subjectBg: "#EEF2FF",
-    done: 45, total: 45,
-    status: "Đã kết thúc",
-    statusType: "ended",
-  },
-  {
-    id: 2,
-    name: "Kiểm tra 15 phút - Hệ tuần hoàn",
-    updated: "Cập nhật: Đang diễn ra",
-    chapter: "Chủ đề 3: Cơ thể người",
-    subject: "SINH HỌC",
-    subjectColor: "#16A34A",
-    subjectBg: "#F0FDF4",
-    done: 28, total: 42,
-    status: "Đang diễn ra",
-    statusType: "active",
-  },
-  {
-    id: 3,
-    name: "Bài khảo sát Năng lực Cuối chương 4",
-    updated: "Bắt đầu: 15/11/2024",
-    chapter: "Chương 4: Thống kê và Xác suất",
-    subject: "TOÁN HỌC",
-    subjectColor: "#F59E0B",
-    subjectBg: "#FFFBEB",
-    done: 0, total: 40,
-    status: "Đã lên lịch",
-    statusType: "scheduled",
-  },
-  {
-    id: 4,
-    name: "Ôn tập trắc nghiệm chương 2",
-    updated: "Cập nhật: 3 ngày trước",
-    chapter: "Chương 2: Liên kết hóa học",
-    subject: "HÓA HỌC",
-    subjectColor: "#EF4444",
-    subjectBg: "#FEF2F2",
-    done: 38, total: 38,
-    status: "Đã kết thúc",
-    statusType: "ended",
-  },
-];
+import { getTests, deleteTest } from "@/services/test";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { TestEntity } from "@/entity/test";
 
 const statusStyles: Record<string, { bg: string; color: string; dot: string }> = {
   ended:     { bg: "#F3F4F6", color: "#6B7280", dot: "#9CA3AF" },
@@ -66,19 +20,25 @@ const statusStyles: Record<string, { bg: string; color: string; dot: string }> =
   scheduled: { bg: "#FFFBEB", color: "#D97706", dot: "#F59E0B" },
 };
 
-function ProgressBar({ done, total }: { done: number; total: number }) {
-  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div style={{ width: 90, height: 6, background: "#EFF6FF", borderRadius: 999 }}>
-        <div style={{ height: 6, width: `${pct}%`, background: pct === 0 ? "#D1D5DB" : "#3B82F6", borderRadius: 999, transition: "width 0.4s" }} />
-      </div>
-      <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", whiteSpace: "nowrap" }}>{done}/{total}</span>
-    </div>
-  );
-}
+function StatusBadge({ test }: { test: TestEntity }) {
+  const now = new Date();
+  const startTime = test.startTime ? new Date(test.startTime) : null;
+  const endTime = test.endTime ? new Date(test.endTime) : null;
+  
+  let status = "Chưa rõ";
+  let type = "ended";
+  
+  if (startTime && startTime > now) {
+    status = "Đã lên lịch";
+    type = "scheduled";
+  } else if (endTime && endTime < now) {
+    status = "Đã kết thúc";
+    type = "ended";
+  } else {
+    status = "Đang diễn ra";
+    type = "active";
+  }
 
-function StatusBadge({ status, type }: { status: string; type: string }) {
   const s = statusStyles[type] || statusStyles.ended;
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: s.bg, color: s.color, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999 }}>
@@ -90,19 +50,41 @@ function StatusBadge({ status, type }: { status: string; type: string }) {
 
 export default function ExamManagement() {
   const [page, setPage] = useState(1);
-  const totalPages = 2;
+  const [tests, setTests] = useState<TestEntity[]>([]);
+  const router = useRouter();
+
+  const fetchTests = async () => {
+    try {
+      const res = await getTests();
+      if (res.data) {
+        setTests(res.data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchTests();
+  }, []);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm("Xóa bài kiểm tra này?")) {
+      await deleteTest(id);
+      fetchTests();
+    }
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", padding: "28px 28px", position: "relative" }}>
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
 
-        {/* Breadcrumb */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
           <Calendar size={13} color="#3B82F6" />
           <span style={{ fontSize: 13, color: "#3B82F6", fontWeight: 500 }}>Học kỳ 1 - 2024</span>
         </div>
 
-        {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
             <H1>Quản lý Bài kiểm tra</H1>
@@ -111,6 +93,7 @@ export default function ExamManagement() {
             </P>
           </div>
           <Button
+            onClick={() => router.push("/teacher/assignments/tests/create")}
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.9")}
             onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
           >
@@ -119,165 +102,88 @@ export default function ExamManagement() {
           </Button>
         </div>
 
-        {/* Stat cards */}
         <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
           <StatCard
             icon={ClipboardList} iconBg="#EFF6FF" iconColor="#3B82F6"
-            label="Tổng số bài kiểm tra" value="24"
+            label="Tổng số bài kiểm tra" value={tests.length.toString()}
             badge="+2 tháng này" badgeUp={true}
           />
           <StatCard
             icon={CheckCircle2} iconBg="#F5F3FF" iconColor="#8B5CF6"
-            label="Tỉ lệ hoàn thành trung bình" value="88.5%"
-            badge="+0.5%" badgeUp={true}
+            label="Tỉ lệ hoàn thành trung bình" value="--"
+            badge="0%" badgeUp={true}
           />
           <StatCard
             icon={Star} iconBg="#FFFBEB" iconColor="#F59E0B"
-            label="Điểm trung bình khối" value="7.2 / 10"
-            badge="-0.1%" badgeUp={false}
+            label="Điểm trung bình khối" value="--"
+            badge="0%" badgeUp={false}
           />
         </div>
 
-        {/* Table card */}
         <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>
 
-          {/* Table header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #F3F4F6" }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>Danh sách bài kiểm tra</span>
-            <div style={{ display: "flex", gap: 10 }}>
-              <Button style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 9,
-                padding: "7px 14px", fontSize: 13, fontWeight: 500, color: "#374151", cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.color = "#3B82F6"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
-              >
-                <SlidersHorizontal size={14} /> Bộ lọc
-              </Button>
-              <Button style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 9,
-                padding: "7px 14px", fontSize: 13, fontWeight: 500, color: "#374151", cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#3B82F6"; e.currentTarget.style.color = "#3B82F6"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
-              >
-                <Download size={14} /> Xuất dữ liệu
-              </Button>
-            </div>
           </div>
 
-          {/* Column headers */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "2.2fr 1.8fr 1fr 1.2fr 1.1fr 0.4fr",
+            gridTemplateColumns: "2.5fr 2fr 1.2fr 1.5fr 1fr",
             padding: "10px 24px",
             borderBottom: "1px solid #F3F4F6",
             background: "#FAFAFA",
           }}>
-            {["TÊN BÀI KIỂM TRA", "CHƯƠNG / CHỦ ĐỀ", "MÔN HỌC", "HOÀN THÀNH", "TRẠNG THÁI", "THAO TÁC"].map(h => (
+            {["TÊN BÀI KIỂM TRA", "CHƯƠNG / CHỦ ĐỀ", "THỜI LƯỢNG", "TRẠNG THÁI", "THAO TÁC"].map(h => (
               <span key={h} style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.07em" }}>{h}</span>
             ))}
           </div>
 
-          {/* Rows */}
-          {exams.map((exam, i) => (
+          {tests.length === 0 && (
+            <div className="p-8 text-center text-gray-400 text-sm">Chưa có bài kiểm tra nào</div>
+          )}
+
+          {tests.map((test, i) => (
             <div
-              key={exam.id}
+              key={test.id}
+              onClick={() => router.push(`/teacher/assignments/tests/${test.id}`)}
               style={{
                 display: "grid",
-                gridTemplateColumns: "2.2fr 1.8fr 1fr 1.2fr 1.1fr 0.4fr",
+                gridTemplateColumns: "2.5fr 2fr 1.2fr 1.5fr 1fr",
                 padding: "16px 24px",
                 alignItems: "center",
-                borderBottom: i < exams.length - 1 ? "1px solid #F9FAFB" : "none",
+                borderBottom: i < tests.length - 1 ? "1px solid #F9FAFB" : "none",
                 transition: "background 0.15s",
                 cursor: "pointer",
               }}
               onMouseEnter={e => (e.currentTarget.style.background = "#FAFAFA")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              {/* Name */}
               <div>
-                <P style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>{exam.name}</P>
+                <P style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>{test.exercise?.title}</P>
                 <P style={{ fontSize: 11, color: "#9CA3AF", margin: "3px 0 0", display: "flex", alignItems: "center", gap: 4 }}>
-                  <Clock size={10} /> {exam.updated}
+                  <Clock size={10} /> {test.startTime ? format(new Date(test.startTime), "dd/MM HH:mm", { locale: vi }) : 'Chưa xếp lịch'}
                 </P>
               </div>
-              {/* Chapter */}
-              <span style={{ fontSize: 13, color: "#6B7280" }}>{exam.chapter}</span>
-              {/* Subject */}
-              <span style={{
-                fontSize: 11, fontWeight: 800, color: exam.subjectColor,
-                background: exam.subjectBg, padding: "3px 10px", borderRadius: 999,
-                letterSpacing: "0.04em", display: "inline-block",
-              }}>{exam.subject}</span>
-              {/* Progress */}
-              <ProgressBar done={exam.done} total={exam.total} />
-              {/* Status */}
-              <StatusBadge status={exam.status} type={exam.statusType} />
-              {/* Actions */}
-              <Button style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 4, display: "flex", alignItems: "center" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#374151")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}
-              >
-                <MoreHorizontal size={18} />
-              </Button>
+              
+              <span style={{ fontSize: 13, color: "#6B7280" }}>{test.topic?.name || test.subject?.name || 'Chung'}</span>
+              
+              <span style={{ fontSize: 13, fontWeight: 500 }}>{test.timeLimitMinutes} phút</span>
+              
+              <StatusBadge test={test} />
+              
+              <div>
+                <Button 
+                  onClick={(e) => handleDelete(e, test.id)}
+                  style={{ background: "#FEE2E2", color: "#EF4444", padding: "6px 10px", height: "auto" }}
+                  className="hover:bg-red-200"
+                >
+                  <Trash size={14} />
+                </Button>
+              </div>
             </div>
           ))}
-
-          {/* Pagination */}
-          <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "14px 24px", borderTop: "1px solid #F3F4F6",
-          }}>
-            <span style={{ fontSize: 13, color: "#6B7280" }}>
-              Hiển thị <b style={{ color: "#111827" }}>1-4</b> trên <b style={{ color: "#111827" }}>24</b> bài kiểm tra
-            </span>
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <Button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #E5E7EB", background: "#fff", fontSize: 13, color: "#374151", fontWeight: 500, cursor: "pointer" }}
-              >Trước</Button>
-              {[1, 2].map(n => (
-                <Button key={n} onClick={() => setPage(n)} style={{
-                  width: 34, height: 34, borderRadius: 8,
-                  border: page === n ? "none" : "1px solid #E5E7EB",
-                  background: page === n ? "#3B82F6" : "#fff",
-                  color: page === n ? "#fff" : "#374151",
-                  fontWeight: page === n ? 700 : 400,
-                  fontSize: 13, cursor: "pointer",
-                  boxShadow: page === n ? "0 2px 6px rgba(59,130,246,0.3)" : "none",
-                  transition: "all 0.15s",
-                }}>{n}</Button>
-              ))}
-              <Button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #E5E7EB", background: "#fff", fontSize: 13, color: "#374151", fontWeight: 500, cursor: "pointer" }}
-              >Sau</Button>
-            </div>
-          </div>
         </div>
       </div>
-
-      {/* FAB */}
-      <Button style={{
-        position: "fixed", bottom: 28, right: 28,
-        width: 52, height: 52, borderRadius: "50%",
-        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-        border: "none", cursor: "pointer",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: "0 4px 16px rgba(59,130,246,0.45)",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        zIndex: 50,
-      }}
-        onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.08)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,130,246,0.55)"; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(59,130,246,0.45)"; }}
-      >
-        <Sparkles size={22} color="#fff" />
-      </Button>
     </div>
   );
 }

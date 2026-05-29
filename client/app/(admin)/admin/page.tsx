@@ -122,6 +122,7 @@ export default function AdminDashboard() {
           setRecentUsers(usersRes.data as unknown as RecentUser[]);
         }
       } catch (error) {
+        console.log(error)
         // Silent fail
       } finally {
         setLoading(false);
@@ -230,7 +231,7 @@ export default function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[220px] text-gray-400 text-sm">
+            <div className="flex items-center justify-center h-55 text-gray-400 text-sm">
               Chưa có dữ liệu
             </div>
           )}

@@ -85,6 +85,7 @@ model Subject {
   children          Subject[]          @relation("SubjectHierarchy")
   topics            Topic[]
   tutorSubjects     TutorSubject[]
+  tests             Test[]
 }
 
 model Topic {
@@ -101,6 +102,7 @@ model Topic {
   parent            Topic?             @relation("TopicHierarchy", fields: [parentTopicId], references: [id])
   children          Topic[]            @relation("TopicHierarchy")
   subject           Subject            @relation(fields: [subjectId], references: [id])
+  tests             Test[]
 }
 
 model TutorSubject {
@@ -135,6 +137,7 @@ model Exercise {
   topic              Topic?               @relation(fields: [topicId], references: [id])
   attachments        ExerciseAttachment[]
   questions          ExerciseQuestion[]
+  tests              Test[]
 }
 
 model ExerciseQuestion {
@@ -189,6 +192,7 @@ model ExerciseSubmission {
   assignmentId  String             @db.Char(36)
   studentId     String             @db.Char(36)
   attemptNumber Int?
+  startedAt     DateTime?
   submittedAt   DateTime?
   totalScore    Decimal?           @db.Decimal(6, 2)
   percentage    Decimal?           @db.Decimal(5, 2)
@@ -395,4 +399,25 @@ enum USER_ROLE {
   ADMIN
   TEACHER
   STUDENT
+}
+
+model Test {
+  id               String    @id @db.Char(36)
+  exerciseId       String    @db.Char(36)
+  topicId          String?   @db.Char(36)
+  subjectId        String?   @db.Char(36)
+  testType         String    @db.VarChar(50)
+  timeLimitMinutes Int
+  passingScore     Decimal   @db.Decimal(5, 2)
+  maxAttempts      Int       @default(1)
+  shuffleQuestions Boolean   @default(false)
+  shuffleOptions   Boolean   @default(false)
+  showResult       String    @db.VarChar(50)
+  isPublished      Boolean   @default(false)
+  startTime        DateTime?
+  endTime          DateTime?
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  topic    Topic?   @relation(fields: [topicId], references: [id])
+  subject  Subject? @relation(fields: [subjectId], references: [id])
 }

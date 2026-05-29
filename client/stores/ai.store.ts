@@ -1,10 +1,14 @@
 import { create } from 'zustand';
 
+export interface AiDraftData {
+  grade?: string;
+  subjectId?: string;
+  [key: string]: unknown; 
+}
+
 interface AiStoreType {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  aiDraft: any | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setAiDraft: (draft: any | null) => void;
+  aiDraft: AiDraftData | null;
+  setAiDraft: (draft: AiDraftData | null) => void;
   clearAiDraft: () => void;
 }
 

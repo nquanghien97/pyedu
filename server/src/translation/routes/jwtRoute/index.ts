@@ -22,6 +22,8 @@ import { requireAdmin, getDashboardStats, getAllUsers, createUser, updateUser, d
 import { getTeacherDashboardStats, getStudentDashboardStats } from './dashboardHandler';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from './notificationHandler';
 import { sseStreamHandler } from './sseHandler';
+import { getTests, getTestById, createTest, deleteTest } from './testHandler';
+import { aiExplainHandler } from './aiExplainHandler';
 import authMiddleware from '../authMiddleware';
 
 export const jwtRouter = express.Router();
@@ -89,6 +91,7 @@ protectedRouter.delete('/uploads/:id', deleteAttachment);
 protectedRouter.post('/ai/generate-exercise', generateExerciseByAI);
 protectedRouter.post('/ai/generate-exercise-by-file', upload.single('file'), generateExerciseFromFile);
 protectedRouter.get('/teacher/ai-exercises/history', getAiExerciseHistory);
+protectedRouter.post('/ai/explain', aiExplainHandler);
 
 // Teacher Meta Data (for Assign Dropdowns)
 protectedRouter.get('/teacher/classes', getTeacherClasses);
@@ -138,5 +141,11 @@ protectedRouter.get('/admin/users', requireAdmin, getAllUsers);
 protectedRouter.post('/admin/users', requireAdmin, createUser);
 protectedRouter.put('/admin/users/:id', requireAdmin, updateUser);
 protectedRouter.delete('/admin/users/:id', requireAdmin, deleteUser);
+
+// Tests
+protectedRouter.get('/tests', getTests);
+protectedRouter.get('/tests/:id', getTestById);
+protectedRouter.post('/tests', createTest);
+protectedRouter.delete('/tests/:id', deleteTest);
 
 jwtRouter.use(protectedRouter);

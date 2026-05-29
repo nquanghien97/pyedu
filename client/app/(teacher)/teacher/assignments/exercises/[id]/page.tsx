@@ -59,9 +59,6 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
   const [allSubjects, setAllSubjects] = useState<SubjectEntity[]>([]);
   const [topics, setTopics] = useState<TopicEntity[]>([]);
 
-  // Lọc môn học theo khối lớp đang chọn
-  const subjects = allSubjects.filter((s) => s.grade === Number(editGradeId));
-
   const fetchExercise = useCallback(async () => {
     try {
       const res = await getExerciseById(id);
@@ -174,12 +171,11 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
 
   const selectClass =
     'flex h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6] transition-shadow';
-
   return (
     <div className="max-w-4xl mx-auto">
       <Button
         onClick={() => router.back()}
-        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+        className="flex items-center gap-1 text-sm mb-4"
       >
         <ArrowLeftIcon className="w-4 h-4" />
         Quay lại
@@ -242,8 +238,6 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
                   value={editGradeId}
                   onChange={(e) => {
                     setEditGradeId(e.target.value);
-                    setEditSubjectId('');
-                    setEditTopicId('');
                   }}
                   className={selectClass}
                 >
@@ -259,7 +253,6 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
                 <label className="text-xs font-semibold text-gray-500 block mb-1">Môn học</label>
                 <select
                   value={editSubjectId}
-                  disabled={!editGradeId}
                   onChange={(e) => {
                     setEditSubjectId(e.target.value);
                     setEditTopicId('');
@@ -267,7 +260,7 @@ export default function ExerciseDetailPage({ params }: { params: Promise<{ id: s
                   className={selectClass}
                 >
                   <option value="">-- Chọn môn --</option>
-                  {subjects.map((s) => (
+                  {allSubjects.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
                     </option>

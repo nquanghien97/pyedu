@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/auth.store";
-import { CheckCircle2, Star, Flame, ChevronDown, Sparkles, Clock, Trophy } from "lucide-react";
+import { CheckCircle2, Star, ChevronDown, Sparkles, Clock, Trophy } from "lucide-react";
 import { WeeklyChart } from "./Chart";
 import { getStudentDashboardStats } from "@/services/dashboard";
 import Link from "next/link";
@@ -66,6 +66,7 @@ export default function StudentDashboard() {
           setStats(res.data);
         }
       } catch (error) {
+        console.log("Lỗi khi tải thống kê dashboard:", error);
         // Silent fail
       } finally {
         setLoading(false);
@@ -97,7 +98,7 @@ export default function StudentDashboard() {
           {loading ? (
             <>
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 h-[120px] animate-pulse">
+                <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 h-30 animate-pulse">
                   <div className="w-10 h-10 bg-gray-100 rounded-xl mb-3" />
                   <div className="w-20 h-3 bg-gray-100 rounded mb-2" />
                   <div className="w-12 h-6 bg-gray-100 rounded" />
@@ -240,7 +241,7 @@ export default function StudentDashboard() {
           <div className="flex flex-col gap-4">
 
             {/* AI suggestion */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-5 shadow-md">
+            <div className="relative overflow-hidden bg-linear-to-br from-blue-500 to-blue-700 rounded-2xl p-5 shadow-md">
               <svg className="absolute top-0 right-0 opacity-10" width="120" height="120" viewBox="0 0 120 120">
                 <circle cx="80" cy="20" r="60" fill="#fff" />
               </svg>

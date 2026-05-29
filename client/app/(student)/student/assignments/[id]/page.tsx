@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Clock,
-  CheckCircle2,
   AlertCircle,
   Send,
   Loader2,
-  BookOpen,
   ChevronLeft,
   ChevronRight,
   Trophy,
@@ -61,22 +59,23 @@ export default function DoExercisePage() {
   const [previousSubmissions, setPreviousSubmissions] = useState<SubmissionEntity[]>([]);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   // Fetch assignment details
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Get assignment with exercise + questions
-        const res = await api<AssignmentDetail>({
-          url: `/api/v1/student/assignments/${assignmentId}/submissions`,
-        });
+    // const fetchData = async () => {
+    //   try {
+    //     // Get assignment with exercise + questions
+    //     const res = await api<AssignmentDetail>({
+    //       url: `/api/v1/student/assignments/${assignmentId}/submissions`,
+    //     });
 
-        // We need to also fetch the exercise details separately
-        // since the student assignment endpoint doesn't include questions
-      } catch {
-        // fallback
-      }
-    };
+    //     // We need to also fetch the exercise details separately
+    //     // since the student assignment endpoint doesn't include questions
+    //   } catch {
+    //     // fallback
+    //   }
+    // };
 
     const loadAssignment = async () => {
       setLoading(true);
@@ -125,7 +124,7 @@ export default function DoExercisePage() {
 
   // Timer countdown
   useEffect(() => {
-    if (timeLeft === null || timeLeft <= 0 || showResult) return;
+    if (!hasStarted || timeLeft === null || timeLeft <= 0 || showResult) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -138,28 +137,13 @@ export default function DoExercisePage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, showResult]);
+  }, [timeLeft, showResult, hasStarted]);
 
-  // Auto-submit when time is up
-  useEffect(() => {
-    if (timeLeft === 0 && !showResult && !submitting) {
-      handleSubmit();
-    }
-  }, [timeLeft, showResult, submitting]);
-
-  const questions = assignment?.exercise?.questions ?? [];
+  const questions = useMemo(() => assignment?.exercise.questions ?? [], [assignment]);
   const currentQuestion = questions[currentQuestionIndex];
   const totalQuestions = questions.length;
 
-  const updateAnswer = (questionId: string, answerData: AnswerData) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: answerData }));
-  };
-
-  const answeredCount = Object.keys(answers).length;
-  const progressPercent =
-    totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (submitting) return;
     setSubmitting(true);
 
@@ -181,7 +165,22 @@ export default function DoExercisePage() {
     } finally {
       setSubmitting(false);
     }
+  }, [submitting, questions, assignmentId, answers]);
+
+  // Auto-submit when time is up
+  useEffect(() => {
+    if (timeLeft === 0 && !showResult && !submitting) {
+      handleSubmit();
+    }
+  }, [timeLeft, showResult, submitting, handleSubmit]);
+
+  const updateAnswer = (questionId: string, answerData: AnswerData) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: answerData }));
   };
+
+  const answeredCount = Object.keys(answers).length;
+  const progressPercent =
+    totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -201,6 +200,62 @@ export default function DoExercisePage() {
   }
 
   if (!assignment) return null;
+
+  // Start Screen
+  if (!hasStarted && !showResult) {
+    return (
+      <div className="min-h-screen bg-slate-50 p-7 flex items-center justify-center">
+        <div className="max-w-2xl w-full bg-white rounded-2xl border border-slate-100 shadow-sm p-8">
+          <div className="text-center mb-8">
+            <H1>{assignment.exercise.title}</H1>
+            <P className="text-gray-500 mt-2">{assignment.exercise.subject?.name}</P>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-blue-50 p-4 rounded-xl text-center">
+              <P className="text-xs text-blue-600 font-medium">Thời gian làm bài</P>
+              <P className="text-xl font-bold text-blue-700">{assignment.exercise.timeLimitMinutes || 'Không giới hạn'} phút</P>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-xl text-center">
+              <P className="text-xs text-purple-600 font-medium">Số lần làm lại tối đa</P>
+              <P className="text-xl font-bold text-purple-700">{assignment.maxAttempts || 'Không giới hạn'}</P>
+            </div>
+          </div>
+
+          {previousSubmissions.length > 0 && (
+            <div className="mb-8">
+              <H3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Lịch sử nộp bài ({previousSubmissions.length})</H3>
+              <div className="space-y-3">
+                {previousSubmissions.map((sub) => (
+                  <div key={sub.id} className="flex justify-between items-center p-4 rounded-xl border border-gray-100 bg-gray-50">
+                    <div>
+                      <P className="font-semibold text-gray-800">Lần {sub.attemptNumber}</P>
+                      <P className="text-xs text-gray-500">
+                        {sub.submittedAt ? new Date(sub.submittedAt).toLocaleString('vi-VN') : 'Đã nộp'}
+                      </P>
+                    </div>
+                    <div className="text-right">
+                      <P className="font-bold text-blue-600">{sub.totalScore} / {assignment.exercise.totalPoints} điểm</P>
+                      <P className="text-xs text-green-600 font-semibold">{sub.percentage}%</P>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-center gap-4 mt-8">
+            <Button variant="outline" onClick={() => router.push('/student/assignments')} className="px-6">
+              Quay lại
+            </Button>
+            <Button onClick={() => setHasStarted(true)} className="bg-blue-600 hover:bg-blue-700 px-8">
+              Bắt đầu làm bài
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show result view
   if (showResult && submissionResult) {
@@ -430,7 +485,7 @@ export default function DoExercisePage() {
 
       <div className="flex-1 flex max-w-6xl mx-auto w-full py-6 px-4 gap-6">
         {/* Question Navigator */}
-        <div className="w-64 flex-shrink-0">
+        <div className="w-64 shrink-0">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sticky top-20">
             <H3 className="text-xs uppercase tracking-wider mb-4">
               Câu hỏi ({totalQuestions})
@@ -577,7 +632,7 @@ function normalizeOptions(
 ): Array<{ id: string; text: string }> {
   if (!rawOptions || !Array.isArray(rawOptions)) return [];
 
-  const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  // const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
   return rawOptions.map((opt: unknown, index: number) => {
     // Format 1: plain string — AI-generated exercises store options as string arrays
@@ -700,7 +755,7 @@ function MultipleChoiceInput({
           }}
         >
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
+            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold"
             style={{
               background: selected === opt.id ? '#3B82F6' : '#F1F5F9',
               color: selected === opt.id ? 'white' : '#64748B',
@@ -757,7 +812,7 @@ function MultipleSelectInput({
             }}
           >
             <div
-              className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold"
+              className="w-6 h-6 rounded flex items-center justify-center shrink-0 text-xs font-bold"
               style={{
                 background: isSelected ? '#3B82F6' : '#F1F5F9',
                 color: isSelected ? 'white' : '#64748B',

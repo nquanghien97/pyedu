@@ -12,11 +12,19 @@ const INITIAL_DELAY_MS = 2000;
  * (Gemini đôi khi trả về newline/tab thô trong string values)
  */
 function safeJsonParse(text: string): unknown {
+  // 1. Strip markdown code fences (```json ... ``` or ``` ... ```)
+  let cleaned = text.trim();
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+  }
+  cleaned = cleaned.trim();
+
+  // 2. Try parsing directly
   try {
-    return JSON.parse(text);
+    return JSON.parse(cleaned);
   } catch {
-    // Thay thế control characters bên trong JSON string values
-    const sanitized = text.replace(
+    // 3. Replace control characters inside JSON string values
+    const sanitized = cleaned.replace(
       /[\x00-\x1F\x7F]/g,
       (ch) => {
         switch (ch) {
@@ -27,7 +35,16 @@ function safeJsonParse(text: string): unknown {
         }
       }
     );
-    return JSON.parse(sanitized);
+    try {
+      return JSON.parse(sanitized);
+    } catch {
+      // 4. Last resort: try to extract JSON object/array from the text
+      const jsonMatch = sanitized.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[1]);
+      }
+      throw new Error(`Cannot parse AI response as JSON. Raw text starts with: "${text.slice(0, 100)}"`);
+    }
   }
 }
 
@@ -250,10 +267,74 @@ Trả về JSON đúng schema sau (không bọc markdown):
       };
     }
   },
+
+  /**
+   * AI giải thích bài tập chi tiết từng bước
+   */
+  async explainQuestion(params: {
+    questionText: string;
+    studentAnswer: string;
+    correctAnswer?: string;
+  }): Promise<AIExplainResult> {
+    const prompt = `Bạn là một gia sư AI kiên nhẫn và giỏi chuyên môn.
+Hãy giải thích chi tiết cách giải bài tập sau đây từng bước một.
+
+Câu hỏi: ${params.questionText}
+Bài làm của học sinh: ${params.studentAnswer}
+${params.correctAnswer ? `Đáp án đúng: ${params.correctAnswer}` : ''}
+
+Yêu cầu trả về JSON chuẩn xác (không dùng markdown backticks) với schema sau:
+{
+  "explanation": {
+    "steps": [
+      {
+        "stepNumber": 1,
+        "title": "Tên bước",
+        "content": "Nội dung giải thích",
+        "formula": "Công thức nếu có (tùy chọn)"
+      }
+    ],
+    "relatedKnowledge": ["Kiến thức 1", "Kiến thức 2"],
+    "tips": "Mẹo giải nhanh (tùy chọn)"
+  }
+}`;
+
+    try {
+      const result = await withRetry(async () => {
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            temperature: 0.5,
+          },
+        });
+        if (!response.text) throw new Error('Empty response from Gemini');
+        return safeJsonParse(response.text) as AIExplainResult;
+      }, 'Explain Question');
+      return result;
+    } catch (e) {
+      console.error('[Gemini Service] Explain Question failed:', e);
+      throw e;
+    }
+  }
 };
 
 export interface GradeEssayResult {
   pointsEarned: number;
   feedback: string;
   isCorrect: boolean | null;
+}
+
+export interface AIExplainResult {
+  explanation: {
+    steps: {
+      stepNumber: number;
+      title: string;
+      content: string;
+      formula?: string;
+    }[];
+    relatedKnowledge: string[];
+    tips?: string;
+  }
 }
