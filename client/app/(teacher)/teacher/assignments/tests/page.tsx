@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, MouseEvent } from "react";
 import {
-  ClipboardList, CheckCircle2, Star, SlidersHorizontal,
-  Download, MoreHorizontal, Calendar, Clock, Sparkles, Plus, Trash
+  ClipboardList, CheckCircle2, Star, Calendar, Clock, Sparkles, Plus, Trash
 } from "lucide-react";
 import StatCard from "./StatCard";
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,12 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { TestEntity } from "@/entity/test";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { notification } from "@/components/notification";
 
 const statusStyles: Record<string, { bg: string; color: string; dot: string }> = {
-  ended:     { bg: "#F3F4F6", color: "#6B7280", dot: "#9CA3AF" },
-  active:    { bg: "#F0FDF4", color: "#16A34A", dot: "#22C55E" },
+  ended: { bg: "#F3F4F6", color: "#6B7280", dot: "#9CA3AF" },
+  active: { bg: "#F0FDF4", color: "#16A34A", dot: "#22C55E" },
   scheduled: { bg: "#FFFBEB", color: "#D97706", dot: "#F59E0B" },
 };
 
@@ -24,10 +25,10 @@ function StatusBadge({ test }: { test: TestEntity }) {
   const now = new Date();
   const startTime = test.startTime ? new Date(test.startTime) : null;
   const endTime = test.endTime ? new Date(test.endTime) : null;
-  
+
   let status = "Chưa rõ";
   let type = "ended";
-  
+
   if (startTime && startTime > now) {
     status = "Đã lên lịch";
     type = "scheduled";
@@ -51,9 +52,10 @@ function StatusBadge({ test }: { test: TestEntity }) {
 export default function ExamManagement() {
   const [page, setPage] = useState(1);
   const [tests, setTests] = useState<TestEntity[]>([]);
+  const [testToDelete, setTestToDelete] = useState<TestEntity | null>(null);
   const router = useRouter();
 
-  const fetchTests = async () => {
+  const fetchTests = useCallback(async () => {
     try {
       const res = await getTests();
       if (res.data) {
@@ -62,22 +64,29 @@ export default function ExamManagement() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [])
 
   useEffect(() => {
-    fetchTests();
-  }, []);
+    (async () => {
+      await fetchTests()
+    })()
+  }, [fetchTests]);
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (confirm("Xóa bài kiểm tra này?")) {
+  const confirmDelete = async (id: string) => {
+    try {
       await deleteTest(id);
+      notification.success("Bài kiểm tra đã được xoá.");
       fetchTests();
+    } catch (err) {
+      console.log(err);
+      notification.error("Có lỗi xảy ra khi xoá bài kiểm tra.");
+    } finally {
+      setTestToDelete(null);
     }
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", padding: "28px 28px", position: "relative" }}>
+    <div className="min-h-screen bg-[#F8FAFC] p-7 relative">
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
 
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -87,7 +96,7 @@ export default function ExamManagement() {
 
         <div className="flex justify-between items-start mb-8">
           <div>
-            <H1>Quản lý Bài kiểm tra</H1>
+            <H1 className="">Quản lý Bài kiểm tra</H1>
             <P style={{ fontSize: 13, color: "#9CA3AF", marginTop: 6, marginBottom: 0 }}>
               Theo dõi, tạo và phân tích kết quả các bài đánh giá định kỳ.
             </P>
@@ -164,16 +173,19 @@ export default function ExamManagement() {
                   <Clock size={10} /> {test.startTime ? format(new Date(test.startTime), "dd/MM HH:mm", { locale: vi }) : 'Chưa xếp lịch'}
                 </P>
               </div>
-              
+
               <span style={{ fontSize: 13, color: "#6B7280" }}>{test.topic?.name || test.subject?.name || 'Chung'}</span>
-              
+
               <span style={{ fontSize: 13, fontWeight: 500 }}>{test.timeLimitMinutes} phút</span>
-              
+
               <StatusBadge test={test} />
-              
+
               <div>
-                <Button 
-                  onClick={(e) => handleDelete(e, test.id)}
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTestToDelete(test)
+                  }}
                   style={{ background: "#FEE2E2", color: "#EF4444", padding: "6px 10px", height: "auto" }}
                   className="hover:bg-red-200"
                 >
@@ -184,6 +196,26 @@ export default function ExamManagement() {
           ))}
         </div>
       </div>
+      {testToDelete && (
+        <Dialog open={!!testToDelete} onOpenChange={(open) => !open && setTestToDelete(null)}>
+          <DialogContent className="sm:max-w-106.25">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-gray-900">Xác nhận xoá</DialogTitle>
+              <DialogDescription className="text-sm text-gray-400">
+                Bạn có chắc chắn muốn xoá bài kiểm tra này? Hành động này không thể hoàn tác.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setTestToDelete(null)}>
+                Huỷ
+              </Button>
+              <Button onClick={() => confirmDelete(testToDelete.id)} className="bg-red-500 hover:bg-red-600 border-transparent">
+                {testToDelete !== null ? "Xoá" : "Đang xoá..."}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

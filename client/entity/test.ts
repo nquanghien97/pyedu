@@ -15,6 +15,7 @@ export interface TestEntity {
   isPublished: boolean;
   startTime?: string | Date;
   endTime?: string | Date;
+  assignmentId?: string;
 
   // Relations (optional based on include in backend)
   exercise?: ExerciseEntity;
@@ -35,6 +36,8 @@ export interface CreateTestInput {
   showResult?: string;
   startTime?: string | Date;
   endTime?: string | Date;
+  assignedToType?: string;
+  assignedToId?: string;
   questions?: Array<{
     questionText: string;
     questionType: string;
@@ -47,6 +50,8 @@ export interface CreateTestInput {
     aiGradingEnabled?: boolean;
   }>;
 }
+
+export type UpdateTestInput = Partial<CreateTestInput>;
 
 export interface AIExplainResult {
   explanation: {

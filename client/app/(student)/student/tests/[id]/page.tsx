@@ -36,13 +36,16 @@ export default function TestTakerPage() {
   
   
   const submitTest = useCallback(async () => {
-    if (!test || !test.exercise?.id) return;
+    if (!test || !test.assignmentId) {
+      alert("Không tìm thấy thông tin Assignment của đề thi này!");
+      return;
+    }
     try {
-      await submitExercise(test.exercise.id, {
+      await submitExercise(test.assignmentId, {
         answers,
         // timeSpentSeconds: test.timeLimitMinutes * 60 - (timeLeft || 0)
       } as unknown as { answers: SubmitAnswerInput[] });
-      router.push(`/student/assignments/${test.exercise.id}/result`);
+      router.push(`/student/assignments/${test.assignmentId}/result`);
     } catch (e) {
       console.error(e);
       alert("Lỗi khi nộp bài");

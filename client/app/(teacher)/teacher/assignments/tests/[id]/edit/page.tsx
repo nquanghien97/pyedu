@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { H1, H2, P } from "@/components/ui/typography";
-import { createTest } from "@/services/test";
+import { getTestById, updateTest } from "@/services/test";
 import { getSubjects } from "@/services/subject";
 import { classService } from "@/services/class";
 import { getTeacherStudents, DropdownClass, DropdownStudent } from "@/services/meta";
@@ -18,8 +18,9 @@ import { QuestionType } from '@/entity/exercise';
 import { notification } from "@/components/notification";
 import {
   ArrowLeftIcon, ArrowRightIcon, PlusIcon, CheckCircle2,
-  Settings2, FileText, Users, User as UserIcon, Globe
+  Settings2, FileText, Users, User as UserIcon, Globe, AlertTriangle
 } from "lucide-react";
+import { format } from "date-fns";
 
 // ---------- Zod Schema ----------
 
@@ -60,13 +61,16 @@ const STEPS = [
   { label: 'Giao bài', icon: Users },
 ];
 
-export default function CreateTestPage() {
+export default function EditTestPage() {
+  const params = useParams();
+  const id = params?.id as string;
   const router = useRouter();
+  
   const [step, setStep] = useState(0);
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
   const [classes, setClasses] = useState<DropdownClass[]>([]);
   const [students, setStudents] = useState<DropdownStudent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const {
     register,
@@ -74,6 +78,7 @@ export default function CreateTestPage() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<TestFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,12 +113,55 @@ export default function CreateTestPage() {
       getSubjects(),
       classService.getClasses(),
       getTeacherStudents(),
-    ]).then(([subRes, clsRes, stdRes]) => {
+      getTestById(id),
+    ]).then(([subRes, clsRes, stdRes, testRes]) => {
       if (subRes.data) setSubjects(subRes.data);
       setClasses(clsRes.data || []);
       setStudents(stdRes);
+
+      if (testRes.data) {
+        const test = testRes.data;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const defaultQuestions = test.exercise?.questions?.map((q: any) => ({
+          questionText: q.questionText,
+          questionType: q.questionType,
+          points: q.points,
+          content: q.content || getContentForType(q.questionType as QuestionType),
+          explanation: q.explanation || '',
+          hints: q.hints || [],
+          aiGradingEnabled: q.aiGradingEnabled || false,
+        })) || [];
+
+        // Format date to local datetime-local string
+        const formatDateTime = (isoDate?: string | Date | null) => {
+          if (!isoDate) return '';
+          return format(new Date(isoDate), "yyyy-MM-dd'T'HH:mm");
+        };
+
+        reset({
+          title: test.exercise?.title || '',
+          subjectId: test.subjectId || '',
+          testType: test.testType || 'chapter_test',
+          timeLimitMinutes: test.timeLimitMinutes || 45,
+          passingScore: test.passingScore || 50,
+          maxAttempts: test.maxAttempts || 1,
+          shuffleQuestions: test.shuffleQuestions || false,
+          shuffleOptions: test.shuffleOptions || false,
+          showResult: test.showResult || 'immediately',
+          startTime: formatDateTime(test.startTime),
+          endTime: formatDateTime(test.endTime),
+          questions: defaultQuestions,
+          assignedToType: 'all', // We don't have this in test entity directly returned, will default to all
+          assignedToId: 'all',
+        });
+      }
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      notification.error("Lỗi khi tải dữ liệu bài kiểm tra");
+      router.push("/teacher/assignments/tests");
     });
-  }, []);
+  }, [id, reset, router]);
 
   const addQuestion = () => {
     append({
@@ -143,9 +191,8 @@ export default function CreateTestPage() {
       return;
     }
 
-    setLoading(true);
     try {
-      const res = await createTest({
+      const res = await updateTest(id, {
         title: data.title,
         subjectId: data.subjectId || undefined,
         testType: data.testType,
@@ -174,15 +221,13 @@ export default function CreateTestPage() {
           };
         }),
       });
-      if (res.data) {
-        notification.success('Tạo bài kiểm tra thành công!');
-        router.push("/teacher/assignments/tests");
+      if (res.data || res.message) {
+        notification.success('Đã cập nhật bài kiểm tra thành công!');
+        router.push(`/teacher/assignments/tests/${id}`);
       }
     } catch (error) {
       console.error(error);
-      notification.error("Lỗi khi tạo bài kiểm tra");
-    } finally {
-      setLoading(false);
+      notification.error("Lỗi khi cập nhật bài kiểm tra");
     }
   };
 
@@ -199,17 +244,33 @@ export default function CreateTestPage() {
 
   const prevStep = () => setStep(s => Math.max(s - 1, 0));
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-4">
           <Button variant="outline" size="icon" onClick={() => router.back()}
             className="rounded-xl bg-white border-slate-200 text-slate-600 hover:bg-slate-100">
             <ArrowLeftIcon size={18} />
           </Button>
-          <H1 className="text-2xl">Tạo Bài Kiểm Tra Mới</H1>
+          <H1 className="text-2xl">Chỉnh sửa Bài Kiểm Tra</H1>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex items-start gap-3 text-amber-800">
+          <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
+          <div className="text-sm">
+            <p className="font-semibold mb-1">Cảnh báo quan trọng!</p>
+            <p>Nếu bài kiểm tra này đã có học sinh làm, việc lưu chỉnh sửa sẽ <strong>xóa toàn bộ lịch sử và kết quả bài làm cũ</strong> của học sinh. Học sinh sẽ phải làm lại từ đầu. Vui lòng cân nhắc kỹ trước khi Lưu.</p>
+          </div>
         </div>
 
         {/* Stepper */}
@@ -427,8 +488,8 @@ export default function CreateTestPage() {
                 Tiếp tục <ArrowRightIcon size={16} className="ml-1" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isSubmitting || loading}>
-                {isSubmitting || loading ? 'Đang tạo...' : 'Tạo bài kiểm tra'}
+              <Button type="submit" className="bg-amber-600 hover:bg-amber-700" disabled={isSubmitting || loading}>
+                {isSubmitting || loading ? 'Đang lưu...' : 'Lưu thay đổi'}
               </Button>
             )}
           </div>

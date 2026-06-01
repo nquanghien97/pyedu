@@ -19,9 +19,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
 
     const initAuth = async () => {
+      setIsInitializing(true);
       try {
         // Nếu chưa có accessToken trong memory (vừa F5), chủ động gọi refresh trước
-        // Việc này tránh việc gọi các API khác bị 401 đỏ console
         const { accessToken } = useAuthStore.getState();
         if (!accessToken) {
           await refreshAccessToken();
@@ -30,9 +30,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         // Sau khi đã thử refresh (thành công hoặc không), mới gọi /me
         const res = await api({ url: '/api/v1/users/me' });
         if (res.success) {
-           const userData = res.data as any;
+           const userData = res.data as Parameters<typeof setUser>[0];
            setUser(userData);
-           useAuthStore.setState({ me: userData });
+           useAuthStore.setState({ me: userData as ReturnType<typeof useAuthStore.getState>['me'] });
         }
       } catch (error) {
         console.error("Auth initialization failed:", error);
@@ -42,7 +42,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     };
 
     initAuth();
-  }, [setAccessToken, setUser]);
+  }, [pathname, setAccessToken, setUser]);
 
   if (isInitializing) {
     return (
@@ -54,3 +54,4 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   return <>{children}</>;
 }
+

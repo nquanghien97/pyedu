@@ -143,10 +143,10 @@ export default function AutoAssignPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-end mb-8">
           <div>
-            <H1 className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Calendar className="text-blue-600" />
-              Giao bài tự động (Auto-Assign)
-            </H1>
+              <H1>Giao bài tự động (Auto-Assign)</H1>
+            </div>
             <P className="text-sm text-gray-500 mt-2">
               Thiết lập hệ thống tự động chọn và giao bài tập hàng ngày cho các lớp.
             </P>

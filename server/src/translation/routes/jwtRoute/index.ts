@@ -22,7 +22,7 @@ import { requireAdmin, getDashboardStats, getAllUsers, createUser, updateUser, d
 import { getTeacherDashboardStats, getStudentDashboardStats } from './dashboardHandler';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from './notificationHandler';
 import { sseStreamHandler } from './sseHandler';
-import { getTests, getTestById, createTest, deleteTest } from './testHandler';
+import { getTests, getTestById, createTest, updateTest, deleteTest } from './testHandler';
 import { aiExplainHandler } from './aiExplainHandler';
 import authMiddleware from '../authMiddleware';
 
@@ -146,6 +146,7 @@ protectedRouter.delete('/admin/users/:id', requireAdmin, deleteUser);
 protectedRouter.get('/tests', getTests);
 protectedRouter.get('/tests/:id', getTestById);
 protectedRouter.post('/tests', createTest);
+protectedRouter.put('/tests/:id', updateTest);
 protectedRouter.delete('/tests/:id', deleteTest);
 
 jwtRouter.use(protectedRouter);

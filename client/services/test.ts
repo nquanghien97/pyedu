@@ -16,6 +16,13 @@ export async function createTest(data: CreateTestInput) {
   });
 }
 
+export async function updateTest(id: string, data: Partial<CreateTestInput>) {
+  return api<{ message: string }>({
+    url: `/api/v1/tests/${id}`,
+    options: { method: 'PUT', body: JSON.stringify(data) },
+  });
+}
+
 export async function deleteTest(id: string) {
   return api<{ message: string }>({
     url: `/api/v1/tests/${id}`,
