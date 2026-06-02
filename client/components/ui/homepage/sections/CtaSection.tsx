@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 export default function CtaSection({ bgColor }: { bgColor?: string }) {
   return (
     <section className={`py-8 relative overflow-hidden ${bgColor}`}>
-      <div className="absolute inset-0 bg-gradient-to-r from-[#3b82f6] to-[#1d4ed8]" />
+      <div className="absolute inset-0 bg-linear-to-r from-[#3b82f6] to-[#1d4ed8]" />
       <div
         className="absolute inset-0 opacity-10"
         style={{

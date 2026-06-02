@@ -7,9 +7,9 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
     <section className={`relative pt-24 pb-8 lg:pt-24 overflow-hidden ${bgColor}`}>
       {/* Background decorations */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-0 w-[400px] h-[400px] bg-blue-100/40 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-100/30 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-200 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-40 right-0 w-100 h-100 bg-blue-100/40 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-75 h-75 bg-indigo-100/30 rounded-full blur-3xl" />
         {/* Grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"
@@ -71,7 +71,7 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <a
+            <Link
               href="/#features"
             >
               <Button
@@ -82,7 +82,7 @@ export default function HeroSection({ bgColor }: { bgColor?: string }) {
                 Tìm hiểu thêm
                 <ChevronDown className="w-5 h-5 ml-1" />
               </Button>
-            </a>
+            </Link>
           </div>
 
           {/* Hero Illustration */}

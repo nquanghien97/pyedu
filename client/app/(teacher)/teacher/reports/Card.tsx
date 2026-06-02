@@ -34,7 +34,7 @@ export function AlertCard({ type, title, tag, tagColor, desc } : { type: "warnin
 // ── Stat Card ────────────────────────────────────────────────────
 export function StatCard({ label, value, delta, up } : { label: string, value: string, delta: string, up: boolean }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5" style={{ flex: 1 }}>
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex-1">
       <P className="text-sm text-muted-foreground mb-2">{label}</P>
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-bold">{value}</span>

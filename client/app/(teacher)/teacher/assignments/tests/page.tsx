@@ -87,17 +87,17 @@ export default function ExamManagement() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-7 relative">
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
+      <div className="max-w-4xl mx-auto">
 
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+        <div className="flex items-center gap-2 mb-5">
           <Calendar size={13} color="#3B82F6" />
-          <span style={{ fontSize: 13, color: "#3B82F6", fontWeight: 500 }}>Học kỳ 1 - 2024</span>
+          <span className="text-sm text-blue-500 font-medium">Học kỳ 1 - 2024</span>
         </div>
 
         <div className="flex justify-between items-start mb-8">
           <div>
-            <H1 className="">Quản lý Bài kiểm tra</H1>
-            <P style={{ fontSize: 13, color: "#9CA3AF", marginTop: 6, marginBottom: 0 }}>
+            <H1>Quản lý Bài kiểm tra</H1>
+            <P className="text-sm text-muted-foreground mt-1.5">
               Theo dõi, tạo và phân tích kết quả các bài đánh giá định kỳ.
             </P>
           </div>
@@ -111,7 +111,7 @@ export default function ExamManagement() {
           </Button>
         </div>
 
-        <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+        <div className="flex gap-4 mb-6">
           <StatCard
             icon={ClipboardList} iconBg="#EFF6FF" iconColor="#3B82F6"
             label="Tổng số bài kiểm tra" value={tests.length.toString()}
@@ -129,21 +129,15 @@ export default function ExamManagement() {
           />
         </div>
 
-        <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #F3F4F6" }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>Danh sách bài kiểm tra</span>
+          <div className="flex justify-between items-center p-6 border-b border-gray-200">
+            <span className="text-lg font-bold text-gray-900">Danh sách bài kiểm tra</span>
           </div>
 
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "2.5fr 2fr 1.2fr 1.5fr 1fr",
-            padding: "10px 24px",
-            borderBottom: "1px solid #F3F4F6",
-            background: "#FAFAFA",
-          }}>
+          <div className="grid grid-cols-5 p-6 border-b border-gray-200 bg-gray-50">
             {["TÊN BÀI KIỂM TRA", "CHƯƠNG / CHỦ ĐỀ", "THỜI LƯỢNG", "TRẠNG THÁI", "THAO TÁC"].map(h => (
-              <span key={h} style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.07em" }}>{h}</span>
+              <span key={h} className="text-xs font-bold text-muted-foreground tracking-wide">{h}</span>
             ))}
           </div>
 
@@ -168,15 +162,15 @@ export default function ExamManagement() {
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
               <div>
-                <P style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>{test.exercise?.title}</P>
-                <P style={{ fontSize: 11, color: "#9CA3AF", margin: "3px 0 0", display: "flex", alignItems: "center", gap: 4 }}>
+                <P className="text-sm font-bold text-gray-900 margin-0">{test.exercise?.title}</P>
+                <P className="text-xs text-muted-foreground mt-1" style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <Clock size={10} /> {test.startTime ? format(new Date(test.startTime), "dd/MM HH:mm", { locale: vi }) : 'Chưa xếp lịch'}
                 </P>
               </div>
 
-              <span style={{ fontSize: 13, color: "#6B7280" }}>{test.topic?.name || test.subject?.name || 'Chung'}</span>
+              <span className="text-sm text-gray-500">{test.topic?.name || test.subject?.name || 'Chung'}</span>
 
-              <span style={{ fontSize: 13, fontWeight: 500 }}>{test.timeLimitMinutes} phút</span>
+              <span className="text-sm font-medium">{test.timeLimitMinutes} phút</span>
 
               <StatusBadge test={test} />
 
@@ -186,8 +180,7 @@ export default function ExamManagement() {
                     e.stopPropagation();
                     setTestToDelete(test)
                   }}
-                  style={{ background: "#FEE2E2", color: "#EF4444", padding: "6px 10px", height: "auto" }}
-                  className="hover:bg-red-200"
+                  className="bg-[#FEE2E2] hover:bg-red-200 text-[#EF4444] px-3 py-2 h-auto"
                 >
                   <Trash size={14} />
                 </Button>

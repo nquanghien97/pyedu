@@ -11,16 +11,19 @@ interface StatCardProps {
 
 export default function StatCard({ icon: Icon, iconBg, iconColor, label, value, badge, badgeUp }: StatCardProps) {
   return (
-    <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", padding: "22px 24px", flex: 1 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-        <div style={{ width: 42, height: 42, borderRadius: 12, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="bg-white rounded-4xl border border-gray-200 shadow-sm p-5 flex-1">
+      <div className="flx justify-between items-start mb-4">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ background: iconBg }}
+        >
           <Icon size={20} color={iconColor} />
         </div>
-        <span style={{
-          fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
-          background: badgeUp ? "#F0FDF4" : "#FEF2F2",
-          color: badgeUp ? "#16A34A" : "#DC2626",
-        }}>{badge}</span>
+        <span
+          className={`text-xs font-bol px-1 py-2 rounded-full ${badgeUp ? "bg-[#F0FDF4] text-[#16A34A]" : "bg-[#FEF2F2] text-[#DC2626]"}`}
+        >
+          {badge}
+        </span>
       </div>
       <P className="text-xs text-[#9CA3AF]">{label}</P>
       <P className="text-2xl font-bold text-[#111827]">{value}</P>

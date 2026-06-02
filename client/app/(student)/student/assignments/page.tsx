@@ -335,7 +335,7 @@ export default function AssignmentPage() {
 
             {showFilterDropdown && (
               <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-50 py-1 overflow-hidden">
-                <Button className="w-full py-2.5 text-left text-sm hover:bg-blue-50" style={{ color: !selectedSubjectId ? '#3B82F6' : '#374151', fontWeight: !selectedSubjectId ? 600 : 400, }} onClick={() => {
+                <Button className={`w-full py-2.5 text-left text-sm hover:bg-blue-50 ${!selectedSubjectId ? 'text-[#3B82F6] font-semibold' : 'text-[#374151] font-light'}`} onClick={() => {
                   setSelectedSubjectId('');
                   setShowFilterDropdown(false);
                 }}
@@ -343,7 +343,7 @@ export default function AssignmentPage() {
                   Tất cả môn học
                 </Button>
                 {allSubjects.map((subject) => (
-                  <Button key={subject.id} className="w-full py-2.5 text-left text-sm hover:bg-blue-50" style={{ color: selectedSubjectId === subject.id ? '#3B82F6' : '#374151', fontWeight: selectedSubjectId === subject.id ? 600 : 400, }} onClick={() => {
+                  <Button key={subject.id} className={`w-full py-2.5 text-left text-sm hover:bg-blue-50 ${selectedSubjectId === subject.id ? 'text-[#3B82F6] font-semibold' : 'text-[#374151] font-light'}`} onClick={() => {
                     setSelectedSubjectId(subject.id);
                     setShowFilterDropdown(false);
                   }}
@@ -370,7 +370,6 @@ export default function AssignmentPage() {
                   activeTab === t.key
                     ? '2px solid #3B82F6'
                     : '2px solid transparent',
-                marginBottom: -1,
               }}
             >
               {t.label}

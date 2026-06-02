@@ -186,13 +186,7 @@ export default function StudentsPage() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                          style={{
-                            background: '#EFF6FF',
-                            color: '#3B82F6',
-                          }}
-                        >
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-[#EFF6FF] text-[#3B82F6]">
                           {initials}
                         </div>
                         <div>

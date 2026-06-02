@@ -2,14 +2,13 @@ import { Search, Bell, Download, TrendingUp } from "lucide-react";
 import { AlertCard, StatCard } from "./Card";
 import { BarChart, DonutChart, LineChart } from "./Chart";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { H1, P } from "@/components/ui/typography";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 export default function ReportsPage() {
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", padding: "28px 28px" }}>
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
+    <div className="min-h-screen bg-[#F8FAFC] p-7">
+      <div className="max-w-4xl mx-auto">
 
         {/* Top bar */}
         <div className="flex items-center justify-between mb-7">

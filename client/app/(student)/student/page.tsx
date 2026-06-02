@@ -216,11 +216,10 @@ export default function StudentDashboard() {
                           )}
                         </P>
                       </div>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        s.status === "graded"
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.status === "graded"
                           ? "bg-green-50 text-green-600"
                           : "bg-blue-50 text-blue-600"
-                      }`}>
+                        }`}>
                         {STATUS_LABELS[s.status || ""] || s.status}
                       </span>
                     </div>
@@ -309,15 +308,7 @@ export default function StudentDashboard() {
                   </div>
                 ))}
                 <div
-                  className="flex items-center justify-center text-xs font-bold text-blue-500 rounded-full border-2 border-white"
-                  style={{
-                    width: 34,
-                    height: 34,
-                    background: "#EFF6FF",
-                    marginLeft: -10,
-                    position: "relative",
-                    zIndex: 0,
-                  }}
+                  className="flex items-center justify-center text-xs font-bold text-blue-500 rounded-full border-2 border-white w-8 h-8 bg-[#EFF6FF] -ml-2 relative z-0"
                 >
                   +12
                 </div>
