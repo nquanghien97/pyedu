@@ -229,7 +229,7 @@ export default function CreateTestPage() {
                   {isDone ? <CheckCircle2 size={16} /> : <Icon size={16} />}
                   {s.label}
                 </button>
-                {i < STEPS.length - 1 && <div className="w-8 h-0.5 bg-slate-200 mx-1 flex-shrink-0" />}
+                {i < STEPS.length - 1 && <div className="w-8 h-0.5 bg-slate-200 mx-1 shrink-0" />}
               </div>
             );
           })}

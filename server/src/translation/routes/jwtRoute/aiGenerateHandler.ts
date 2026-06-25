@@ -211,3 +211,85 @@ export async function getAiExerciseHistory(req: Request, res: Response) {
     return res.status(500).json({ success: false, error: 'Lỗi khi tải lịch sử' });
   }
 }
+
+export async function generateSolution(req: Request, res: Response) {
+  try {
+    const { questionId } = req.body;
+    if (!questionId) {
+      return res.status(400).json({ success: false, error: 'Thiếu questionId' });
+    }
+
+    const { prisma } = await import('../../database/prisma');
+    const question = await prisma.exerciseQuestion.findUnique({
+      where: { id: questionId },
+    });
+
+    if (!question) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy câu hỏi' });
+    }
+
+    const aiSolution = await geminiService.generateSolution({
+      questionText: question.questionText || '',
+      questionType: question.questionType || 'multiple_choice',
+    });
+
+    const updated = await prisma.exerciseQuestion.update({
+      where: { id: questionId },
+      data: {
+        content: question.content
+          ? { ...(question.content as Record<string, unknown>), sampleAnswer: aiSolution.sampleAnswer }
+          : { sampleAnswer: aiSolution.sampleAnswer },
+        explanation: aiSolution.explanation,
+      },
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('[AI Handler] Error generating solution:', error);
+    return res.status(500).json({ success: false, error: 'Lỗi khi sinh lời giải' });
+  }
+}
+
+export async function regenerateQuestion(req: Request, res: Response) {
+  try {
+    const questionId = req.params.id as string;
+    if (!questionId) {
+      return res.status(400).json({ success: false, error: 'Thiếu questionId' });
+    }
+
+    const { prisma } = await import('../../database/prisma');
+    const question = await prisma.exerciseQuestion.findUnique({
+      where: { id: questionId },
+    });
+
+    if (!question) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy câu hỏi' });
+    }
+
+    const exercise = await prisma.exercise.findUnique({
+      where: { id: question.exerciseId },
+    });
+
+    const regenerated = await geminiService.regenerateQuestion({
+      exerciseTitle: exercise?.title || 'Bài tập',
+      questionText: question.questionText || '',
+      questionType: question.questionType || 'multiple_choice',
+    });
+
+    const updated = await prisma.exerciseQuestion.update({
+      where: { id: questionId },
+      data: {
+        questionText: regenerated.questionText,
+        questionType: regenerated.questionType,
+        content: regenerated.content as any,
+        explanation: regenerated.explanation,
+        hints: regenerated.hints as any,
+      },
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('[AI Handler] Error regenerating question:', error);
+    return res.status(500).json({ success: false, error: 'Lỗi khi tạo lại câu hỏi' });
+  }
+}

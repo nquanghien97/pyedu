@@ -11,7 +11,7 @@ const verifyToken = async (
     const result = jwt.decode(token, { complete: true });
 
     jwt.verify(token, ENV_VARS.jwtSecret, {
-      algorithms: [result?.header.alg as jwt.Algorithm],
+      algorithms: ['HS256'],
     });
 
     if (typeof result?.payload === 'string') {

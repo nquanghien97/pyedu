@@ -43,6 +43,15 @@ export const getTests = async (req: Request, res: Response) => {
   }
 };
 
+function shuffleArray<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export const getTestById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
@@ -56,9 +65,83 @@ export const getTestById = async (req: Request, res: Response) => {
       where: { exerciseId: test.exerciseId },
     });
 
-    // Nếu học sinh và shuffleQuestions, cần trộn ở đây
-    // Ở đây đơn giản hoá, trả về gốc
-    res.json({ success: true, data: { ...test, assignmentId: assignment?.id } });
+    const userRole = req.user?.role;
+    const isStudent = userRole === 'STUDENT';
+
+    let hasSubmitted = false;
+    if (isStudent && assignment) {
+      const student = await prisma.student.findUnique({
+        where: { userId: req.user?.id },
+      });
+      if (student) {
+        const submission = await prisma.exerciseSubmission.findFirst({
+          where: {
+            assignmentId: assignment.id,
+            studentId: student.id,
+            status: { in: ['submitted', 'graded'] },
+          },
+        });
+        if (submission) {
+          hasSubmitted = true;
+        }
+      }
+    }
+
+    let questions = test.exercise?.questions || [];
+
+    if (isStudent && !hasSubmitted) {
+      questions = questions.map((q) => {
+        const scrubbedContent = q.content ? { ...(q.content as Record<string, any>) } : null;
+        if (scrubbedContent) {
+          delete scrubbedContent.correctAnswer;
+          delete scrubbedContent.correctAnswers;
+          delete scrubbedContent.sampleAnswer;
+          delete scrubbedContent.rubric;
+
+          if (Array.isArray(scrubbedContent.options)) {
+            scrubbedContent.options = scrubbedContent.options.map((opt: any) => {
+              if (typeof opt === 'object' && opt !== null) {
+                const { isCorrect, ...rest } = opt;
+                return rest;
+              }
+              return opt;
+            });
+          }
+        }
+        return {
+          ...q,
+          content: scrubbedContent,
+          explanation: null,
+        } as any;
+      });
+
+      if (test.shuffleQuestions) {
+        questions = shuffleArray(questions);
+      }
+
+      if (test.shuffleOptions) {
+        questions = questions.map((q) => {
+          if (q.content && Array.isArray((q.content as any).options)) {
+            return {
+              ...q,
+              content: {
+                ...(q.content as any),
+                options: shuffleArray((q.content as any).options),
+              },
+            };
+          }
+          return q;
+        });
+      }
+    }
+
+    const scrubbedTest = {
+      ...test,
+      exercise: test.exercise ? { ...test.exercise, questions } : null,
+      assignmentId: assignment?.id,
+    };
+
+    res.json({ success: true, data: scrubbedTest });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -233,6 +316,366 @@ export const deleteTest = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     await testRepository.delete(id);
     res.json({ success: true, message: 'Đã xóa' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+export const publishTest = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const test = await testRepository.findById(id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy bài kiểm tra' });
+    }
+
+    if (test.exercise?.createdBy !== req.user?.id && req.user?.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền xuất bản bài thi này' });
+    }
+
+    const updated = await testRepository.update(id, { isPublished: true });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+export const startTest = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const test = await testRepository.findById(id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy bài kiểm tra' });
+    }
+
+    if (!test.isPublished) {
+      return res.status(400).json({ success: false, message: 'Bài kiểm tra chưa được xuất bản' });
+    }
+
+    const now = new Date();
+    if (test.startTime && test.startTime > now) {
+      return res.status(400).json({ success: false, message: 'Bài kiểm tra chưa mở' });
+    }
+    if (test.endTime && test.endTime < now) {
+      return res.status(400).json({ success: false, message: 'Bài kiểm tra đã đóng' });
+    }
+
+    // Get student profile
+    const student = await prisma.student.findUnique({
+      where: { userId: req.user?.id },
+    });
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy profile học sinh' });
+    }
+
+    // Get assignment for this test
+    const assignment = await prisma.assignment.findFirst({
+      where: { exerciseId: test.exerciseId },
+    });
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy Assignment của bài thi này' });
+    }
+
+    // Check max attempts
+    const attemptsCount = await prisma.exerciseSubmission.count({
+      where: { assignmentId: assignment.id, studentId: student.id },
+    });
+
+    if (attemptsCount >= test.maxAttempts) {
+      return res.status(400).json({ success: false, message: 'Bạn đã đạt giới hạn số lần làm bài' });
+    }
+
+    // Create a new started submission
+    const submission = await prisma.exerciseSubmission.create({
+      data: {
+        id: require('nanoid').nanoid(36),
+        assignmentId: assignment.id,
+        studentId: student.id,
+        startedAt: new Date(),
+        attemptNumber: attemptsCount + 1,
+        status: 'started',
+      },
+    });
+
+    res.json({ success: true, data: submission });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+export const submitTest = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { answers } = req.body; // array of { questionId, answerData }
+
+    const test = await testRepository.findById(id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy bài kiểm tra' });
+    }
+
+    // Get student profile
+    const student = await prisma.student.findUnique({
+      where: { userId: req.user?.id },
+    });
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy profile học sinh' });
+    }
+
+    // Get assignment
+    const assignment = await prisma.assignment.findFirst({
+      where: { exerciseId: test.exerciseId },
+      include: { exercise: { include: { questions: true } } },
+    });
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy Assignment của bài thi này' });
+    }
+
+    // Find the current started submission
+    const submission = await prisma.exerciseSubmission.findFirst({
+      where: { assignmentId: assignment.id, studentId: student.id, status: 'started' },
+      orderBy: { startedAt: 'desc' },
+    });
+
+    if (!submission) {
+      return res.status(400).json({ success: false, message: 'Không tìm thấy lượt làm bài thi đang diễn ra' });
+    }
+
+    const now = new Date();
+    const elapsedSeconds = Math.floor((now.getTime() - submission.startedAt!.getTime()) / 1000);
+    const limitSeconds = test.timeLimitMinutes * 60;
+    const graceBuffer = 60; // 60s buffer
+
+    // Auto-grade
+    const { gradeSubmission } = await import('../../../execution/grading/grading.service');
+    const gradingResults = await gradeSubmission(
+      assignment.exercise.questions.map((q) => ({
+        id: q.id,
+        questionText: q.questionText,
+        questionType: q.questionType,
+        points: q.points ? Number(q.points) : null,
+        content: q.content,
+        autoGrade: q.autoGrade,
+        aiGradingEnabled: q.aiGradingEnabled,
+      })),
+      answers.map((a: any) => ({
+        questionId: a.questionId,
+        answerData: a.answerData,
+      }))
+    );
+
+    const totalPointsEarned = gradingResults.reduce((sum, r) => sum + (r.pointsEarned ?? 0), 0);
+    const maxPoints = Number(assignment.exercise.totalPoints || 0);
+    const percentage = maxPoints > 0 ? (totalPointsEarned / maxPoints) * 100 : 0;
+
+    // Update submission inside transaction
+    const updatedSubmission = await prisma.$transaction(async (tx) => {
+      // Create answers first
+      if (gradingResults.length > 0) {
+        await tx.submissionAnswer.createMany({
+          data: gradingResults.map((r) => ({
+            id: require('nanoid').nanoid(36),
+            submissionId: submission.id,
+            questionId: r.questionId,
+            answerData: (answers.find((a: any) => a.questionId === r.questionId)?.answerData) as any,
+            isCorrect: r.isCorrect,
+            pointsEarned: r.pointsEarned,
+            feedback: r.feedback,
+          })),
+        });
+      }
+
+      return tx.exerciseSubmission.update({
+        where: { id: submission.id },
+        data: {
+          submittedAt: now,
+          status: 'graded',
+          totalScore: totalPointsEarned,
+          percentage,
+          isLate: elapsedSeconds > limitSeconds + graceBuffer,
+        },
+      });
+    });
+
+    // Update student progress in background
+    const { updateStudentProgress } = await import('../../../execution/progress/progress.service');
+    updateStudentProgress(
+      student.id,
+      assignment.exercise.subjectId,
+      assignment.exercise.topicId
+    ).catch(() => {});
+
+    res.json({ success: true, data: updatedSubmission });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server khi nộp bài' });
+  }
+};
+
+export const getTestLeaderboard = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const test = await testRepository.findById(id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy bài kiểm tra' });
+    }
+
+    const assignment = await prisma.assignment.findFirst({
+      where: { exerciseId: test.exerciseId },
+    });
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy Assignment của bài thi này' });
+    }
+
+    // Get all graded submissions for this assignment
+    const submissions = await prisma.exerciseSubmission.findMany({
+      where: { assignmentId: assignment.id, status: 'graded' },
+      include: {
+        student: {
+          include: { user: { select: { name: true } } },
+        },
+      },
+      orderBy: [
+        { totalScore: 'desc' },
+        { submittedAt: 'asc' }, // faster submission takes precedence if scores are tied
+      ],
+    });
+
+    // Map to leaderboard format
+    const leaderboard = submissions.map((sub, index) => {
+      const timeSpentSeconds = sub.startedAt && sub.submittedAt
+        ? Math.floor((sub.submittedAt.getTime() - sub.startedAt.getTime()) / 1000)
+        : 0;
+
+      const formatDuration = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      };
+
+      return {
+        rank: index + 1,
+        studentName: sub.student.user.name || 'Học sinh',
+        score: sub.totalScore ? Number(sub.totalScore) : 0,
+        percentage: sub.percentage ? Number(sub.percentage) : 0,
+        completionTime: formatDuration(timeSpentSeconds),
+        submittedAt: sub.submittedAt,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: {
+        testTitle: test.exercise?.title || 'Bài kiểm tra',
+        totalStudents: leaderboard.length,
+        leaderboard,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+export const getTestStatistics = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const test = await testRepository.findById(id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy bài kiểm tra' });
+    }
+
+    const assignment = await prisma.assignment.findFirst({
+      where: { exerciseId: test.exerciseId },
+    });
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy Assignment của bài thi này' });
+    }
+
+    const submissions = await prisma.exerciseSubmission.findMany({
+      where: { assignmentId: assignment.id, status: 'graded' },
+    });
+
+    if (submissions.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          totalSubmissions: 0,
+          averageScore: 0,
+          highestScore: 0,
+          lowestScore: 0,
+          passRate: 0,
+        },
+      });
+    }
+
+    const scores = submissions.map((sub) => sub.totalScore ? Number(sub.totalScore) : 0);
+    const percentages = submissions.map((sub) => sub.percentage ? Number(sub.percentage) : 0);
+
+    const totalSubmissions = submissions.length;
+    const highestScore = Math.max(...scores);
+    const lowestScore = Math.min(...scores);
+    const averageScore = Math.round((scores.reduce((sum, val) => sum + val, 0) / totalSubmissions) * 100) / 100;
+
+    const passingScorePercent = Number(test.passingScore || 50);
+    const passedCount = percentages.filter((p) => p >= passingScorePercent).length;
+    const passRate = Math.round((passedCount / totalSubmissions) * 10000) / 100;
+
+    res.json({
+      success: true,
+      data: {
+        totalSubmissions,
+        averageScore,
+        highestScore,
+        lowestScore,
+        passRate,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+export const getTestResult = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const test = await testRepository.findById(id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy bài kiểm tra' });
+    }
+
+    const student = await prisma.student.findUnique({
+      where: { userId: req.user?.id },
+    });
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy profile học sinh' });
+    }
+
+    const assignment = await prisma.assignment.findFirst({
+      where: { exerciseId: test.exerciseId },
+    });
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy Assignment của bài thi này' });
+    }
+
+    const submission = await prisma.exerciseSubmission.findFirst({
+      where: { assignmentId: assignment.id, studentId: student.id, status: 'graded' },
+      include: {
+        answers: {
+          include: { question: true },
+        },
+      },
+      orderBy: { submittedAt: 'desc' },
+    });
+
+    if (!submission) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy kết quả làm bài của bạn' });
+    }
+
+    res.json({ success: true, data: submission });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Lỗi server' });

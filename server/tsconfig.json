@@ -10,6 +10,7 @@
     "outDir": "./build",
     "strict": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "forceConsistentCasingInFileNames": true,
     "paths": {},
     "resolveJsonModule": true,

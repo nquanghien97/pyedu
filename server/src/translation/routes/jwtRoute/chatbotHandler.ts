@@ -1,37 +1,25 @@
 import { withAsyncErrorHandling } from "../../withAsyncErrorHandling"
-
-const OLLAMA_URL = 'http://localhost:11434';
+import { logger } from "../../../lib/logger";
+import { geminiService } from "../../../execution/ai/gemini.service";
 
 export const chatbotHandler = withAsyncErrorHandling(async (req, res) => {
   try {
     const { prompt } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ success: false, error: { message: 'Thiếu nội dung câu hỏi' } });
+    }
 
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen3:4b',
-        prompt,
-        stream: false,
-        options: {
-          reasoning: false
-        }
-      })
-    });
-
-    const data = await response.json() as { response: string };
+    const reply = await geminiService.generateChatResponse(prompt);
 
     res.json({
       success: true,
-      data: data.response
+      data: reply
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Chatbot handler error:', err);
     res.status(500).json({
       success: false,
-      error: err
+      error: { message: 'Đã có lỗi hệ thống xảy ra. Vui lòng thử lại sau.' }
     });
   }
 });
