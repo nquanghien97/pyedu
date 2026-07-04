@@ -1,5 +1,4 @@
 import { useAuthStore } from "@/stores/auth.store";
-import Cookies from 'js-cookie';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -99,7 +98,6 @@ export async function api<T = unknown, M = object>({
         // Refresh thất bại -> xóa session
         useAuthStore.getState().setAccessToken(null);
         useAuthStore.getState().setUser(null);
-        Cookies.remove('role');
         
         // Gọi logout API để server xóa cookie
         try {
