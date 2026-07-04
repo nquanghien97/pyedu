@@ -111,9 +111,9 @@ export async function api<T = unknown, M = object>({
         } catch (e) {
           console.log(e)
         }
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-            window.location.href = '/login';
-        }
+        // if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        //     window.location.href = '/login';
+        // }
         throw new Error('Unauthorized');
       }
     }

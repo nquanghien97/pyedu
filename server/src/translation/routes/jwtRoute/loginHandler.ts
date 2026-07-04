@@ -32,11 +32,6 @@ export const loginHandler: RequestHandler = withAsyncErrorHandling(
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Clear legacy role cookie if it exists (must match the old domain and path)
-    res.clearCookie("role", {
-      path: "/",
-      domain: isSecure ? ".nongsanviet.site" : undefined,
-    });
 
     res.status(200).json({
       success: true,
