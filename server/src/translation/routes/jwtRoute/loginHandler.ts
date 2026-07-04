@@ -28,7 +28,6 @@ export const loginHandler: RequestHandler = withAsyncErrorHandling(
       secure: isSecure,
       sameSite: isSecure ? "none" : "lax",
       path: "/",
-      // domain: isSecure ? ".nongsanviet.site" : undefined, // Removed hardcoded domain to support vercel.app frontend
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

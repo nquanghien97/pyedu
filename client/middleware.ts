@@ -5,6 +5,7 @@ import { USER_ROLE } from "./entity/user";
 export default function middleware(req: NextRequest) {
   const role = req.cookies.get("role")?.value;
   const hasRefreshToken = req.cookies.has("refreshToken");
+  console.log("Middleware check:", { role, hasRefreshToken, pathname: req.nextUrl.pathname });
 
   const { pathname } = req.nextUrl;
 
