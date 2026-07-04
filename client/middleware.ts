@@ -4,24 +4,23 @@ import { USER_ROLE } from "./entity/user";
 
 export default function middleware(req: NextRequest) {
   const role = req.cookies.get("role")?.value;
-  const hasRefreshToken = req.cookies.has("refreshToken");
-  console.log("Middleware check:", { role, hasRefreshToken, pathname: req.nextUrl.pathname });
+  // const hasRefreshToken = req.cookies.has("refreshToken");
 
   const { pathname } = req.nextUrl;
 
   // Nếu có role cookie nhưng không còn refreshToken → session đã hết hạn
   // Xóa role cookie cũ và coi như chưa đăng nhập
-  if (role && !hasRefreshToken) {
-    const isDashboard =
-      pathname.startsWith("/student") ||
-      pathname.startsWith("/teacher") ||
-      pathname.startsWith("/admin");
-    const response = isDashboard
-      ? NextResponse.redirect(new URL("/login", req.url))
-      : NextResponse.next();
-    response.cookies.delete("role");
-    return response;
-  }
+  // if (role && !hasRefreshToken) {
+  //   const isDashboard =
+  //     pathname.startsWith("/student") ||
+  //     pathname.startsWith("/teacher") ||
+  //     pathname.startsWith("/admin");
+  //   const response = isDashboard
+  //     ? NextResponse.redirect(new URL("/login", req.url))
+  //     : NextResponse.next();
+  //   response.cookies.delete("role");
+  //   return response;
+  // }
 
   // Nếu chưa login mà vào dashboard
   if (!role && (
