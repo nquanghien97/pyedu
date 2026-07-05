@@ -22,7 +22,11 @@ export const tokenService = {
   async generateRefreshToken(userId: number, role: string): Promise<string> {
     // Tạo JWT payload chứa userId và role
     const tokenString = jwt.sign(
-      { userId, role },
+      { 
+        userId, 
+        role,
+        jti: crypto.randomUUID()
+      },
       ENV_VARS.jwtRefreshSecret,
       {
         algorithm: 'HS256',
