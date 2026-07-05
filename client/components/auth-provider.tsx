@@ -3,13 +3,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/auth.store';
 import { api, refreshAccessToken } from '@/lib/api';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const hasInitialized = useRef(false);
-  const { setAccessToken, setUser } = useAuthStore();
+  const { setAccessToken, setUser, user } = useAuthStore();
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const publicPaths = ['/', '/login', '/register'];
+    if (!publicPaths.includes(pathname) && !user && !isInitializing) {
+      // Clear cookie role to avoid redirect loop
+      document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      router.push('/login');
+    }
+  }, [user, pathname, isInitializing, router]);
 
   useEffect(() => {
     // Không chạy initAuth trên các trang public
