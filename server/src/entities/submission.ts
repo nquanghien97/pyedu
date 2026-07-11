@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 export const SUBMISSION_STATUSES = ['submitted', 'graded', 'reviewed'] as const;
+export const SUBMISSION_TYPES = ['online', 'file_upload'] as const;
 
 export type SubmissionStatus = (typeof SUBMISSION_STATUSES)[number];
+export type SubmissionType = (typeof SUBMISSION_TYPES)[number];
 
 const answerDataSchema = z.object({
   type: z.string(),

@@ -19,11 +19,13 @@ import {
 } from '@/entity/exercise';
 import { AnswerData, SubmitAnswerInput, SubmissionEntity } from '@/entity/submission';
 import { api } from '@/lib/api';
-import { submitExercise, getMySubmissions } from '@/services/submission';
+import { submitExercise, getMySubmissions, uploadFileSubmission } from '@/services/submission';
 import { notification } from '@/components/notification';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { H1, H3, P } from "@/components/ui/typography";
+import { FileUploadZone } from '@/components/shared/file-upload-zone';
+import { SubmissionAttachments } from '@/components/shared/submission-attachments';
 
 interface AssignmentDetail {
   id: string;
@@ -60,6 +62,9 @@ export default function DoExercisePage() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [activeDoingTab, setActiveDoingTab] = useState<'online' | 'file_upload'>('online');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [fileNote, setFileNote] = useState('');
 
   // Fetch assignment details
   useEffect(() => {
@@ -167,6 +172,23 @@ export default function DoExercisePage() {
     }
   }, [submitting, questions, assignmentId, answers]);
 
+  const handleFileUploadSubmit = useCallback(async () => {
+    if (uploadedFiles.length === 0 || submitting) return;
+    setSubmitting(true);
+
+    try {
+      const result = await uploadFileSubmission(assignmentId, uploadedFiles, fileNote);
+      setSubmissionResult(result);
+      setShowResult(true);
+      notification.success('Nộp file bài làm thành công!');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Có lỗi xảy ra';
+      notification.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [submitting, assignmentId, uploadedFiles, fileNote]);
+
   // Auto-submit when time is up
   useEffect(() => {
     if (timeLeft === 0 && !showResult && !submitting) {
@@ -210,48 +232,67 @@ export default function DoExercisePage() {
             <H1>{assignment.exercise.title}</H1>
             <P className="text-gray-500 mt-2">{assignment.exercise.subject?.name}</P>
           </div>
-          
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-blue-50 p-4 rounded-xl text-center">
-              <P className="text-xs text-blue-600 font-medium">Thời gian làm bài</P>
-              <P className="text-xl font-bold text-blue-700">{assignment.exercise.timeLimitMinutes || 'Không giới hạn'} phút</P>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-xl text-center">
-              <P className="text-xs text-purple-600 font-medium">Số lần làm lại tối đa</P>
-              <P className="text-xl font-bold text-purple-700">{assignment.maxAttempts || 'Không giới hạn'}</P>
-            </div>
-          </div>
 
-          {previousSubmissions.length > 0 && (
-            <div className="mb-8">
-              <H3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Lịch sử nộp bài ({previousSubmissions.length})</H3>
-              <div className="space-y-3">
-                {previousSubmissions.map((sub) => (
-                  <div key={sub.id} className="flex justify-between items-center p-4 rounded-xl border border-gray-100 bg-gray-50">
-                    <div>
-                      <P className="font-semibold text-gray-800">Lần {sub.attemptNumber}</P>
-                      <P className="text-xs text-gray-500">
-                        {sub.submittedAt ? new Date(sub.submittedAt).toLocaleString('vi-VN') : 'Đã nộp'}
-                      </P>
-                    </div>
-                    <div className="text-right">
-                      <P className="font-bold text-blue-600">{sub.totalScore} / {assignment.exercise.totalPoints} điểm</P>
-                      <P className="text-xs text-green-600 font-semibold">{sub.percentage}%</P>
-                    </div>
-                  </div>
-                ))}
+
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-blue-50 p-4 rounded-xl text-center">
+                  <P className="text-xs text-blue-600 font-medium">Thời gian làm bài</P>
+                  <P className="text-xl font-bold text-blue-700">{assignment.exercise.timeLimitMinutes || 'Không giới hạn'} phút</P>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-xl text-center">
+                  <P className="text-xs text-purple-600 font-medium">Số lần làm lại tối đa</P>
+                  <P className="text-xl font-bold text-purple-700">{assignment.maxAttempts || 'Không giới hạn'}</P>
+                </div>
               </div>
-            </div>
-          )}
 
-          <div className="flex justify-center gap-4 mt-8">
-            <Button variant="outline" onClick={() => router.push('/student/assignments')} className="px-6">
-              Quay lại
-            </Button>
-            <Button onClick={() => setHasStarted(true)} className="bg-blue-600 hover:bg-blue-700 px-8">
-              Bắt đầu làm bài
-            </Button>
-          </div>
+              {previousSubmissions.length > 0 && (
+                <div className="mb-8">
+                  <H3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Lịch sử nộp bài ({previousSubmissions.length})</H3>
+                  <div className="space-y-3">
+                    {previousSubmissions.map((sub) => (
+                      <div
+                        key={sub.id}
+                        className="flex justify-between items-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-slate-100/50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setSubmissionResult(sub);
+                          setShowResult(true);
+                        }}
+                      >
+                        <div>
+                          <P className="font-semibold text-gray-800">
+                            Lần {sub.attemptNumber} {sub.submissionType === 'file_upload' ? '(File upload)' : '(Trực tuyến)'}
+                          </P>
+                          <P className="text-xs text-gray-500">
+                            {sub.submittedAt ? new Date(sub.submittedAt).toLocaleString('vi-VN') : 'Đã nộp'}
+                          </P>
+                        </div>
+                        <div className="text-right">
+                          {sub.status === 'submitted' ? (
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                              Chờ chấm
+                            </span>
+                          ) : (
+                            <>
+                              <P className="font-bold text-blue-600">{sub.totalScore !== null ? Number(sub.totalScore) : 0} / {assignment.exercise.totalPoints} điểm</P>
+                              <P className="text-xs text-green-600 font-semibold">{sub.percentage}%</P>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-center gap-4 mt-8">
+                <Button variant="outline" onClick={() => router.push('/student/assignments')} className="px-6">
+                  Quay lại
+                </Button>
+                <Button onClick={() => setHasStarted(true)} className="bg-blue-600 hover:bg-blue-700 px-8">
+                  Bắt đầu làm bài
+                </Button>
+              </div>
+
         </div>
       </div>
     );
@@ -322,80 +363,98 @@ export default function DoExercisePage() {
           </div>
 
           {/* Detailed Answers */}
-          <div className="space-y-4 mb-6">
-            {submissionResult.answers.map((answer, idx) => {
-              const question = answer.question;
-              return (
-                <div
-                  key={answer.id}
-                  className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                        {idx + 1}
-                      </span>
-                      <span className="text-xs text-gray-400 font-medium uppercase">
-                        {question?.questionType === 'multiple_choice'
-                          ? 'Trắc nghiệm'
-                          : question?.questionType === 'fill_blank'
-                            ? 'Điền khuyết'
-                            : question?.questionType === 'true_false'
-                              ? 'Đúng/Sai'
-                              : question?.questionType === 'essay'
-                                ? 'Tự luận'
-                                : question?.questionType ?? ''}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {answer.isCorrect === true && (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
-                          ✓ Đúng
-                        </span>
-                      )}
-                      {answer.isCorrect === false && (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
-                          ✗ Sai
-                        </span>
-                      )}
-                      {answer.isCorrect === null && (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">
-                          Chờ chấm
-                        </span>
-                      )}
-                      <span className="text-xs font-semibold text-gray-500">
-                        {answer.pointsEarned ?? '?'}/{question?.points ?? 0} điểm
-                      </span>
-                    </div>
-                  </div>
-
-                  <P className="text-sm text-gray-800 font-medium mb-3">
-                    {question?.questionText}
-                  </P>
-
-                  {answer.feedback && (
-                    <div className="bg-slate-50 rounded-xl p-3 mt-3">
-                      <P className="text-xs text-gray-500 font-medium mb-1">
-                        Nhận xét:
-                      </P>
-                      <P className="text-sm text-gray-700">{answer.feedback}</P>
-                    </div>
-                  )}
-
-                  {question?.explanation && (
-                    <div className="bg-blue-50 rounded-xl p-3 mt-3">
-                      <P className="text-xs text-blue-600 font-medium mb-1">
-                        Giải thích:
-                      </P>
-                      <P className="text-sm text-blue-800">
-                        {question.explanation}
-                      </P>
-                    </div>
-                  )}
+          {submissionResult.submissionType === 'file_upload' ? (
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
+              <H3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
+                File bài làm đã nộp
+              </H3>
+              <SubmissionAttachments attachments={submissionResult.attachments || []} />
+              
+              {submissionResult.status === 'submitted' && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mt-4 flex items-center gap-2.5">
+                  <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                  <span className="text-sm text-amber-700 font-medium">
+                    Bài làm của bạn đã được lưu nhận và đang chờ giáo viên chấm điểm thủ công.
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4 mb-6">
+              {submissionResult.answers.map((answer, idx) => {
+                const question = answer.question;
+                return (
+                  <div
+                    key={answer.id}
+                    className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                          {idx + 1}
+                        </span>
+                        <span className="text-xs text-gray-400 font-medium uppercase">
+                          {question?.questionType === 'multiple_choice'
+                            ? 'Trắc nghiệm'
+                            : question?.questionType === 'fill_blank'
+                              ? 'Điền khuyết'
+                              : question?.questionType === 'true_false'
+                                ? 'Đúng/Sai'
+                                : question?.questionType === 'essay'
+                                  ? 'Tự luận'
+                                  : question?.questionType ?? ''}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {answer.isCorrect === true && (
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                            ✓ Đúng
+                          </span>
+                        )}
+                        {answer.isCorrect === false && (
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+                            ✗ Sai
+                          </span>
+                        )}
+                        {answer.isCorrect === null && (
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                            Chờ chấm
+                          </span>
+                        )}
+                        <span className="text-xs font-semibold text-gray-500">
+                          {answer.pointsEarned ?? '?'}/{question?.points ?? 0} điểm
+                        </span>
+                      </div>
+                    </div>
+
+                    <P className="text-sm text-gray-800 font-medium mb-3">
+                      {question?.questionText}
+                    </P>
+
+                    {answer.feedback && (
+                      <div className="bg-slate-50 rounded-xl p-3 mt-3">
+                        <P className="text-xs text-gray-500 font-medium mb-1">
+                          Nhận xét:
+                        </P>
+                        <P className="text-sm text-gray-700">{answer.feedback}</P>
+                      </div>
+                    )}
+
+                    {question?.explanation && (
+                      <div className="bg-blue-50 rounded-xl p-3 mt-3">
+                        <P className="text-xs text-blue-600 font-medium mb-1">
+                          Giải thích:
+                        </P>
+                        <P className="text-sm text-blue-800">
+                          {question.explanation}
+                        </P>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex justify-center gap-3">
             <Button
@@ -442,6 +501,30 @@ export default function DoExercisePage() {
             </div>
           </div>
 
+          {/* Tab Toggle */}
+          <div className="flex bg-slate-100 rounded-lg p-0.5 gap-0.5">
+            <button
+              onClick={() => setActiveDoingTab('online')}
+              className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                activeDoingTab === 'online'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Làm trực tuyến
+            </button>
+            <button
+              onClick={() => setActiveDoingTab('file_upload')}
+              className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                activeDoingTab === 'file_upload'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Nộp file bài làm
+            </button>
+          </div>
+
           <div className="flex items-center gap-4">
             {/* Timer */}
             {timeLeft !== null && (
@@ -457,32 +540,37 @@ export default function DoExercisePage() {
               </div>
             )}
 
-            {/* Progress */}
-            <div className="flex items-center gap-2">
-              <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <span className="text-xs font-semibold text-gray-500">
-                {answeredCount}/{totalQuestions}
-              </span>
-            </div>
+            {activeDoingTab === 'online' && (
+              <>
+                {/* Progress */}
+                <div className="flex items-center gap-2">
+                  <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-500">
+                    {answeredCount}/{totalQuestions}
+                  </span>
+                </div>
 
-            {/* Submit */}
-            <Button onClick={handleSubmit} disabled={submitting || answeredCount === 0} className="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
-              {submitting ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Send size={14} />
-              )}
-              Nộp bài
-            </Button>
+                {/* Submit */}
+                <Button onClick={handleSubmit} disabled={submitting || answeredCount === 0} className="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {submitting ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Send size={14} />
+                  )}
+                  Nộp bài
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
+      {activeDoingTab === 'online' ? (
       <div className="flex-1 flex max-w-6xl mx-auto w-full py-6 px-4 gap-6">
         {/* Question Navigator */}
         <div className="w-64 shrink-0">
@@ -607,6 +695,97 @@ export default function DoExercisePage() {
           )}
         </div>
       </div>
+      ) : (
+        <div className="flex-1 max-w-6xl mx-auto w-full py-6 px-4 space-y-6">
+          {/* Đề bài - Read-only */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <H3 className="text-sm font-bold text-gray-700 mb-4 uppercase tracking-wider">
+              Đề bài ({totalQuestions} câu)
+            </H3>
+            <div className="space-y-4">
+              {questions.map((q, idx) => {
+                const qContent = q.content as Record<string, unknown> | null;
+                const qType = normalizeQuestionType(q.questionType);
+                const typeLabels: Record<string, string> = {
+                  multiple_choice: 'Trắc nghiệm',
+                  multiple_select: 'Chọn nhiều',
+                  fill_blank: 'Điền khuyết',
+                  true_false: 'Đúng/Sai',
+                  essay: 'Tự luận',
+                  matching: 'Nối cột',
+                  ordering: 'Sắp xếp',
+                };
+                return (
+                  <div key={q.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs text-gray-400 font-medium uppercase">
+                        {typeLabels[qType] ?? q.questionType ?? ''}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-400 ml-auto">
+                        {q.points ?? 0} điểm
+                      </span>
+                    </div>
+                    <P className="text-sm text-gray-800 font-medium leading-relaxed">
+                      {q.questionText}
+                    </P>
+                    {qType === 'multiple_choice' && Array.isArray(qContent?.options) && (
+                      <div className="mt-3 space-y-1.5">
+                        {normalizeOptions((qContent.options as unknown[]) ?? []).map((opt, oi) => (
+                          <div key={opt.id} className="flex items-center gap-2 text-sm text-gray-600 pl-2">
+                            <span className="font-semibold text-gray-400">{['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][oi]}.</span>
+                            <span>{opt.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {qType === 'true_false' && (
+                      <div className="mt-3 flex gap-4 text-sm text-gray-500 pl-2">
+                        <span>A. Đúng</span>
+                        <span>B. Sai</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Nộp file bài làm */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <H3 className="text-sm font-bold text-gray-700 mb-4 uppercase tracking-wider">
+              Nộp file bài làm
+            </H3>
+            <FileUploadZone onFilesSelected={setUploadedFiles} maxFiles={5} maxSizeMB={20} />
+
+            <div className="mt-4">
+              <label className="block text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">
+                Ghi chú gửi giáo viên (tùy chọn)
+              </label>
+              <textarea
+                value={fileNote}
+                onChange={(e) => setFileNote(e.target.value)}
+                className="w-full border border-slate-200 rounded-xl p-3.5 text-sm min-h-24 hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-hidden transition-all bg-white text-slate-700"
+                placeholder="Nhập ghi chú hoặc lời nhắn gửi giáo viên nếu có..."
+              />
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t border-slate-100">
+              <Button
+                onClick={handleFileUploadSubmit}
+                disabled={submitting || uploadedFiles.length === 0}
+                className="bg-blue-600 hover:bg-blue-700 px-8 flex items-center gap-2"
+              >
+                {submitting && <Loader2 size={16} className="animate-spin" />}
+                <Send size={14} />
+                Nộp file bài làm
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

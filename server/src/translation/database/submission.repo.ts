@@ -103,12 +103,68 @@ export const submissionRepository = {
   },
 
   /**
+   * Create a new file upload submission
+   */
+  async createFileUploadSubmission(
+    assignmentId: string,
+    studentId: string,
+    submissionId: string
+  ) {
+    const existingCount = await prisma.exerciseSubmission.count({
+      where: { assignmentId, studentId },
+    });
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+    });
+
+    return prisma.exerciseSubmission.create({
+      data: {
+        id: submissionId,
+        assignmentId,
+        studentId,
+        attemptNumber: existingCount + 1,
+        submittedAt: new Date(),
+        submissionType: 'file_upload',
+        status: 'submitted',
+        totalScore: null,
+        percentage: null,
+        isLate: assignment?.dueDate ? new Date() > assignment.dueDate : false,
+      },
+      include: {
+        attachments: true,
+        assignment: {
+          include: {
+            exercise: {
+              select: {
+                id: true,
+                title: true,
+                grade: true,
+                subject: { select: { id: true, name: true } },
+                topic: { select: { id: true, name: true } },
+                totalPoints: true,
+                timeLimitMinutes: true,
+              },
+            },
+          },
+        },
+        student: {
+          include: {
+            user: { select: { name: true, email: true } },
+          },
+        },
+      },
+    });
+  },
+
+  /**
    * Get submission by ID with all details
    */
   async findById(submissionId: string) {
     return prisma.exerciseSubmission.findUnique({
       where: { id: submissionId },
       include: {
+        attachments: true,
         answers: {
           include: {
             question: {
@@ -163,6 +219,7 @@ export const submissionRepository = {
               user: { select: { name: true, email: true } },
             },
           },
+          attachments: true,
           _count: { select: { answers: true } },
         },
         orderBy: { submittedAt: 'desc' },
@@ -188,6 +245,7 @@ export const submissionRepository = {
     return prisma.exerciseSubmission.findMany({
       where: { studentId, assignmentId },
       include: {
+        attachments: true,
         answers: {
           include: {
             question: {
@@ -255,6 +313,7 @@ export const submissionRepository = {
       totalScore: number;
       percentage: number;
       status: string;
+      feedback?: string;
       answerUpdates: { id: string; isCorrect?: boolean; pointsEarned?: number; feedback?: string }[];
     }
   ) {

@@ -79,7 +79,7 @@ export default function AIGeneratePage() {
     setIsGenerating(true);
     try {
       const gName = GRADES.find(g => g.id === data.grade)?.name;
-      const sName = topicSubjects.find(s => s.id === data.subjectId)?.name;
+      const sName = allSubjects.find(s => s.id === data.subjectId)?.name;
 
       const res = await aiGenerateService.generateByTopic({
         gradeName: gName,

@@ -188,21 +188,24 @@ model Assignment {
 }
 
 model ExerciseSubmission {
-  id            String             @id @db.Char(36)
-  assignmentId  String             @db.Char(36)
-  studentId     String             @db.Char(36)
-  attemptNumber Int?
-  startedAt     DateTime?
-  submittedAt   DateTime?
-  totalScore    Decimal?           @db.Decimal(6, 2)
-  percentage    Decimal?           @db.Decimal(5, 2)
-  status        String?            @db.VarChar(50)
-  isLate        Boolean?
-  gradedBy      Int?
-  assignment    Assignment         @relation(fields: [assignmentId], references: [id])
-  grader        User?              @relation("GradedBy", fields: [gradedBy], references: [id])
-  student       Student            @relation(fields: [studentId], references: [id])
-  answers       SubmissionAnswer[]
+  id             String                 @id @db.Char(36)
+  assignmentId   String                 @db.Char(36)
+  studentId      String                 @db.Char(36)
+  attemptNumber  Int?
+  submissionType String?                @db.VarChar(50) @default("online")
+  startedAt      DateTime?
+  submittedAt    DateTime?
+  totalScore     Decimal?               @db.Decimal(6, 2)
+  percentage     Decimal?               @db.Decimal(5, 2)
+  status         String?                @db.VarChar(50)
+  isLate         Boolean?
+  gradedBy       Int?
+  feedback       String?                @db.Text
+  assignment     Assignment             @relation(fields: [assignmentId], references: [id])
+  grader         User?                  @relation("GradedBy", fields: [gradedBy], references: [id])
+  student        Student                @relation(fields: [studentId], references: [id])
+  answers        SubmissionAnswer[]
+  attachments    SubmissionAttachment[]
 }
 
 model SubmissionAnswer {
@@ -216,6 +219,21 @@ model SubmissionAnswer {
   question     ExerciseQuestion   @relation(fields: [questionId], references: [id])
   submission   ExerciseSubmission @relation(fields: [submissionId], references: [id])
 }
+
+model SubmissionAttachment {
+  id           String             @id @db.Char(36)
+  submissionId String             @db.Char(36)
+  fileName     String             @db.VarChar(255)
+  fileUrl      String
+  publicId     String?            @db.VarChar(255)
+  fileType     String             @db.VarChar(100)
+  fileSize     Int?
+  ocrStatus    String?            @db.VarChar(50) @default("pending")
+  ocrResult    Json?
+  createdAt    DateTime           @default(now())
+  submission   ExerciseSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
 
 model Course {
   id        String         @id @db.Char(36)

@@ -1,5 +1,5 @@
-import { api } from '@/lib/api';
-import { SubmissionEntity, SubmitAnswerInput } from '@/entity/submission';
+import { api, apiFormData } from '@/lib/api';
+import { SubmissionEntity, SubmitAnswerInput, SubmissionAttachmentEntity } from '@/entity/submission';
 
 export interface SubmitExercisePayload {
   answers: SubmitAnswerInput[];
@@ -75,6 +75,7 @@ export async function getAssignmentSubmissions(
 export interface UpdateGradePayload {
   totalScore: number;
   percentage: number;
+  feedback?: string | null;
   answerUpdates: Array<{
     id: string;
     isCorrect?: boolean | null;
@@ -96,3 +97,48 @@ export async function updateSubmissionGrade(
   });
   return response.data;
 }
+
+export async function uploadFileSubmission(
+  assignmentId: string,
+  files: File[],
+  note?: string
+): Promise<SubmissionEntity> {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  if (note) {
+    formData.append('note', note);
+  }
+
+  const response = await apiFormData<SubmissionEntity>({
+    url: `/api/v1/student/assignments/${assignmentId}/upload`,
+    options: {
+      method: 'POST',
+      body: formData,
+    },
+  });
+  return response.data;
+}
+
+export async function getSubmissionAttachments(
+  submissionId: string
+): Promise<SubmissionAttachmentEntity[]> {
+  const response = await api<SubmissionAttachmentEntity[]>({
+    url: `/api/v1/student/submissions/${submissionId}/attachments`,
+  });
+  return response.data;
+}
+
+export async function deleteSubmissionAttachment(
+  submissionId: string,
+  attachmentId: string
+): Promise<void> {
+  await api<void>({
+    url: `/api/v1/student/submissions/${submissionId}/attachments/${attachmentId}`,
+    options: {
+      method: 'DELETE',
+    },
+  });
+}
+

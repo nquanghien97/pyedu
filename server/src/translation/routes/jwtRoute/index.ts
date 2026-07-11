@@ -14,6 +14,7 @@ import { sendMessage } from './chatMessageHandler';
 import { getStudentAssignments } from './studentAssignmentHandler';
 import { createTeacherAssignment, getTeacherAssignments } from './teacherAssignmentHandler';
 import { submitAssignment, getSubmissionById, getAssignmentSubmissions, getMySubmissions, updateSubmissionGrade } from './submissionHandler';
+import { uploadSubmission, uploadFileSubmission, getSubmissionAttachments, deleteSubmissionAttachment } from './studentFileUploadHandler';
 import { getMyProgress, getStudentsProgress, getStudentProgressDetail } from './progressHandler';
 import { getTeacherClasses, getTeacherStudents } from './metaHandler';
 import { getAutoAssignConfigs, createAutoAssignConfig, updateAutoAssignConfig, deleteAutoAssignConfig, triggerAutoAssign } from './autoAssignHandler';
@@ -116,6 +117,9 @@ protectedRouter.get('/teacher/assignments/:id/submissions', requireRole(USER_ROL
 protectedRouter.get('/student/assignments', requireRole(USER_ROLE.STUDENT), getStudentAssignments);
 protectedRouter.post('/student/assignments/:id/submit', requireRole(USER_ROLE.STUDENT), submitAssignment);
 protectedRouter.get('/student/assignments/:id/submissions', requireRole(USER_ROLE.STUDENT), getMySubmissions);
+protectedRouter.post('/student/assignments/:id/upload', requireRole(USER_ROLE.STUDENT), uploadSubmission.array('files', 5), uploadFileSubmission);
+protectedRouter.get('/student/submissions/:id/attachments', requireRole(USER_ROLE.STUDENT), getSubmissionAttachments);
+protectedRouter.delete('/student/submissions/:id/attachments/:attachmentId', requireRole(USER_ROLE.STUDENT), deleteSubmissionAttachment);
 
 // Submissions
 protectedRouter.get('/submissions/:id', getSubmissionById);

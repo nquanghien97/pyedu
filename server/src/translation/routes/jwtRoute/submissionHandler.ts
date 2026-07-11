@@ -261,7 +261,7 @@ export const updateSubmissionGrade: RequestHandler = withAsyncErrorHandling(
     }
 
     const submissionId = req.params.id;
-    const { totalScore, percentage, answerUpdates } = req.body;
+    const { totalScore, percentage, feedback, answerUpdates } = req.body;
 
     const submission = await submissionRepository.findById(submissionId);
     if (!submission) {
@@ -273,6 +273,7 @@ export const updateSubmissionGrade: RequestHandler = withAsyncErrorHandling(
       totalScore,
       percentage,
       status: 'graded',
+      feedback,
       answerUpdates,
     });
 
