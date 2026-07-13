@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/auth.store";
+import Cookies from "js-cookie";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -44,9 +45,14 @@ export async function refreshAccessToken(): Promise<string | null> {
 
     const resJson = await response.json();
     const newToken = resJson.data.accessToken;
+    const role = resJson.data.role;
     
     if (newToken) {
       useAuthStore.getState().setAccessToken(newToken);
+      // Restore role cookie from server response
+      if (role) {
+        Cookies.set('role', role, { expires: 7 });
+      }
       return newToken;
     }
     return null;

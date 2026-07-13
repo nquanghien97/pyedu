@@ -64,6 +64,7 @@ export const refreshHandler: RequestHandler = withAsyncErrorHandling(
       success: true,
       data: {
         accessToken: newAccessToken,
+        role: user.role,
       }
     });
   }
