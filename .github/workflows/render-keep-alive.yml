@@ -14,5 +14,7 @@ jobs:
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
         run: |
           test -n "$BACKEND_URL"
-          curl --fail --silent --show-error --max-time 30 \
+          echo "Ping started at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          curl --fail --show-error --max-time 30 \
+            --write-out "\nHTTP status: %{http_code}\nResponse time: %{time_total}s\n" \
             "$BACKEND_URL/livez"
