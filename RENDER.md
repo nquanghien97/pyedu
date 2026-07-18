@@ -1,12 +1,13 @@
-# GitHub Actions keep-alive
+# Cron-job keep-alive
 
-Workflow `.github/workflows/render-keep-alive.yml` gọi `GET /livez` mỗi 10 phút
-để đánh thức backend Render và tránh trạng thái sleep giữa các lần gọi.
+Sử dụng [cron-job.org](https://cron-job.org) để gọi `GET /livez` mỗi 10 phút,
+giúp đánh thức backend Render và tránh trạng thái sleep giữa các lần gọi.
 
-Trong GitHub repository, tạo Actions secret:
+Tạo một cron job với:
 
-- **Name:** `BACKEND_URL`
-- **Value:** `https://<ten-backend>.onrender.com`
+- **URL:** `https://<ten-backend>.onrender.com/livez`
+- **Method:** `GET`
+- **Schedule:** mỗi 10 phút
+- **Expected response:** HTTP `200`
 
-Có thể chạy thủ công tại **Actions → Keep Render backend awake → Run workflow**.
-GitHub Actions cron dùng múi giờ UTC và có thể chạy trễ vài phút.
+Endpoint `/livez` đã có sẵn trong backend và kiểm tra kết nối database.
